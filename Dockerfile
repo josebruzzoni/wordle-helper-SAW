@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 # Building the application inside an alpine container
-FROM openjdk:16-alpine3.14
+FROM openjdk:16-alpine3.13
 # Defining the working directory
 WORKDIR /wordle-helper
 # We copy the mvnw and pom.xml files and also the .mvn folder to the image
