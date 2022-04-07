@@ -7,6 +7,7 @@ WORKDIR /wordle-helper
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 # We install the dependencies
+RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline
 # We now copy the source files
 COPY src ./src
