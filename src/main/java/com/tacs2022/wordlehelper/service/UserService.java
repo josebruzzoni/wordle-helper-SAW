@@ -23,4 +23,16 @@ public class UserService {
         );
     }
 
+    public void delete(Long id) {
+        User user = userRepo.findById(id).orElseThrow(
+                () -> new NotFoundException("User with Id: " + id + " was not found")
+        );
+        userRepo.delete(user);
+    }
+
+    public User save(User newUser){
+        userRepo.save(newUser);
+        return newUser;
+    }
+
 }
