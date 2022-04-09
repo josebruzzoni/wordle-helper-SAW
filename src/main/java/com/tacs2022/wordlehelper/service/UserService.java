@@ -5,6 +5,7 @@ import java.util.List;
 import com.tacs2022.wordlehelper.domain.User;
 import com.tacs2022.wordlehelper.repos.UserRepository;
 
+import com.tacs2022.wordlehelper.service.Exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

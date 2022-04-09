@@ -35,13 +35,13 @@ public class WordleHelperApplication {
 			);
 
 			hardcodear(tournamentRepo,
-					new Tournament(1L, "Budokay Tenkaichi", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-02"), Language.ES, Visibility.PUBLIC)
-					, new Tournament(2L, "Budokay Tenkaichi", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-02"), Language.ES, Visibility.PUBLIC)
+					new Tournament("Budokay Tenkaichi", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-10"), Language.ES, Visibility.PUBLIC)
+					, new Tournament("Mundialito", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-11"), Language.ES, Visibility.PUBLIC)
 			);
 		};
 	}
 
-	private final <T, Repo extends CrudRepository<T, Long>> void hardcodear(Repo repo, T... hardcodeos){
+	private <T, Repo extends CrudRepository<T, Long>> void hardcodear(Repo repo, T... hardcodeos){
 		repo.saveAll(Arrays.asList(hardcodeos));
 	}
 }
