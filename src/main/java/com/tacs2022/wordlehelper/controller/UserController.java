@@ -19,6 +19,8 @@ public class UserController {
     @Autowired
     UserService userService;
 
+    // users endpoints
+
     @GetMapping("/users")
     public Map<String,List<User>> getAllUsers() {
         Map<String,List<User>> users = new HashMap<>();
@@ -37,13 +39,21 @@ public class UserController {
         }
     }
 
-    @DeleteMapping(path = "/users/{id}")
-    public void delete(@PathVariable(value = "id") Long id) {
-        userService.delete(id);
-    }
+    // users/{id} endpoints
 
     @GetMapping("/users/{id}")
     public User getUserById(@PathVariable(value = "id") Long id) {
         return userService.findById(id);
+    }
+
+    @PatchMapping("/users/{id}")
+    public ResponseEntity update(@RequestBody User existingUser) {
+        userService.update(existingUser);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping(path = "/users/{id}")
+    public void delete(@PathVariable(value = "id") Long id) {
+        userService.delete(id);
     }
 }

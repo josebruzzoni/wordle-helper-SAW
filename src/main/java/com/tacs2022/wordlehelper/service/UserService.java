@@ -35,4 +35,8 @@ public class UserService {
         return newUser;
     }
 
+    public void update(User existingUser){
+        userRepo.save(existingUser);
+    }
+
 }
