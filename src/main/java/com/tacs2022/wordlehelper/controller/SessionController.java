@@ -1,6 +1,5 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.domain.User;
 import com.tacs2022.wordlehelper.dtos.AuthDto;
 import com.tacs2022.wordlehelper.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +24,9 @@ public class SessionController {
     }
 
     @DeleteMapping(path = "/sessions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity logout(@RequestBody AuthDto authDto) {
-        String token = sessionService.getToken(authDto);
+    public ResponseEntity logout(@RequestBody String token) {
+        sessionService.removeToken(token);
 
-        return new ResponseEntity(token, HttpStatus.OK);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }
