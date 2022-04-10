@@ -16,17 +16,15 @@ public class SessionController {
     @Autowired
     SessionService sessionService;
 
-    @PostMapping(path = "/sessions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(path = "/sessions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> login(@RequestBody AuthDto authDto) {
         String token = sessionService.getToken(authDto);
-
         return new ResponseEntity(token, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/sessions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(path = "/sessions", consumes = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity logout(@RequestBody String token) {
         sessionService.removeToken(token);
-
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }

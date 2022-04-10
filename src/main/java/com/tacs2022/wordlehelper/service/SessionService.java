@@ -17,8 +17,8 @@ public class SessionService {
     UserService userService;
 
     public String getToken(AuthDto authDto){
-        String token = "";
-        Session session = new Session();
+        String token = "token";
+        Session session = new Session(1l, token, userService.findById(1l));
         session.token = token;
         this.sessionRepo.save(session);
         return token;

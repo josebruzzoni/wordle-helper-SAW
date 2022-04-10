@@ -28,22 +28,20 @@ public class UserController {
         return users;
     }
 
-    // Hay que validar body
+
     @PostMapping(path = "/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<User> create(@RequestBody User newUser) throws ServerException {
+    public ResponseEntity<User> create(@RequestBody User newUser){
         User user = userService.save(newUser);
-        if (user == null) {
-            throw new ServerException("User couldnt be created");
-        } else {
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
-        }
+        return new ResponseEntity(user, HttpStatus.CREATED);
     }
 
     // users/{id} endpoints
 
     @GetMapping("/users/{id}")
-    public User getUserById(@PathVariable(value = "id") Long id) {
-        return userService.findById(id);
+    public Map<String,User> getUserById(@PathVariable(value = "id") Long id) {
+        Map<String,User> user = new HashMap<>();
+        user.put("user", userService.findById(id));
+        return user;
     }
 
     @PatchMapping("/users/{id}")
@@ -53,7 +51,8 @@ public class UserController {
     }
 
     @DeleteMapping(path = "/users/{id}")
-    public void delete(@PathVariable(value = "id") Long id) {
+    public ResponseEntity delete(@PathVariable(value = "id") Long id) {
         userService.delete(id);
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }
