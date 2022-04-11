@@ -38,11 +38,11 @@ public class TournamentController {
         User newParticipant = userService.findById(jsonRequest.);
         Tournament tournament = tournamentService.findById(idTournament);
         tournament.addParticipant(newParticipant);
-    }
+    }*/
 
     @PostMapping("/tournaments")
     public Tournament postTournament(@RequestBody Tournament tournament){
         tournamentService.addTournament(tournament);
         return tournament;
-    }*/
+    }
 }
