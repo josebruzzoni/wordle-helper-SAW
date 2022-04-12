@@ -41,7 +41,7 @@ public class UserController {
         return new ResponseEntity(user, HttpStatus.OK);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity update(@RequestBody User existingUser) {
         userService.update(existingUser);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
