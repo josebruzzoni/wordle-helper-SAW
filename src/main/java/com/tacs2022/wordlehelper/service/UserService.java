@@ -1,5 +1,6 @@
 package com.tacs2022.wordlehelper.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.tacs2022.wordlehelper.domain.User;
@@ -13,8 +14,8 @@ public class UserService {
     @Autowired
     UserRepository userRepo;
 
-    public List<User> findAll() {
-        return (List<User>) userRepo.findAll();
+    public ArrayList<User> findAll() {
+        return (ArrayList<User>) userRepo.findAll();
     }
 
     public User findById(Long id) {

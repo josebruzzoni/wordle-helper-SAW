@@ -1,6 +1,7 @@
 package com.tacs2022.wordlehelper.controller;
 
 import java.rmi.ServerException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,22 +15,21 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@RestController("/users")
 public class UserController {
     @Autowired
     UserService userService;
 
     // users endpoints
 
-    @GetMapping("/users")
-    public Map<String,List<User>> getAllUsers() {
-        Map<String,List<User>> users = new HashMap<>();
-        users.put("users", userService.findAll());
-        return users;
+    @GetMapping()
+    public ResponseEntity<ArrayList<User>> getAllUsers() {
+        ArrayList<User> users = userService.findAll();
+
+        return new ResponseEntity(users, HttpStatus.OK);
     }
 
-
-    @PostMapping(path = "/users", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<User> create(@RequestBody User newUser){
         User user = userService.save(newUser);
         return new ResponseEntity(user, HttpStatus.CREATED);
@@ -37,20 +37,19 @@ public class UserController {
 
     // users/{id} endpoints
 
-    @GetMapping("/users/{id}")
-    public Map<String,User> getUserById(@PathVariable(value = "id") Long id) {
-        Map<String,User> user = new HashMap<>();
-        user.put("user", userService.findById(id));
-        return user;
+    @GetMapping("/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable(value = "id") Long id) {
+        User user = userService.findById(id);
+        return new ResponseEntity(user, HttpStatus.OK);
     }
 
-    @PatchMapping("/users/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity update(@RequestBody User existingUser) {
         userService.update(existingUser);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping(path = "/users/{id}")
+    @DeleteMapping(path = "/{id}")
     public ResponseEntity delete(@PathVariable(value = "id") Long id) {
         userService.delete(id);
         return new ResponseEntity(HttpStatus.NO_CONTENT);

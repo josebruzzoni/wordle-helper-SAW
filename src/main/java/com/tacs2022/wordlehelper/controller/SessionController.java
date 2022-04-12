@@ -11,18 +11,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+@RestController("/sessions")
 public class SessionController {
     @Autowired
     SessionService sessionService;
 
-    @PostMapping(path = "/sessions", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity<String> login(@RequestBody AuthDto authDto) {
         String token = sessionService.getToken(authDto);
         return new ResponseEntity(token, HttpStatus.OK);
     }
 
-    @DeleteMapping(path = "/sessions", consumes = MediaType.TEXT_PLAIN_VALUE)
+    @DeleteMapping(consumes = MediaType.TEXT_PLAIN_VALUE)
     public ResponseEntity logout(@RequestBody String token) {
         sessionService.removeToken(token);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
