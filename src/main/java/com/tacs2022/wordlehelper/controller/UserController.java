@@ -1,9 +1,6 @@
 package com.tacs2022.wordlehelper.controller;
 
-import java.rmi.ServerException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.tacs2022.wordlehelper.domain.User;
@@ -54,4 +51,11 @@ public class UserController {
         userService.delete(id);
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
+    
+    @PostMapping("/users/{idUser}/results")
+    public ResponseEntity<Object> postTournament(@RequestBody Map<String, Object> json, @PathVariable(value = "idUser") Long idTournament){
+        return ResponseEntity.noContent().build();
+    }
+    
+    
 }

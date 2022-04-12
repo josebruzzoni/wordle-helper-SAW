@@ -6,6 +6,9 @@ WORKDIR /wordle-helper
 # We copy the mvnw and pom.xml files and also the .mvn folder to the image
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
+# Install dos2unix package to convert file line ending from CRLF to LF
+RUN apk add dos2unix
+RUN dos2unix mvnw
 # We install the dependencies
 RUN chmod +x mvnw
 RUN ./mvnw dependency:go-offline
