@@ -8,21 +8,26 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/sessions")
 public class SessionController {
     @Autowired
     SessionService sessionService;
 
-    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity<String> login(@RequestBody AuthDto authDto) {
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, String> login(@RequestBody AuthDto authDto) {
         String token = sessionService.getToken(authDto);
-        return new ResponseEntity(token, HttpStatus.OK);
+        Map<String, String> response = new HashMap<>();
+        response.put("token", token);
+        return response;
     }
 
     @DeleteMapping(consumes = MediaType.TEXT_PLAIN_VALUE)
-    public ResponseEntity logout(@RequestBody String token) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void logout(@RequestBody String token) {
         sessionService.removeToken(token);
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }
