@@ -1,13 +1,13 @@
 package com.tacs2022.wordlehelper.service;
 
+import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
-import com.tacs2022.wordlehelper.service.Exceptions.NotFoundException;
+import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -26,14 +26,13 @@ public class TournamentService {
     }
 
     @Transactional
-    public void addTournament(Tournament tournament) {
+    public Tournament save(Tournament tournament) {
         tournamentRepo.save(tournament);
+        return tournament;
     }
 
-    public List<Object> getTournamentLeaderboard(Long id) {
-//        return findById(id).getLeaderboard();
-        findById(id);
-        return new ArrayList<>();
+    public Leaderboard getTournamentLeaderboard(Long id) {
+        return findById(id).generateLeaderboard();
     }
 
 }

@@ -40,4 +40,9 @@ public class Tournament {
     public void addParticipant(User newParticipant) {
         this.participants.add(newParticipant);
     }
+
+    public Leaderboard generateLeaderboard(){
+        //TODO: generate leaderboard
+        return new Leaderboard();
+    }
 }
