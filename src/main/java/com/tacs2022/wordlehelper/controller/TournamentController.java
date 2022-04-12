@@ -14,6 +14,7 @@ import java.util.Map;
 
 import javax.transaction.Transactional;
 
+@RequestMapping("/tournaments")
 @RestController()
 public class TournamentController {
     @Autowired
@@ -21,31 +22,31 @@ public class TournamentController {
     @Autowired
     UserService userService;
 
-    @GetMapping("/tournaments")
+    @GetMapping()
     public List<Tournament> getAllTournaments() {
         return tournamentService.findAll();
     }
 
-    @PostMapping("/tournaments")
+    @PostMapping()
     @Transactional
     public ResponseEntity<Tournament> postTournament(@RequestBody Tournament tournament){
         tournamentService.addTournament(tournament);
         return ResponseEntity.ok(tournament);
     }
 
-    @GetMapping("/tournaments/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Tournament> getTournamentById(@PathVariable(value = "id") Long id) {
         return ResponseEntity.ok(tournamentService.findById(id));
     }
 
-    @GetMapping("/tournaments/{id}/leaderboard")
+    @GetMapping("/{id}/leaderboard")
     public ResponseEntity<Map<String, Object>> getLeaderboardOfTournament(@PathVariable(value = "id") Long id){
     	Map<String, Object> body  = new HashMap<String, Object>();
     	body.put("leaderboard", tournamentService.getTournamentLeaderboard(id));
         return ResponseEntity.ok(body);
     }
 
-	@PostMapping("/tournaments/{id}/participants")
+	@PostMapping("/{id}/participants")
 	@Transactional
     public ResponseEntity<Map<String, String>> addParticipant(@RequestBody Map<String, Long> body, @PathVariable(value = "id") Long idTournament){
         Tournament tournament = tournamentService.findById(idTournament);
