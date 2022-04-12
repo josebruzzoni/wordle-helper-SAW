@@ -1,6 +1,6 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.domain.Tournaments.Tournament;
+import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
 

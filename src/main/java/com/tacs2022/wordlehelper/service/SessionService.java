@@ -1,13 +1,10 @@
 package com.tacs2022.wordlehelper.service;
 
-import com.tacs2022.wordlehelper.domain.Session;
+import com.tacs2022.wordlehelper.domain.user.Session;
 import com.tacs2022.wordlehelper.dtos.AuthDto;
 import com.tacs2022.wordlehelper.repos.SessionRepository;
-import com.tacs2022.wordlehelper.repos.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 
 @Service
 public class SessionService {

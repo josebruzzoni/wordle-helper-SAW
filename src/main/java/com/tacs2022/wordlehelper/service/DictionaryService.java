@@ -2,7 +2,7 @@ package com.tacs2022.wordlehelper.service;
 
 import java.util.List;
 
-import com.tacs2022.wordlehelper.domain.Word;
+import com.tacs2022.wordlehelper.domain.dictionary.Word;
 
 import org.springframework.stereotype.Service;
 

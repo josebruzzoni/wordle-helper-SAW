@@ -1,9 +1,8 @@
 package com.tacs2022.wordlehelper.service;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import com.tacs2022.wordlehelper.domain.User;
+import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.repos.UserRepository;
 
 import com.tacs2022.wordlehelper.service.Exceptions.NotFoundException;

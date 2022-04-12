@@ -1,4 +1,4 @@
-package com.tacs2022.wordlehelper.domain;
+package com.tacs2022.wordlehelper.domain.dictionary;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

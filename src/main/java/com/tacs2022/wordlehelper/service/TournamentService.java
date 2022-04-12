@@ -1,6 +1,6 @@
 package com.tacs2022.wordlehelper.service;
 
-import com.tacs2022.wordlehelper.domain.Tournaments.Tournament;
+import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
 import com.tacs2022.wordlehelper.service.Exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

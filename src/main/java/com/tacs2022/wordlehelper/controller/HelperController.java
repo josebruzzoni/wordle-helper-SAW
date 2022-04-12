@@ -1,7 +1,6 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.domain.User;
-import com.tacs2022.wordlehelper.domain.WordPlay;
+import com.tacs2022.wordlehelper.domain.play.WordPlay;
 import com.tacs2022.wordlehelper.service.HelperService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
