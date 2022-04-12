@@ -1,8 +1,10 @@
 package com.tacs2022.wordlehelper.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import com.tacs2022.wordlehelper.domain.Word;
+import com.tacs2022.wordlehelper.domain.dictionary.Word;
 import com.tacs2022.wordlehelper.service.DictionaryService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,10 @@ public class DictionaryController {
     }
 
     @GetMapping("/{language}/words")
-    public List<Word> getWordsByName(@PathVariable(value = "language") String language, @RequestParam(value = "wordName") String wordName) {
-        return dictionaryService.findAllByNameAndLanguage(wordName, language);
+    public Map<String, List<Word>> getWordsByName(@PathVariable(value = "language") String language, @RequestParam(value = "wordName") String wordName) {
+        List<Word> words = dictionaryService.findAllByNameAndLanguage(wordName, language);
+        Map<String, List<Word>> response = new HashMap<>();
+        response.put("words", words);
+        return response;
     }
 }

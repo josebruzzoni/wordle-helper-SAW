@@ -1,4 +1,4 @@
-package com.tacs2022.wordlehelper.domain;
+package com.tacs2022.wordlehelper.domain.user;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;

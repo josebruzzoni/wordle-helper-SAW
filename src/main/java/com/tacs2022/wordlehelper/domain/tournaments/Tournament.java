@@ -1,9 +1,9 @@
-package com.tacs2022.wordlehelper.domain.Tournaments;
+package com.tacs2022.wordlehelper.domain.tournaments;
 
-import com.tacs2022.wordlehelper.domain.User;
+import com.tacs2022.wordlehelper.domain.Language;
+import com.tacs2022.wordlehelper.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Generated;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
@@ -39,5 +39,10 @@ public class Tournament {
 
     public void addParticipant(User newParticipant) {
         this.participants.add(newParticipant);
+    }
+
+    public Leaderboard generateLeaderboard(){
+        //TODO: generate leaderboard
+        return new Leaderboard();
     }
 }
