@@ -24,7 +24,7 @@ public class DictionaryController {
         return dictionaryService.findByNameAndLanguage(wordName, language);
     }
 
-    @GetMapping("/{language}/search")
+    @GetMapping("/{language}/words")
     public List<Word> getWordsByName(@PathVariable(value = "language") String language, @RequestParam(value = "wordName") String wordName) {
         return dictionaryService.findAllByNameAndLanguage(wordName, language);
     }
