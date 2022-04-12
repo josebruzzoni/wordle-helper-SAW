@@ -30,7 +30,7 @@ public class TournamentService {
         tournamentRepo.save(tournament);
     }
 
-    public List<Object> getLeaderboardOfTournament(Long id) {
+    public List<Object> getTournamentLeaderboard(Long id) {
 //        return findById(id).getLeaderboard();
         findById(id);
         return new ArrayList<>();

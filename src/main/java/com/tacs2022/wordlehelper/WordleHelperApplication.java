@@ -30,8 +30,8 @@ public class WordleHelperApplication {
 
 		return args -> {
 			hardcodear(userRepo,
-					new User(1l, "Julian", "1234")
-					, new User(2l, "Agus", "password")
+					new User(1L, "Julian", "1234")
+					, new User(2L, "Agus", "password")
 			);
 
 			hardcodear(tournamentRepo,
