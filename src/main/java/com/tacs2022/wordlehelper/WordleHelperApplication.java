@@ -29,19 +29,11 @@ public class WordleHelperApplication {
 	CommandLineRunner initDatabase(UserRepository userRepo, TournamentRepository tournamentRepo) {
 
 		return args -> {
-			hardcodear(userRepo,
-					new User(1L, "Julian", "1234")
-					, new User(2L, "Agus", "password")
-			);
+			userRepo.save(new User(1L, "Julian", "1234"));
+			userRepo.save(new User(2L, "Agus", "password"));
 
-			hardcodear(tournamentRepo,
-					new Tournament("Budokai Tenkaichi", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-10"), Language.ES, Visibility.PUBLIC)
-					, new Tournament("Mundialito", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-11"), Language.ES, Visibility.PUBLIC)
-			);
+			tournamentRepo.save(new Tournament("Budokai Tenkaichi", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-10"), Language.ES, Visibility.PUBLIC));
+			tournamentRepo.save(new Tournament("Mundialito", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-11"), Language.ES, Visibility.PUBLIC));
 		};
-	}
-
-	private <T, Repo extends CrudRepository<T, Long>> void hardcodear(Repo repo, T... hardcodeos){
-		repo.saveAll(Arrays.asList(hardcodeos));
 	}
 }
