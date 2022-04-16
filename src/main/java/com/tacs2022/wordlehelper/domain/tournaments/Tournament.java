@@ -6,10 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,16 +21,18 @@ public class Tournament {
     private String name;
     private LocalDate startDate;
     private LocalDate endDate;
-    private Language language;
+
+    @ElementCollection
+    private List<Language> languages = new ArrayList<>();
     private Visibility visibility;
     @ManyToMany
     private List<User> participants = new ArrayList<>();
 
-    public Tournament(String name, LocalDate startDate, LocalDate endDate, Language language, Visibility visibility) {
+    public Tournament(String name, LocalDate startDate, LocalDate endDate, List<Language> languages, Visibility visibility) {
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.language = language;
+        this.languages.addAll(languages);
         this.visibility = visibility;
     }
 

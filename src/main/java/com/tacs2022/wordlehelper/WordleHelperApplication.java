@@ -12,6 +12,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import java.time.LocalDate;
+import java.util.List;
+
+import static java.util.Arrays.asList;
 
 @SpringBootApplication
 public class WordleHelperApplication {
@@ -27,8 +30,9 @@ public class WordleHelperApplication {
 			userRepo.save(new User(1L, "Julian", "1234"));
 			userRepo.save(new User(2L, "Agus", "password"));
 
-			tournamentRepo.save(new Tournament("Budokai Tenkaichi", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-10"), Language.ES, Visibility.PUBLIC));
-			tournamentRepo.save(new Tournament("Mundialito", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-11"), Language.ES, Visibility.PUBLIC));
+			List<Language> languages = asList(Language.ES, Language.EN);
+			tournamentRepo.save(new Tournament("Budokai Tenkaichi", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-10"), languages, Visibility.PUBLIC));
+			tournamentRepo.save(new Tournament("Mundialito", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-11"), languages, Visibility.PUBLIC));
 		};
 	}
 }
