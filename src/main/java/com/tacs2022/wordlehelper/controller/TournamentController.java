@@ -1,20 +1,25 @@
 package com.tacs2022.wordlehelper.controller;
 
+import com.tacs2022.wordlehelper.controller.Exceptions.MissingAttributesException;
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
+import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.HashMapChangeSet;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.transaction.Transactional;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @RequestMapping("/tournaments")
 @RestController()
@@ -25,10 +30,11 @@ public class TournamentController {
     UserService userService;
 
     @GetMapping()
-    public Map<String, List<Tournament>> getAllTournaments() {
-        List<Tournament> allTournaments = tournamentService.findAll();
+    public Map<String, List<Tournament>> getAllTournaments(@RequestParam(required = false) String role, @RequestParam(required = false) String status) {
         Map<String, List<Tournament>> response = new HashMap<>();
-        response.put("tournaments", allTournaments);
+        response.put(
+                "tournaments", tournamentService.findAll(role, status)
+        );
         return response;
     }
 
@@ -53,10 +59,8 @@ public class TournamentController {
         Tournament tournament = tournamentService.findById(tournamentId);
         Long idParticipant = body.get("idParticipant");
 
-        if(idParticipant == null){ //TODO: Manejar con excepcion
-            Map<String, String> missingAttributes = new HashMap<>();
-            missingAttributes.put("missingAttributes", "idParticipant");
-            return ResponseEntity.badRequest().body(missingAttributes);
+        if(idParticipant == null){
+            throw new MissingAttributesException("idParticipant");
         }
 
         tournament.addParticipant(userService.findById(idParticipant));

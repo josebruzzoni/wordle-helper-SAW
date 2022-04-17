@@ -44,4 +44,12 @@ public class Tournament {
         //TODO: generate leaderboard
         return new Leaderboard();
     }
+
+    public boolean endedToDate(LocalDate date) {
+        return !endDate.isAfter(date);
+    }
+
+    public boolean startedToDate(LocalDate date) {
+        return !startDate.isAfter(date);
+    }
 }

@@ -31,8 +31,8 @@ public class WordleHelperApplication {
 			userRepo.save(new User(2L, "Agus", "password"));
 
 			List<Language> languages = asList(Language.ES, Language.EN);
-			tournamentRepo.save(new Tournament("Budokai Tenkaichi", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-10"), languages, Visibility.PUBLIC));
-			tournamentRepo.save(new Tournament("Mundialito", LocalDate.parse("2222-02-02"), LocalDate.parse("2222-02-11"), languages, Visibility.PUBLIC));
+			tournamentRepo.save(new Tournament("Budokai Tenkaichi", LocalDate.of(2022,2,2), LocalDate.of(2022, 2, 10), languages, Visibility.PRIVATE));
+			tournamentRepo.save(new Tournament("Mundialito", LocalDate.of(2022, 2, 2), LocalDate.of(2022, 2, 11), languages, Visibility.PUBLIC));
 		};
 	}
 }
