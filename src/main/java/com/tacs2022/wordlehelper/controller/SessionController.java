@@ -18,6 +18,7 @@ public class SessionController {
     SessionService sessionService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
     public Map<String, String> login(@RequestBody AuthDto authDto) {
         String token = sessionService.getToken(authDto);
         Map<String, String> response = new HashMap<>();
@@ -25,9 +26,9 @@ public class SessionController {
         return response;
     }
 
-    @DeleteMapping(consumes = MediaType.TEXT_PLAIN_VALUE)
+    @DeleteMapping(path = "/{token}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout(@RequestBody String token) {
+    public void logout(@PathVariable(value = "token") String token) {
         sessionService.removeToken(token);
     }
 }

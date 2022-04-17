@@ -1,5 +1,7 @@
 package com.tacs2022.wordlehelper.service;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 import com.tacs2022.wordlehelper.domain.user.Result;
@@ -35,7 +37,11 @@ public class UserService {
     }
 
     @Transactional
-    public User save(User newUser){
+    public User save(String username, String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        SecurityService hasher = new SecurityService();
+        byte[] salt = hasher.getSalt();
+        byte[] hashedSaltedPassword = hasher.hash(password, salt);
+        User newUser = new User(username, hashedSaltedPassword, salt);
         userRepo.save(newUser);
         return newUser;
     }

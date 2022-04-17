@@ -18,3 +18,4 @@ public class Session {
     @ManyToOne
     public User user;
 }
+

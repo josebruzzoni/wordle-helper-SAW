@@ -1,5 +1,7 @@
 package com.tacs2022.wordlehelper.controller;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -31,8 +33,10 @@ public class UserController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public User create(@RequestBody User newUser){
-        return userService.save(newUser);
+    public User create(@RequestBody Map<String, String> body) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        String username = body.get("username");
+        String password = body.get("password");
+        return userService.save(username, password);
     }
 
     @GetMapping("/{id}")
