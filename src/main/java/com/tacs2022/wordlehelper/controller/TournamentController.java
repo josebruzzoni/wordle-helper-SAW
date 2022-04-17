@@ -56,14 +56,14 @@ public class TournamentController {
 
 	@PostMapping("/{id}/participants")
     public ResponseEntity<Map<String, String>> addParticipant(@RequestBody Map<String, Long> body, @PathVariable(value = "id") Long tournamentId){
-        Tournament tournament = tournamentService.findById(tournamentId);
         Long idParticipant = body.get("idParticipant");
 
         if(idParticipant == null){
             throw new MissingAttributesException("idParticipant");
         }
 
-        tournament.addParticipant(userService.findById(idParticipant));
+        tournamentService.addParticipant(tournamentId, userService.findById(idParticipant));
+
         return ResponseEntity.noContent().build();
     }
 

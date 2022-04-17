@@ -1,5 +1,6 @@
 package com.tacs2022.wordlehelper.service;
 
+import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
@@ -70,4 +71,13 @@ public class TournamentService {
                 ;
     }
 
+    @Transactional
+    public void addParticipant(Long tournamentId, User byId) {
+        Tournament tournament = findById(tournamentId);
+        if(tournament.startedToDate(LocalDate.now())){
+            throw new ExpiredRequestException();
+        }
+
+        tournament.addParticipant(byId);
+    }
 }
