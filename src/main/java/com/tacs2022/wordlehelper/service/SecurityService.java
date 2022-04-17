@@ -1,5 +1,7 @@
 package com.tacs2022.wordlehelper.service;
 
+import com.tacs2022.wordlehelper.domain.user.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKeyFactory;
@@ -11,6 +13,9 @@ import java.security.spec.KeySpec;
 
 @Service
 public class SecurityService {
+    @Autowired
+    UserService userService;
+
     private static final int ITERATIONS = 10000;
     private static final int KEY_LENGTH = 256;
 
@@ -26,6 +31,13 @@ public class SecurityService {
         SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
         byte[] hash = factory.generateSecret(spec).getEncoded();
         return hash;
+    }
+
+    public boolean validatePassword(String username, String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        User user = userService.findByUsername(username);
+        String actualPass = new String(user.getHashedPass());
+        String givenPass = new String(this.hash(password, user.getSalt()));
+        return actualPass.equals(givenPass);
     }
 
 }

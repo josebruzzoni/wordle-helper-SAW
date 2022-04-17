@@ -31,4 +31,5 @@ public class User {
 
     @OneToMany
     private List<Result> results;
+
 }

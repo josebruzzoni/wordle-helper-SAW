@@ -1,5 +1,6 @@
 package com.tacs2022.wordlehelper.domain.user;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 
@@ -12,10 +13,15 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Session {
-    @Id
+    @Id @GeneratedValue
     public Long id;
     public String token;
     @ManyToOne
     public User user;
+
+    public Session(String token, User user){
+        this.token = token;
+        this.user = user;
+    }
 }
 

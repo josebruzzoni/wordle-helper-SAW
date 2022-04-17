@@ -28,6 +28,13 @@ public class UserService {
         );
     }
 
+    public User findByUsername(String username) {
+        List<User> users = userRepo.findByUsername(username);
+        return users.stream().findFirst().orElseThrow(
+                () -> new NotFoundException("User with username: " + username + " was not found")
+        );
+    }
+
     @Transactional
     public void delete(Long id) {
         User user = userRepo.findById(id).orElseThrow(
