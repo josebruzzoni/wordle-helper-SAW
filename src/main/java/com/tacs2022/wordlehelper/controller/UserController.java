@@ -44,11 +44,11 @@ public class UserController {
         return userService.findById(id);
     }
 
-    @PutMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void update(@RequestBody User existingUser) {
-        userService.update(existingUser);
-    }
+//    @PutMapping("/{id}")
+//    @ResponseStatus(HttpStatus.NO_CONTENT)
+//    public void update(@RequestBody User existingUser) {
+//        userService.update(existingUser);
+//    }
 
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
