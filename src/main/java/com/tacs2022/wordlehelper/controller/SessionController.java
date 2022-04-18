@@ -26,7 +26,7 @@ public class SessionController {
         String token = sessionService.getToken(username, password);
         if (token == null){
             Map<String, String> outputBody = new HashMap<>();
-            outputBody.put("message", "Username not registered");
+            outputBody.put("message", "Invalid username or password");
             return ResponseEntity.badRequest().body(outputBody);
         }
         Map<String, String> response = new HashMap<>();
