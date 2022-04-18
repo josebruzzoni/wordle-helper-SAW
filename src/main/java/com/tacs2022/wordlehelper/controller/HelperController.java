@@ -3,10 +3,7 @@ package com.tacs2022.wordlehelper.controller;
 import com.tacs2022.wordlehelper.domain.play.WordPlay;
 import com.tacs2022.wordlehelper.service.HelperService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +16,11 @@ public class HelperController {
     private HelperService helperService;
 
     @GetMapping("/words")
-    public Map<String, List<String>> getPossibleWords(@RequestBody WordPlay attemptedPlay) {
+    public Map<String, List<String>> getPossibleWords(@RequestParam(value = "grey") String greyLettersPlayed,
+                                                      @RequestParam(value = "yellow") String yellowLettersPlayed,
+                                                      @RequestParam(value = "green") String greenLettersPlayed) {
+        //TODO: verify correct format of params => yellow and green must be five characters long, with only letters and '_'
+        WordPlay attemptedPlay = new WordPlay(greyLettersPlayed, yellowLettersPlayed, greenLettersPlayed);
         List<String> possibleWords = helperService.getWordsByPlay(attemptedPlay);
         Map<String, List<String>> response = new HashMap<>();
         response.put("possibleWords", possibleWords);
