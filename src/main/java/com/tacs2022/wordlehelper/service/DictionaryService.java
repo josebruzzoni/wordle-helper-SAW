@@ -11,8 +11,4 @@ public class DictionaryService {
     public Word findByNameAndLanguage(String name, String language) {
         return new Word("1", name, "definition", language);
     }
-
-    public List<Word> findAllByNameAndLanguage(String name, String language) {
-        return List.of(new Word("1", name, "definition", language));
-    }
 }

@@ -15,22 +15,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/dictionary")
+@RequestMapping("/dictionaries")
 public class DictionaryController {
 
     @Autowired
     DictionaryService dictionaryService;
 
-    @GetMapping("/{language}/{word}")
+    @GetMapping("/{language}/words/{word}")
     public Word getWord(@PathVariable(value = "language") String language, @PathVariable(value = "word") String wordName) {
         return dictionaryService.findByNameAndLanguage(wordName, language);
-    }
-
-    @GetMapping("/{language}/words")
-    public Map<String, List<Word>> getWordsByName(@PathVariable(value = "language") String language, @RequestParam(value = "wordName") String wordName) {
-        List<Word> words = dictionaryService.findAllByNameAndLanguage(wordName, language);
-        Map<String, List<Word>> response = new HashMap<>();
-        response.put("words", words);
-        return response;
     }
 }
