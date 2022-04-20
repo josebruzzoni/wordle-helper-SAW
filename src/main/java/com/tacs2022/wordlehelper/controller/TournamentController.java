@@ -4,6 +4,7 @@ import com.tacs2022.wordlehelper.controller.Exceptions.MissingAttributesExceptio
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
+import com.tacs2022.wordlehelper.dtos.AddParticipantDto;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
 
@@ -54,15 +55,9 @@ public class TournamentController {
         return tournamentService.getTournamentLeaderboard(tournamentId);
     }
 
-	@PostMapping("/{id}/participants")
-    public ResponseEntity<Map<String, String>> addParticipant(@RequestBody Map<String, Long> body, @PathVariable(value = "id") Long tournamentId){
-        Long idParticipant = body.get("idParticipant");
-
-        if(idParticipant == null){
-            throw new MissingAttributesException("idParticipant");
-        }
-
-        tournamentService.addParticipant(tournamentId, userService.findById(idParticipant));
+	@PostMapping(value="/{id}/participants")
+    public ResponseEntity<Map<String, String>> addParticipant(@RequestBody AddParticipantDto body, @PathVariable(value = "id") Long tournamentId){
+        tournamentService.addParticipant(tournamentId, userService.findById(body.getIdParticipant()));
 
         return ResponseEntity.noContent().build();
     }
