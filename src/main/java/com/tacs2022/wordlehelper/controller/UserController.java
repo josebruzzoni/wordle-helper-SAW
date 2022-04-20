@@ -45,8 +45,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable(value = "id") Long id) {
-        return userService.findById(id);
+    public OutputUserDto getUserById(@PathVariable(value = "id") Long id) {
+        return new OutputUserDto(userService.findById(id));
     }
 
 //    @PutMapping("/{id}")
