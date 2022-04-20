@@ -57,7 +57,12 @@ public class TournamentController {
 
 	@PostMapping(value="/{id}/participants")
     public ResponseEntity<Map<String, String>> addParticipant(@RequestBody AddParticipantDto body, @PathVariable(value = "id") Long tournamentId){
-        tournamentService.addParticipant(tournamentId, userService.findById(body.getIdParticipant()));
+        Long idParticipant = body.getIdParticipant();
+        if(idParticipant==null){ //TODO: validar en dto
+            throw new MissingAttributesException("idParticipant");
+        }
+
+        tournamentService.addParticipant(tournamentId, userService.findById(idParticipant));
 
         return ResponseEntity.noContent().build();
     }
