@@ -1,5 +1,6 @@
 package com.tacs2022.wordlehelper.service;
 
+import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
 import com.tacs2022.wordlehelper.domain.user.Session;
 import com.tacs2022.wordlehelper.repos.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,10 @@ public class SessionService {
 
     public void removeToken(String token) {
         Session session = this.sessionRepo.getByToken(token);
+        if (session == null){
+            //TODO crear una exception 404 para esto
+            throw new ExpiredRequestException();
+        }
         this.sessionRepo.delete(session);
     }
 }
