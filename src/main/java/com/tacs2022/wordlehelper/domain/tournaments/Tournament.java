@@ -2,6 +2,7 @@ package com.tacs2022.wordlehelper.domain.tournaments;
 
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.user.User;
+import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,6 +35,14 @@ public class Tournament {
         this.endDate = endDate;
         this.languages.addAll(languages);
         this.visibility = visibility;
+    }
+
+    public Tournament(NewTournamentDto newTournamentDto) {
+        this.name = newTournamentDto.getName();
+        this.startDate = newTournamentDto.getStartDate();
+        this.endDate = newTournamentDto.getEndDate();
+        this.languages.addAll(newTournamentDto.getLanguages());
+        this.visibility = newTournamentDto.getVisibility();
     }
 
     public void addParticipant(User newParticipant) {
