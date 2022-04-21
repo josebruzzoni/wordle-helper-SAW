@@ -1,20 +1,17 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.controller.Exceptions.InvalidUserException;
+import com.tacs2022.wordlehelper.controller.exceptions.InvalidUserException;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputSessionDto;
 import com.tacs2022.wordlehelper.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/sessions")

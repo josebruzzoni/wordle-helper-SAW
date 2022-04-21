@@ -1,6 +1,6 @@
 package com.tacs2022.wordlehelper.service;
 
-import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
+import com.tacs2022.wordlehelper.controller.exceptions.ExpiredRequestException;
 import com.tacs2022.wordlehelper.domain.user.Session;
 import com.tacs2022.wordlehelper.repos.SessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
