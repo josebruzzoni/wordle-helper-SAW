@@ -1,5 +1,6 @@
 package com.tacs2022.wordlehelper;
 
+import com.tacs2022.wordlehelper.controller.TelegramController;
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
@@ -22,6 +23,7 @@ public class WordleHelperApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(WordleHelperApplication.class, args);
+		TelegramController.Init();
 	}
 
 	@Bean
