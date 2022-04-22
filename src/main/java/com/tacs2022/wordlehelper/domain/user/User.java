@@ -8,6 +8,7 @@ import javax.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.util.List;
 
@@ -20,7 +21,9 @@ public class User {
     @Id @GeneratedValue
     private Long id;
     private String username;
+    @JsonIgnore
     private byte[] hashedPass;
+    @JsonIgnore
     private byte[] salt;
 
     public User(String username, byte[] hashedPass, byte[] salt) {
