@@ -23,6 +23,7 @@ public class TokenProvider {
 
         return Jwts.builder()
                 .setSubject(usuario.getUsername())
+                .setId(String.valueOf(usuario.getId()))
                 .claim(AUTHORITIES_KEY, grantedAuthorities.stream()
                         .map(GrantedAuthority::getAuthority)
                         .collect(Collectors.toList()))
@@ -43,11 +44,15 @@ public class TokenProvider {
         return new UsernamePasswordAuthenticationToken(userDetails, "");
     }
 
-    public static String getUserName(final String token) {
+    public static String getUsername(final String token) {
         final JwtParser jwtParser = Jwts.parser().setSigningKey(SIGNING_KEY);
-
         final Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token.replace(TOKEN_BEARER_PREFIX + " ", ""));
-
         return claimsJws.getBody().getSubject();
+    }
+
+    public static Long getId(final String token) {
+        final JwtParser jwtParser = Jwts.parser().setSigningKey(SIGNING_KEY);
+        final Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token.replace(TOKEN_BEARER_PREFIX + " ", ""));
+        return Long.valueOf(claimsJws.getBody().getId());
     }
 }
