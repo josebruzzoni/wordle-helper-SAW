@@ -70,7 +70,16 @@
 			<artifactId>dotenv-java</artifactId>
 			<version>2.2.3</version>
 		</dependency>
-	</dependencies>
+		<dependency> <!--Seguridad de spring boot-->
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-security</artifactId>
+		</dependency>
+		<dependency> <!--jwt-->
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt</artifactId>
+			<version>0.6.0</version>
+		</dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
