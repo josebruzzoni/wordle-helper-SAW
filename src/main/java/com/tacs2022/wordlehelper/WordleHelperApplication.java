@@ -23,7 +23,7 @@ public class WordleHelperApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(WordleHelperApplication.class, args);
-		TelegramController.Init();
+		new TelegramController();
 	}
 
 	@Bean
