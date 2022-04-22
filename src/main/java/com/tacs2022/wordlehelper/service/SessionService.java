@@ -23,8 +23,9 @@ public class SessionService {
     SecurityService securityService;
 
     public String getToken(String username, String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
-        if (securityService.validatePassword(username, password)){
-            User user = userService.findByUsername(username);
+        User user = userService.findByUsername(username);
+
+        if (securityService.validatePassword(user, password)){
             String token = TokenProvider.generateToken(user);
             Session session = new Session(token,user);
             this.sessionRepo.save(session);
