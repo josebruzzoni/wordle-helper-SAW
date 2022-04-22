@@ -3,8 +3,10 @@ package com.tacs2022.wordlehelper.controller;
 import com.tacs2022.wordlehelper.controller.Exceptions.MissingAttributesException;
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
+import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewParticipantDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
+import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentsDto;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
@@ -32,13 +34,15 @@ public class TournamentController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public Tournament create(@Valid @RequestBody NewTournamentDto tournament){
-        return tournamentService.save(new Tournament(tournament));
+    public OutputTournamentDto create(@Valid @RequestBody NewTournamentDto tournament){
+    	//TODO get user from token
+    	User owner = userService.findById(Long.valueOf(1));
+        return tournamentService.save(new Tournament(tournament, owner)).getResponse();
     }
 
     @GetMapping("/{id}")
-    public Tournament getTournamentById(@PathVariable(value = "id") Long id) {
-        return tournamentService.findById(id);
+    public OutputTournamentDto getTournamentById(@PathVariable(value = "id") Long id) {
+        return tournamentService.findById(id).getResponse();
     }
 
     @GetMapping("/{id}/leaderboard")
