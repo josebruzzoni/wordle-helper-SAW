@@ -1,8 +1,12 @@
 package Tournaments;
 
+import Utils.TournamentFactory;
 import com.tacs2022.wordlehelper.domain.Language;
+import com.tacs2022.wordlehelper.domain.tournaments.Position;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
+import com.tacs2022.wordlehelper.domain.user.Result;
+import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static java.time.LocalDate.of;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,12 +27,7 @@ public class TournamentsTest {
 
     @BeforeEach
     public void fixture(){
-        tournament = new Tournament(
-                "Luchemos por la vida"
-                , startDate, endDate
-                , List.of(Language.EN, Language.ES)
-                , Visibility.PUBLIC
-        );
+        tournament = TournamentFactory.tournamentBetweenDates(startDate, endDate);
     }
 
     @Test

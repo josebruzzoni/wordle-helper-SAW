@@ -1,6 +1,7 @@
 package com.tacs2022.wordlehelper.domain.tournaments;
 
 import com.tacs2022.wordlehelper.domain.Language;
+import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,8 +9,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -40,9 +41,29 @@ public class Tournament {
         this.participants.add(newParticipant);
     }
 
-    public Leaderboard generateLeaderboard(){
-        //TODO: generate leaderboard
-        return new Leaderboard();
+    public List<Position> generateLeaderboard(){
+        return participants.stream()
+                .map(u -> new Position(u, scoreForUser(u)))
+                .sorted(Comparator.comparing(Position::getFailedAttempts)) //TODO: Ver si hace falta invertir el orden
+                .collect(Collectors.toList());
+    }
+
+    public int scoreForUser(User user){
+        /*if(!user.isParticipant(this)){
+            throw new NotParticipantException(user) //"It was attempted to consult the score of "+user.getUsername()+" who isn't a participant of this tournament
+        }
+        */
+        return user.getResults().stream()
+                .filter(this::resultApplies).map(Result::getFailedAttempts)
+                .reduce(0, Integer::sum);
+    }
+
+    private boolean resultApplies(Result result){
+        return languages.contains(result.getLanguage()) && inProgressToDate(result.getDate());
+    }
+
+    public boolean inProgressToDate(LocalDate date){
+        return startedToDate(date) && !endedToDate(date);
     }
 
     public boolean endedToDate(LocalDate date) {

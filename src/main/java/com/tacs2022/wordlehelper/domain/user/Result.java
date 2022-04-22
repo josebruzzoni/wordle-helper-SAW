@@ -13,8 +13,13 @@ import java.time.LocalDate;
 public class Result {
     @Id @GeneratedValue
     private Long id;
-
-    private Integer score;
+    private Integer failedAttempts;
     private Language language;
     private LocalDate date;
+
+    public Result(Integer failedAttempts, Language language, LocalDate date) {
+        this.failedAttempts = failedAttempts;
+        this.language = language;
+        this.date = date;
+    }
 }

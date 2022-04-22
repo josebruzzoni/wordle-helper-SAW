@@ -2,6 +2,7 @@ package com.tacs2022.wordlehelper.controller;
 
 import com.tacs2022.wordlehelper.controller.Exceptions.MissingAttributesException;
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
+import com.tacs2022.wordlehelper.domain.tournaments.Position;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.dtos.AddParticipantDto;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -51,12 +53,17 @@ public class TournamentController {
     }
 
     @GetMapping("/{id}/leaderboard")
-    public Leaderboard getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId){
-        return tournamentService.getTournamentLeaderboard(tournamentId);
+    public Map<String, List<Position>> getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId){
+        Map<String, List<Position>> response = new HashMap<>();
+        response.put(
+               "leaderboard", tournamentService.getTournamentLeaderboard(tournamentId)
+        );
+
+        return response;
     }
 
 	@PostMapping(value="/{id}/participants")
-    public ResponseEntity<Map<String, String>> addParticipant(@RequestBody AddParticipantDto body, @PathVariable(value = "id") Long tournamentId){
+    public ResponseEntity<Map<String, String>> addParticipant(@Valid @RequestBody AddParticipantDto body, @PathVariable(value = "id") Long tournamentId){
         Long idParticipant = body.getIdParticipant();
         if(idParticipant==null){ //TODO: validar en dto
             throw new MissingAttributesException("idParticipant");

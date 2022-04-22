@@ -60,6 +60,6 @@ public class UserService {
 
     @Transactional
     public void addResult(Long userId, Result result){
-        //TODO
+        findById(userId).addResult(result);
     }
 }

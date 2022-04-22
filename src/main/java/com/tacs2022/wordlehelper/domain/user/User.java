@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.LinkedList;
 import java.util.List;
 
 @Entity
@@ -22,6 +23,9 @@ public class User {
     private String username;
     private byte[] hashedPass;
     private byte[] salt;
+    @OneToMany
+    private List<Result> results = new LinkedList<>();
+
 
     public User(String username, byte[] hashedPass, byte[] salt) {
         this.username = username;
@@ -29,7 +33,8 @@ public class User {
         this.salt = salt;
     }
 
-    @OneToMany
-    private List<Result> results;
 
+    public void addResult(Result result) {
+        this.results.add(result);
+    }
 }
