@@ -2,6 +2,7 @@ package com.tacs2022.wordlehelper.domain.user;
 
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.tacs2022.wordlehelper.domain.Language;
+import com.tacs2022.wordlehelper.dtos.user.NewResultDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -11,6 +12,8 @@ import org.springframework.context.annotation.PropertySource;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
@@ -30,8 +33,10 @@ public class Result {
     }
 
     @Value("score")
-    public int getScore(){
+    public int getScore() {
         int attemptsByDay = 5;
         return attemptsByDay - failedAttempts;
     }
 }
+
+

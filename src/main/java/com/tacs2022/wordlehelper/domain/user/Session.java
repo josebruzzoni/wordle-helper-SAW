@@ -23,5 +23,6 @@ public class Session {
         this.token = token;
         this.user = user;
     }
+
 }
 

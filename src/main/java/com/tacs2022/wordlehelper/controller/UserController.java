@@ -10,8 +10,10 @@ import java.util.stream.Collectors;
 
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
+import com.tacs2022.wordlehelper.dtos.user.NewResultDto;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputUserDto;
+import com.tacs2022.wordlehelper.dtos.user.OutputUsersDto;
 import com.tacs2022.wordlehelper.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +31,10 @@ public class UserController {
     UserService userService;
 
     @GetMapping()
-    public Map<String, List<OutputUserDto>> getAllUsers() {
+    public OutputUsersDto getAllUsers() {
         List<User> users = userService.findAll();
         List<OutputUserDto> userDtos = users.stream().map(u -> new OutputUserDto(u)).collect(Collectors.toList());
-        Map<String, List<OutputUserDto>> response = new HashMap<>();
-        response.put("users", userDtos);
-        return response;
+        return new OutputUsersDto(userDtos);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -45,15 +45,9 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable(value = "id") Long id) {
-        return userService.findById(id);
+    public OutputUserDto getUserById(@PathVariable(value = "id") Long id) {
+        return new OutputUserDto(userService.findById(id));
     }
-
-//    @PutMapping("/{id}")
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    public void update(@RequestBody User existingUser) {
-//        userService.update(existingUser);
-//    }
 
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -61,10 +55,10 @@ public class UserController {
         userService.delete(id);
     }
     
-    @PostMapping("{id}/results")
+    @PostMapping("{userId}/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addUserResults(@RequestBody Result result, @PathVariable(value = "userId") Long userId){
-        userService.addResult(userId, result);
+    public void addUserResults(@Valid @RequestBody NewResultDto result, @PathVariable(value = "userId") Long userId){
+        userService.addResult(userId, result.fromDto());
     }
     
     
