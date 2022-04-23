@@ -4,7 +4,6 @@ import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
-import com.tacs2022.wordlehelper.dtos.user.OutputUserDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,14 +35,6 @@ public class Tournament {
     @ManyToMany
     private List<User> participants = new ArrayList<>();
 
-    public Tournament(String name, LocalDate startDate, LocalDate endDate, List<Language> languages, Visibility visibility) {
-        this.name = name;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.languages.addAll(languages);
-        this.visibility = visibility;
-    }
-
     public Tournament(NewTournamentDto newTournamentDto, User owner) {
         this.name = newTournamentDto.getName();
         this.startDate = newTournamentDto.getStartDate();
@@ -57,10 +48,36 @@ public class Tournament {
     public void addParticipant(User newParticipant) {
         this.participants.add(newParticipant);
     }
+    
+    public Boolean isPrivate() {
+    	return visibility.equals(Visibility.PRIVATE);
+    }
 
     public Leaderboard generateLeaderboard(){
         //TODO: generate leaderboard
         return new Leaderboard();
+    }
+    
+    public TournamentStatus getStatus() {
+    	TournamentStatus status;
+    	
+    	if(isNotStarted()) {
+    		status = TournamentStatus.NOTSTARTED;
+    	}else if(isFinished()) {
+    		status = TournamentStatus.FINISHED;
+    	}else {
+    		status = TournamentStatus.STARTED;
+    	}
+    	
+    	return status;
+    }
+    
+    private Boolean isNotStarted() {
+    	return LocalDate.now().isBefore(startDate);
+    }
+    
+    private Boolean isFinished() {
+    	return endDate.isBefore(LocalDate.now());
     }
 
     public boolean endedToDate(LocalDate date) {
