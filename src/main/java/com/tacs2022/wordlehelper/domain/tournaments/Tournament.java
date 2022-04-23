@@ -3,7 +3,6 @@ package com.tacs2022.wordlehelper.domain.tournaments;
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
-import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +12,6 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Entity
 @Data
@@ -28,19 +26,21 @@ public class Tournament {
     private LocalDate endDate;
     private Visibility visibility;
     @ElementCollection
-    private List<Language> languages = new ArrayList<>();
+    private List<Language> languages;
     
     @ManyToOne
     private User owner;
     @ManyToMany
-    private List<User> participants = new ArrayList<>();
+    private List<User> participants;
 
     public Tournament(NewTournamentDto newTournamentDto, User owner) {
         this.name = newTournamentDto.getName();
         this.startDate = newTournamentDto.getStartDate();
         this.endDate = newTournamentDto.getEndDate();
+        this.languages = new ArrayList<>();
         this.languages.addAll(newTournamentDto.getLanguages());
         this.visibility = newTournamentDto.getVisibility();
+        this.participants = new ArrayList<>();
         this.participants.add(owner);
         this.owner = owner;
     }
@@ -86,13 +86,5 @@ public class Tournament {
 
     public boolean startedToDate(LocalDate date) {
         return !startDate.isAfter(date);
-    }
-    
-    public OutputTournamentDto getResponse() {
-    	List<String> participants = this.participants.stream()
-    			.map( (User user) -> user.getUsername() )
-    			.collect(Collectors.toList());
-    	String username = this.owner.getUsername();
-    	return new OutputTournamentDto(name, startDate, endDate, visibility, languages, username, participants);
     }
 }

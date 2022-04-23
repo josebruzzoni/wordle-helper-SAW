@@ -1,6 +1,5 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.controller.Exceptions.MissingAttributesException;
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.user.User;
@@ -13,11 +12,9 @@ import com.tacs2022.wordlehelper.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Map;
 
 @RequestMapping("/tournaments")
 @RestController()
@@ -34,15 +31,17 @@ public class TournamentController {
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
-    public OutputTournamentDto create(@Valid @RequestBody NewTournamentDto tournament){
-    	//TODO get user from token
-    	User owner = userService.findById(Long.valueOf(1));
-        return tournamentService.save(new Tournament(tournament, owner)).getResponse();
+    public OutputTournamentDto create(@Valid @RequestBody NewTournamentDto tournament, @RequestHeader(required = true) String Authorization){
+    	String token = Authorization.substring(7);
+    	Long userId = userService.getUserIdFromToken(token);
+    	User owner = userService.findById(userId);
+    	Tournament newTournament = new Tournament(tournament, owner);
+        return new OutputTournamentDto(tournamentService.save(newTournament));
     }
 
     @GetMapping("/{id}")
     public OutputTournamentDto getTournamentById(@PathVariable(value = "id") Long id) {
-        return tournamentService.findById(id).getResponse();
+        return new OutputTournamentDto(tournamentService.findById(id));
     }
 
     @GetMapping("/{id}/leaderboard")
