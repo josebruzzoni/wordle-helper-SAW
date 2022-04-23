@@ -3,17 +3,20 @@ package com.tacs2022.wordlehelper.service;
 import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
+import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
+import com.tacs2022.wordlehelper.service.exceptions.ForbiddenException;
 import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
-import net.bytebuddy.asm.Advice;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -22,6 +25,8 @@ import java.util.stream.Collectors;
 public class TournamentService {
     @Autowired
     TournamentRepository tournamentRepo;
+    
+    Logger logger = LoggerFactory.getLogger(TournamentService.class);
 
     public List<Tournament> findAll(){
         return (List<Tournament>) tournamentRepo.findAll();
@@ -72,12 +77,27 @@ public class TournamentService {
     }
 
     @Transactional
-    public void addParticipant(Long tournamentId, User byId) {
+    public void addParticipant(Long tournamentId, User postulator, User participant) {
         Tournament tournament = findById(tournamentId);
-        if(tournament.startedToDate(LocalDate.now())){
+        
+        TournamentStatus status = tournament.getStatus();
+        
+        if(status.equals(TournamentStatus.STARTED) || status.equals(TournamentStatus.FINISHED)){
+        	logger.info("Intento agregar a un usuario a un torneo que ya empezo o ya ha finalizado");
             throw new ExpiredRequestException();
         }
-
-        tournament.addParticipant(byId);
+        
+        if(tournament.isPrivate() && !tournament.isOwner(postulator)) {
+        	logger.info("Intento agregar un usuario a un torneo privado sin ser owner");
+        	throw new ForbiddenException("No podes agregar usuario a este torneo porque es privado");
+        }
+        
+        if(!tournament.isPrivate() && !postulator.equals(participant)) {
+        	logger.info("Intento agregar otro usuario a un torneo publico, solo puede unirse a si mismo");
+        	throw new ForbiddenException("No podes agregar a otro usuario a este torneo, solo podes unirte vos mismo");
+        }
+        
+        if(!tournament.isAParticipant(participant))
+        	tournament.addParticipant(participant);
     }
 }

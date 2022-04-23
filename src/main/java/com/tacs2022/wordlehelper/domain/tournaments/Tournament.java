@@ -44,6 +44,10 @@ public class Tournament {
         this.participants.add(owner);
         this.owner = owner;
     }
+    
+    public Boolean isAParticipant(User newParticipant) {
+    	return this.participants.contains(newParticipant);
+    }
 
     public void addParticipant(User newParticipant) {
         this.participants.add(newParticipant);
@@ -51,6 +55,10 @@ public class Tournament {
     
     public Boolean isPrivate() {
     	return visibility.equals(Visibility.PRIVATE);
+    }
+    
+    public Boolean isOwner(User possibleOwner) {
+    	return this.owner.equals(possibleOwner);
     }
 
     public Leaderboard generateLeaderboard(){

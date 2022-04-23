@@ -32,9 +32,12 @@ public class TournamentController {
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public OutputTournamentDto create(@Valid @RequestBody NewTournamentDto tournament, @RequestHeader(required = true) String Authorization){
-    	String token = Authorization.substring(7);
-    	Long userId = userService.getUserIdFromToken(token);
-    	User owner = userService.findById(userId);
+		/*
+		 * String token = Authorization.substring(7); Long userId =
+		 * userService.getUserIdFromToken(token); User owner =
+		 * userService.findById(userId);
+		 */
+    	User owner = userService.getUserFromToken(Authorization);
     	Tournament newTournament = new Tournament(tournament, owner);
         return new OutputTournamentDto(tournamentService.save(newTournament));
     }
@@ -51,8 +54,10 @@ public class TournamentController {
 
 	@PostMapping(value="/{id}/participants")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addParticipant(@Valid @RequestBody NewParticipantDto body, @PathVariable(value = "id") Long tournamentId){
-        tournamentService.addParticipant(tournamentId, userService.findById(body.getIdParticipant()));
+    public void addParticipant(@Valid @RequestBody NewParticipantDto body, @PathVariable(value = "id") Long tournamentId, @RequestHeader(required = true) String Authorization ){
+		User postulator = userService.getUserFromToken(Authorization);
+		User participant = userService.findById(body.getIdParticipant());
+        tournamentService.addParticipant(tournamentId, postulator, participant);
     }
 
 }

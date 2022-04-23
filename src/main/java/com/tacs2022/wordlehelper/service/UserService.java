@@ -71,5 +71,11 @@ public class UserService {
     public Long getUserIdFromToken(String token){
         return TokenProvider.getId(token);
     }
+    
+    public User getUserFromToken(String auth) {
+    	String token = auth.substring(7);
+    	Long userId = this.getUserIdFromToken(token);
+    	return this.findById(userId);
+    }
 
 }
