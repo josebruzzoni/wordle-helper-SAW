@@ -1,28 +1,21 @@
 package com.tacs2022.wordlehelper.controller;
 
 import com.tacs2022.wordlehelper.controller.Exceptions.MissingAttributesException;
-import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
-import com.tacs2022.wordlehelper.domain.tournaments.Position;
+import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
-import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.dtos.AddParticipantDto;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.HashMapChangeSet;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 
 import javax.validation.Valid;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @RequestMapping("/tournaments")
 @RestController()
@@ -53,8 +46,8 @@ public class TournamentController {
     }
 
     @GetMapping("/{id}/leaderboard")
-    public Map<String, List<Position>> getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId){
-        Map<String, List<Position>> response = new HashMap<>();
+    public Map<String, List<Scoreboard>> getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId){
+        Map<String, List<Scoreboard>> response = new HashMap<>();
         response.put(
                "leaderboard", tournamentService.getTournamentLeaderboard(tournamentId)
         );
@@ -65,9 +58,6 @@ public class TournamentController {
 	@PostMapping(value="/{id}/participants")
     public ResponseEntity<Map<String, String>> addParticipant(@Valid @RequestBody AddParticipantDto body, @PathVariable(value = "id") Long tournamentId){
         Long idParticipant = body.getIdParticipant();
-        if(idParticipant==null){ //TODO: validar en dto
-            throw new MissingAttributesException("idParticipant");
-        }
 
         tournamentService.addParticipant(tournamentId, userService.findById(idParticipant));
 

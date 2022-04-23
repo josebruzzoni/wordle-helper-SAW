@@ -1,20 +1,17 @@
 package com.tacs2022.wordlehelper.service;
 
 import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
-import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
-import com.tacs2022.wordlehelper.domain.tournaments.Position;
+import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
 import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
-import net.bytebuddy.asm.Advice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -47,7 +44,7 @@ public class TournamentService {
         return tournament;
     }
 
-    public List<Position> getTournamentLeaderboard(Long id) {
+    public List<Scoreboard> getTournamentLeaderboard(Long id) {
         return findById(id).generateLeaderboard();
     }
 

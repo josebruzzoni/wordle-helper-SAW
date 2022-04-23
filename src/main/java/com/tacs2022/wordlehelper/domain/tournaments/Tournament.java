@@ -41,21 +41,16 @@ public class Tournament {
         this.participants.add(newParticipant);
     }
 
-    public List<Position> generateLeaderboard(){
+    public List<Scoreboard> generateLeaderboard(){
         return participants.stream()
-                .map(u -> new Position(u, scoreForUser(u)))
-                .sorted(Comparator.comparing(Position::getFailedAttempts)) //TODO: Ver si hace falta invertir el orden
+                .map(this::getUserScoreboard)
+                .sorted(Comparator.comparing(Scoreboard::getFailedAttempts))
                 .collect(Collectors.toList());
     }
 
-    public int scoreForUser(User user){
-        /*if(!user.isParticipant(this)){
-            throw new NotParticipantException(user) //"It was attempted to consult the score of "+user.getUsername()+" who isn't a participant of this tournament
-        }
-        */
-        return user.getResults().stream()
-                .filter(this::resultApplies).map(Result::getFailedAttempts)
-                .reduce(0, Integer::sum);
+    public Scoreboard getUserScoreboard(User user){
+        List<Result> results = user.getResults().stream().filter(this::resultApplies).collect(Collectors.toList());
+        return new Scoreboard(user, results);
     }
 
     private boolean resultApplies(Result result){
