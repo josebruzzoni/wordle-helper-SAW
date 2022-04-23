@@ -23,11 +23,6 @@ public class Result {
         this.date = date;
     }
 
-    public int getScore() {
-        int attemptsByDay = 6;
-        return 10*(attemptsByDay - failedAttempts);
-    }
-
     public boolean match(Result result) {
         return getDate().atStartOfDay().equals(result.getDate().atStartOfDay())
             && getLanguage().equals(result.getLanguage())

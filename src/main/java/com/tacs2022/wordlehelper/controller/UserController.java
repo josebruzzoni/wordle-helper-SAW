@@ -53,15 +53,10 @@ public class UserController {
     }
     
     @PostMapping("{userId}/results")
-    public Result addUserResults(@Valid @RequestBody NewResultDto result, @PathVariable(value = "userId") Long userId){
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void addUserResults(@Valid @RequestBody NewResultDto result, @PathVariable(value = "userId") Long userId){
         Result savedResult = result.fromDto();
         userService.addResult(userId, savedResult);
-        return savedResult;
-    }
-
-    @GetMapping("{userId}/results")
-    public List<Result> gi9ahuti(@PathVariable(value = "userId") Long userId){
-        return userService.findById(userId).getResults();
     }
 
 }
