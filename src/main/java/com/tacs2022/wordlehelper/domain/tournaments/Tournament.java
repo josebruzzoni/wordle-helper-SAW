@@ -3,7 +3,6 @@ package com.tacs2022.wordlehelper.domain.tournaments;
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Tournament {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private LocalDate startDate;
@@ -38,32 +37,31 @@ public class Tournament {
         this.visibility = visibility;
     }
 
-    public Tournament(NewTournamentDto newTournamentDto) {
-        this.name = newTournamentDto.getName();
-        this.startDate = newTournamentDto.getStartDate();
-        this.endDate = newTournamentDto.getEndDate();
-        this.languages.addAll(newTournamentDto.getLanguages());
-        this.visibility = newTournamentDto.getVisibility();
-    }
-
     public void addParticipant(User newParticipant) {
         this.participants.add(newParticipant);
     }
 
-    public List<Scoreboard> generateLeaderboard(){
+    public List<Scoreboard> generateLeaderboardToDate(LocalDate date){
         return participants.stream()
-                .map(this::getUserScoreboard)
-                .sorted(Comparator.comparing(Scoreboard::getFailedAttempts))
+                .map(u->new Scoreboard(u, this))
+                .sorted(Comparator.comparing(s->s.getBadScoreToDate(date)))
                 .collect(Collectors.toList());
     }
 
-    public Scoreboard getUserScoreboard(User user){
-        List<Result> results = user.getResults().stream().filter(this::resultApplies).collect(Collectors.toList());
-        return new Scoreboard(user, results);
+    public int daysPassedToDate(LocalDate date){
+        long days = inProgressToDate(date)? startDate.datesUntil(date).count()
+                : endedToDate(date)? startDate.datesUntil(endDate).count()
+                : 0;
+
+        return (int) days;
     }
 
-    private boolean resultApplies(Result result){
-        return languages.contains(result.getLanguage()) && inProgressToDate(result.getDate());
+    public boolean considers(Result result){
+        return this.supportsLanguage(result.getLanguage()) && inProgressToDate(result.getDate());
+    }
+
+    private boolean supportsLanguage(Language language) {
+        return languages.contains(language);
     }
 
     public boolean inProgressToDate(LocalDate date){
@@ -77,4 +75,5 @@ public class Tournament {
     public boolean startedToDate(LocalDate date) {
         return !startDate.isAfter(date);
     }
+
 }

@@ -7,6 +7,7 @@ import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
 import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -44,8 +45,8 @@ public class TournamentService {
         return tournament;
     }
 
-    public List<Scoreboard> getTournamentLeaderboard(Long id) {
-        return findById(id).generateLeaderboard();
+    public List<Scoreboard> getTournamentLeaderboard(Long id, LocalDate date) {
+        return findById(id).generateLeaderboardToDate(date);
     }
 
     //******************************************************************************************

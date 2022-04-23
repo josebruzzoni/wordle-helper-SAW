@@ -4,41 +4,44 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Value;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 public class Scoreboard {
     User user;
-
+    @JsonIgnore
+    Tournament tournament;
     @JsonIgnore
     List<Result> results;
 
-    public String getUsername() {
-        return user.getUsername(); //TODO refactor
-    }
-
-    public Scoreboard(User user, List<Result> results){
+    public Scoreboard(User user, Tournament tournament){
         this.user = user;
-        this.results = results;
+        this.tournament = tournament;
+        refreshResults();
     }
 
-    public int getScore(){
-        return results.stream().mapToInt(Result::getScore).sum();
+    public int getBadScoreToDate(LocalDate date){
+
+        int notPlayedDays = Integer.max(tournament.daysPassedToDate(date) - getPlayedGames(), 0);
+        return 7*notPlayedDays + getFailedAttempts();
     }
 
     public int getFailedAttempts(){
-        return results.stream().mapToInt(Result::getFailedAttempts).sum();
+        return getResults().stream().mapToInt(Result::getFailedAttempts).sum();
     }
 
-    /*
-    public int getPlayedGames(){
-        return results.size();
+    private int getPlayedGames(){
+        return getResults().size();
     }
 
-    public long getVictories(){
-        return results.stream().filter(r->r.getScore()>0).count();
+    private List<Result> getResults() {
+        return this.results;
     }
-    */
+
+    public void refreshResults(){
+        this.results = user.getResults().stream().filter(tournament::considers).collect(Collectors.toList());
+    }
 }

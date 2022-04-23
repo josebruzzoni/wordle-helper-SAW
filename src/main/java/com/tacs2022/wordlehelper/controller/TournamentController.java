@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +35,7 @@ public class TournamentController {
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public Tournament create(@Valid @RequestBody NewTournamentDto tournament){
-        return tournamentService.save(new Tournament(tournament));
+        return tournamentService.save(tournament.fromDTO());
     }
 
     @GetMapping("/{id}")
@@ -46,7 +47,7 @@ public class TournamentController {
     public Map<String, List<Scoreboard>> getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId){
         Map<String, List<Scoreboard>> response = new HashMap<>();
         response.put(
-               "leaderboard", tournamentService.getTournamentLeaderboard(tournamentId)
+               "leaderboard", tournamentService.getTournamentLeaderboard(tournamentId, LocalDate.now())
         );
 
         return response;
