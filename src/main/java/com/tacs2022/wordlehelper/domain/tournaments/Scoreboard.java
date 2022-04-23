@@ -23,6 +23,10 @@ public class Scoreboard {
         refreshResults();
     }
 
+    public int getBadScore(){
+        return getBadScoreToDate(LocalDate.now());
+    }
+
     public int getBadScoreToDate(LocalDate date){
 
         int notPlayedDays = tournament.daysPassedToDate(date) - getPlayedGames();
