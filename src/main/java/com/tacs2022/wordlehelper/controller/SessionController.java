@@ -35,6 +35,7 @@ public class SessionController {
     @DeleteMapping(path = "/{token}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(@PathVariable(value = "token") String token) {
+
         sessionService.removeToken(token);
     }
 }

@@ -5,6 +5,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +21,9 @@ public class User {
     @Id @GeneratedValue
     private Long id;
     private String username;
+    @JsonIgnore
     private byte[] hashedPass;
+    @JsonIgnore
     private byte[] salt;
 
     public User(String username, byte[] hashedPass, byte[] salt) {
