@@ -24,13 +24,21 @@ public class Scoreboard {
         this.results = results;
     }
 
-    @Value("score")
     public int getScore(){
         return results.stream().mapToInt(Result::getScore).sum();
     }
 
-    @Value("failedAttempts")
     public int getFailedAttempts(){
         return results.stream().mapToInt(Result::getFailedAttempts).sum();
     }
+
+    /*
+    public int getPlayedGames(){
+        return results.size();
+    }
+
+    public long getVictories(){
+        return results.stream().filter(r->r.getScore()>0).count();
+    }
+    */
 }

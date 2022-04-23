@@ -12,6 +12,7 @@ import org.springframework.context.annotation.PropertySource;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.Transient;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -32,10 +33,9 @@ public class Result {
         this.date = date;
     }
 
-    @Value("score")
     public int getScore() {
         int attemptsByDay = 5;
-        return attemptsByDay - failedAttempts;
+        return 10*(attemptsByDay - failedAttempts);
     }
 }
 

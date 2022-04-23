@@ -40,13 +40,13 @@ public class LeaderboardTest {
 
     @Test
     public void scoreCalculatesApropiadly() {
-        assertEquals(5, tournament.getUserScoreboard(user1).getScore());
+        assertEquals(50, tournament.getUserScoreboard(user1).getScore());
     }
 
     @Test
     public void scoreIgnoresResultsOfExcludedLanguages(){
         user1.addResult(new Result(3, Language.EN, startDate));//En idioma no permitido no se considera
-        assertEquals(5, tournament.getUserScoreboard(user1).getScore());
+        assertEquals(50, tournament.getUserScoreboard(user1).getScore());
     }
 
     @Test
@@ -54,7 +54,7 @@ public class LeaderboardTest {
         user1.addResult(new Result(1, Language.ES, startDate.minusDays(1)));//En idioma no permitido no se considera
         user1.addResult(new Result(0, Language.ES, endDate.plusDays(1)));//En idioma no permitido no se considera
 
-        assertEquals(5, tournament.getUserScoreboard(user1).getScore());
+        assertEquals(50, tournament.getUserScoreboard(user1).getScore());
     }
 
     @Test
@@ -66,11 +66,11 @@ public class LeaderboardTest {
 
         tournament.addParticipant(user2);
 
-        assertEquals(1, tournament.getUserScoreboard(user2).getScore());
+        assertEquals(10, tournament.getUserScoreboard(user2).getScore());
         List<Scoreboard> leaderboard = tournament.generateLeaderboard();
 
         assertThat(getFromLeaderBoard(leaderboard, Scoreboard::getUser), is(List.of(user1, user2)));
-        assertThat(getFromLeaderBoard(leaderboard, Scoreboard::getScore), is(List.of(5, 1)));
+        assertThat(getFromLeaderBoard(leaderboard, Scoreboard::getScore), is(List.of(50, 10)));
         assertThat(getFromLeaderBoard(leaderboard, Scoreboard::getFailedAttempts), is(List.of(5, 9)));
     }
 

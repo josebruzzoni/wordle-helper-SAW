@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,7 +28,7 @@ public class User {
     private byte[] hashedPass;
     @JsonIgnore
     private byte[] salt;
-    @OneToMany
+    @OneToMany @Cascade(CascadeType.ALL)
     private List<Result> results = new LinkedList<>();
 
 
