@@ -60,11 +60,6 @@ public class LeaderboardTest {
     }
 
     @Test
-    public void scoreToDateIgnoresResultsOfDaysYetNotPassed(){
-        assertEquals(5, new Scoreboard(user1, tournament).getBadScoreToDate(endDate.minusDays(1)));
-    }
-
-    @Test
     public void daysNotPlayedAreCorrectlyPenalized(){
         LocalDate endDateModified = endDate.plusDays(2);
         tournament.setEndDate(endDateModified);

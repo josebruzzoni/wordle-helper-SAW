@@ -13,8 +13,7 @@ public class NewResultDto {
     private Integer failedAttempts;
     @NotNull(message = "Language cannot be null")
     private Language language;
-    @NotNull(message = "Date cannot be null")
-    private LocalDate date;
+    private LocalDate date = LocalDate.now();
 
     public Result fromDto() {
         return new Result(failedAttempts, language, date);

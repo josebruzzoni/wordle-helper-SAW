@@ -52,6 +52,14 @@ public class TournamentsTest {
     }
 
     @Test
+    public void daysPassedUntilDate(){
+        assertEquals(0, tournament.daysPassedToDate(startDate));
+        assertEquals(1, tournament.daysPassedToDate(startDate.plusDays(1)));
+        assertEquals(2, tournament.daysPassedToDate(endDate));
+        assertEquals(2, tournament.daysPassedToDate(endDate));
+    }
+
+    @Test
     public void tournamentStartedInDaysBeforeIsAlreadyStarted(){
         assertTrue(tournament.startedToDate(startDate.plusDays(1)));
     }

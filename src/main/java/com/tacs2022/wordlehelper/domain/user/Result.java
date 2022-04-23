@@ -27,6 +27,12 @@ public class Result {
         int attemptsByDay = 6;
         return 10*(attemptsByDay - failedAttempts);
     }
+
+    public boolean match(Result result) {
+        return getDate().atStartOfDay().equals(result.getDate().atStartOfDay())
+            && getLanguage().equals(result.getLanguage())
+        ;
+    }
 }
 
 

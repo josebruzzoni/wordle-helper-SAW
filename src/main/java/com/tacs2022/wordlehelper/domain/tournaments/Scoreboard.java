@@ -25,7 +25,7 @@ public class Scoreboard {
 
     public int getBadScoreToDate(LocalDate date){
 
-        int notPlayedDays = Integer.max(tournament.daysPassedToDate(date) - getPlayedGames(), 0);
+        int notPlayedDays = tournament.daysPassedToDate(date) - getPlayedGames();
         return 7*notPlayedDays + getFailedAttempts();
     }
 
