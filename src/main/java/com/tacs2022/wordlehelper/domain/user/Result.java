@@ -34,7 +34,7 @@ public class Result {
     }
 
     public int getScore() {
-        int attemptsByDay = 5;
+        int attemptsByDay = 6;
         return 10*(attemptsByDay - failedAttempts);
     }
 }
