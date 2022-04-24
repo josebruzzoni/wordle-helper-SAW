@@ -17,12 +17,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class HelperServiceTest {
     HelperService helperService;
-    WordPlay wordPlay;
+    WordPlay wordPlay, emptyPlay;
 
     @BeforeEach
     void init(){
         helperService = new HelperService();
         wordPlay = new WordPlay("KIR", "G__W_", "A_L__");
+        emptyPlay = new WordPlay(null, null, null);
     }
 
     //TODO: standardize test names
@@ -34,9 +35,21 @@ class HelperServiceTest {
     }
 
     @Test
+    void whenGivenEmptyGreenPlay_HelperMustBuildRegularExpression_Any(){
+        String regexFromGreen = helperService.buildAllInPositionRegularExpression(emptyPlay.getLettersByColor(LetterColor.GREEN)).toUpperCase();
+        assertEquals(".....", regexFromGreen);
+    }
+
+    @Test
     void whenGivenPlay_HelperMustBuildRegularExpression_NoneOf(){
         String regexFromGray = helperService.buildNoneOfRegularExpression(wordPlay.getLettersByColor(LetterColor.GRAY)).toUpperCase();
         assertEquals("[^KIR][^KIR][^KIR][^KIR][^KIR]", regexFromGray);
+    }
+
+    @Test
+    void whenGivenEmptyGrayPlay_HelperMustBuildRegularExpression_Any(){
+        String regexFromGray = helperService.buildNoneOfRegularExpression(emptyPlay.getLettersByColor(LetterColor.GRAY)).toUpperCase();
+        assertEquals(".....", regexFromGray);
     }
 
     @ParameterizedTest
@@ -48,6 +61,11 @@ class HelperServiceTest {
     })
     void test_hasEveryOf_NotInPosition(String word, boolean matches){
         assertEquals(matches, helperService.hasEveryOfNotInPosition(word.toLowerCase(), wordPlay.getLettersByColor(LetterColor.YELLOW)));
+    }
+
+    @Test
+    void whenGivenEmptyYellowPlay_hasEveryOfNotInPosition_mustMatch(){
+        assertTrue(helperService.hasEveryOfNotInPosition("MATCH", emptyPlay.getLettersByColor(LetterColor.YELLOW)));
     }
 
     //TODO: more tests

@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 @Service
 public class HelperService {
 
-    private static final int WORD_LENGTH = 5;
+    public static final int WORD_LENGTH = 5;
 
     private static final Map<Language, String> LANGUAGE_WORDS_FILE_MAP = Map.of(
             Language.EN, "src/main/resources/helper/5letter-english.list",
@@ -35,6 +35,7 @@ public class HelperService {
             String greenRegex = buildAllInPositionRegularExpression(wordPlay.getLettersByColor(LetterColor.GREEN));
 
             possibleOptions = stream
+                    .map(String::toLowerCase)
                     .filter(line -> line.matches(grayRegex))
                     .filter(line -> line.matches(greenRegex))
                     .filter(line -> hasEveryOfNotInPosition(line, wordPlay.getLettersByColor(LetterColor.YELLOW)))
@@ -48,7 +49,7 @@ public class HelperService {
         return possibleOptions;
     }
 
-    //TODO have one regular expression of everything (yellow and green) combined
+    //Regular Expressions doc
     //https://www.javatpoint.com/java-regex#:~:text=The%20Java%20Regex%20or%20Regular,the%20Java%20Regex%20Tester%20Tool.
 
     public String buildAllInPositionRegularExpression(List<LetterPlay> lettersPlayed){
@@ -68,14 +69,13 @@ public class HelperService {
 
     public String buildNoneOfRegularExpression(List<LetterPlay> lettersPlayed){
         //string of all characters together
-        String letters = lettersPlayed.stream().map(l -> l.getLetter().toString()).reduce((acc, e) -> acc  + e).orElse("");
+        String letters = lettersPlayed.stream().map(l -> l.getLetter().toString()).reduce((acc, e) -> acc  + e).orElse(".");
         //regex that represents if a character doesn't match any of letters
-        String notAnyLetterRegex = "[^" + letters + "]";
+        String notAnyLetterRegex = !letters.equals(".") ? "[^" + letters + "]" : letters; //in case list is empty return 'any' regular expression
         //repeat five times for all positions
-        return notAnyLetterRegex.repeat(5);
+        return notAnyLetterRegex.repeat(WORD_LENGTH);
     }
 
-    //TODO test if it can be done through regex
     public boolean hasEveryOfNotInPosition(String word, List<LetterPlay> lettersPlayed){
         for (LetterPlay letter : lettersPlayed){
             if (!word.contains(letter.getLetter().toString()) //word does not contain letter
@@ -85,30 +85,3 @@ public class HelperService {
         return true;
     }
 }
-
-
-
-/*
-        1. ARBOL
-        2. FUEGO
-        3. PISCO
-        4. COITO
-        5. CHIVO
-        6. CHINO <=====
-
-
-
-        grey: ARBLFUEGPS
-        yellow: ___O_ ==> _I_C_
-        green:  ____O ==> C_I_O ==> CHI_O
-
-
-        Pasos
-        1. Filtrar por las verdes =>  qye tengan en el lugar correpsondiente TODAS
-        2. Filtrar por las grises =>  que no tengan en ningun lugar TODAS
-        3. Filtrar por las amarilloas => que contengan en algun lugar (que no sea su posicion + ninguna de las verdes)
-
-
-
-        opcion para modificar la ruta ==> ?yellow=p3h5 para atacar el caso que salto ayer
- */

@@ -1,4 +1,4 @@
-package com.tacs2022.wordlehelper.controller.Exceptions;
+package com.tacs2022.wordlehelper.controller.exceptions;
 
 import java.util.HashMap;
 import java.util.List;
