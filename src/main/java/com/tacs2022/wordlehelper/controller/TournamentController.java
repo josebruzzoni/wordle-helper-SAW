@@ -32,19 +32,15 @@ public class TournamentController {
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public OutputTournamentDto create(@Valid @RequestBody NewTournamentDto tournament, @RequestHeader(required = true) String Authorization){
-		/*
-		 * String token = Authorization.substring(7); Long userId =
-		 * userService.getUserIdFromToken(token); User owner =
-		 * userService.findById(userId);
-		 */
     	User owner = userService.getUserFromToken(Authorization);
     	Tournament newTournament = new Tournament(tournament, owner);
         return new OutputTournamentDto(tournamentService.save(newTournament));
     }
 
     @GetMapping("/{id}")
-    public OutputTournamentDto getTournamentById(@PathVariable(value = "id") Long id) {
-        return new OutputTournamentDto(tournamentService.findById(id));
+    public OutputTournamentDto getTournamentById(@PathVariable(value = "id") Long id, @RequestHeader(required = true) String Authorization) {
+        User user = userService.getUserFromToken(Authorization);
+    	return new OutputTournamentDto(tournamentService.getByIdAndValidateVisibility(id, user));
     }
 
     @GetMapping("/{id}/leaderboard")

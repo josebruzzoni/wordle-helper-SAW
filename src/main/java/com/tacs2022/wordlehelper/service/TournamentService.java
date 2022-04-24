@@ -44,6 +44,17 @@ public class TournamentService {
                 () -> new NotFoundException("No tournament with id "+id+" was found")
         );
     }
+    
+    public Tournament getByIdAndValidateVisibility(Long id, User user) {
+    	Tournament tournament = findById(id);
+    	
+    	if(tournament.isPrivate() && !tournament.isOwner(user) && !tournament.isAParticipant(user)) {
+    		logger.info("El usuario no tiene permisos para ver este torneo");
+        	throw new ForbiddenException("El usuario no tiene permisos para ver este torneo");
+    	}
+    	
+    	return tournament;
+    }
 
     @Transactional
     public Tournament save(Tournament tournament) {
