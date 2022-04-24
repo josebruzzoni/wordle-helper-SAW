@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 import javax.validation.Valid;
 
 @RequestMapping("/tournaments")
@@ -25,8 +27,22 @@ public class TournamentController {
     UserService userService;
 
     @GetMapping()
-    public OutputTournamentsDto getAllTournaments(@RequestParam(required = false) String role, @RequestParam(required = false) String status) {
-        return new OutputTournamentsDto(tournamentService.findAll(role, status));
+    public OutputTournamentsDto getAllTournaments(@RequestParam(required = false) String role, @RequestParam(required = false) String status, @RequestHeader(required = true) String Authorization) {
+    	User user = userService.getUserFromToken(Authorization);
+    	List<Tournament> tournaments = null;
+    	
+    	//change role for type. Values = (PUBLIC, REGISTERED, OWN)
+    	if(role != null && status != null) {
+    		tournaments = tournamentService.findByTypeAndStatus(role, status, user);
+        } else if( role != null ) {
+        	tournaments = tournamentService.findByType(role, user);
+        } else if( status != null) {
+        	tournaments = tournamentService.findByStatus(status, user);
+        } else {
+        	tournaments = tournamentService.findAllByUser(user);
+        }
+    	
+    	return new OutputTournamentsDto(tournaments);
     }
 
     @PostMapping()

@@ -16,6 +16,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class OutputTournamentDto {
 	
+	private Long id;
 	private String name;
     private LocalDate startDate;
     private LocalDate endDate;
@@ -25,6 +26,7 @@ public class OutputTournamentDto {
     private List<String> participants;
 	
     public OutputTournamentDto(Tournament tournament) {
+    	this.id = tournament.getId();
     	this.name = tournament.getName();
     	this.startDate = tournament.getStartDate();
     	this.endDate = tournament.getEndDate();

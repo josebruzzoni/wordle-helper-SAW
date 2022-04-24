@@ -111,4 +111,20 @@ public class TournamentService {
         if(!tournament.isAParticipant(participant))
         	tournament.addParticipant(participant);
     }
+
+	public List<Tournament> findByTypeAndStatus(String type, String status, User user) {
+		return this.findAll(); //TODO
+	}
+
+	public List<Tournament> findByType(String type, User user) {
+		return this.findAll(); //TODO
+	}
+
+	public List<Tournament> findByStatus(String status, User user) {
+		return this.findAll(); //TODO
+	}
+
+	public List<Tournament> findAllByUser(User user) {
+		return this.findAll(); //TODO
+	}
 }
