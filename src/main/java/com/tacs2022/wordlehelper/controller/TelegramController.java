@@ -9,19 +9,26 @@ import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
-import com.tacs2022.wordlehelper.service.TelegramTempService;
+import com.tacs2022.wordlehelper.service.SessionService;
+import com.tacs2022.wordlehelper.service.UserService;
+import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
 import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+@Controller
 public class TelegramController {
     private Map<Long, String> usernameByChatId = new HashMap<>();
     private Map<Long, String> lastMessageSentByChatId = new HashMap<>();
     private TelegramBot bot;
-    private TelegramTempService tempService = new TelegramTempService();
-    /*private SessionService sessionService;*/
+    @Autowired
+    private SessionService sessionService;
+    @Autowired
+    private UserService userService;
     public TelegramController(){
         /*sessionService = new SessionService();*/
         Dotenv dotenv = Dotenv.configure().load();
@@ -67,6 +74,7 @@ public class TelegramController {
     }
 
     private void handleMessage(Message message){
+        System.out.println("paso por handleMessage");
         if (message != null) {
             long chatId = message.chat().id();
 
@@ -114,10 +122,13 @@ public class TelegramController {
         String password = message.text();
 
         try {
-            /*String token = this.sessionService.getToken(username, password);*/
-            String token = this.tempService.getToken(chatId, username, password);
+            String token = this.sessionService.getToken(username, password);
 
             if (token == null) {
+                /* Nota: en realidad este caso se va a dar solo cuando me logueo para un usuario existente pero con una
+                 contraseña que no cumple los requisitos de validación. Es un caso medio raro pero lo mejor no sería
+                 devolver que la contraseña no cumple los requisitos porque sino así capaz el cliente puede saber que
+                 el usuari existe mediante prueba y error. */
                 SendMessage sendMessage = new SendMessage(chatId, "Usuario o contraseña inválido.");
                 this.bot.execute(sendMessage);
                 this.cleanMaps(chatId);
@@ -127,8 +138,16 @@ public class TelegramController {
                 this.bot.execute(sendMessage);
                 this.sendKeyboardForLogued(chatId);
             }
-        }catch(Exception e){
-            System.out.println(e);
+        }catch(NotFoundException e){
+            SendMessage sendMessage = new SendMessage(chatId, "Usuario o contraseña inválido.");
+            this.bot.execute(sendMessage);
+            this.cleanMaps(chatId);
+            this.handleLogin(chatId);
+        } catch(Exception e){
+            SendMessage sendMessage = new SendMessage(chatId, "Ocurrió un error.");
+            this.bot.execute(sendMessage);
+            this.cleanMaps(chatId);
+            this.handleLogin(chatId);
         }
     }
 
@@ -137,7 +156,7 @@ public class TelegramController {
         String password = message.text();
 
         try {
-            this.tempService.save(username, password);
+            this.userService.save(username, password);
             SendMessage sendMessage = new SendMessage(chatId, "El usuario ha sido creado correctamente.");
             bot.execute(sendMessage);
             this.sendKeyboardForNotLogued(chatId);
@@ -152,6 +171,7 @@ public class TelegramController {
     }
 
     private void sendKeyboardForNotLogued(long chatId){
+        System.out.println("paso por sendKeyboardForNotLogued");
         InlineKeyboardButton loginButton = new InlineKeyboardButton("Login").callbackData("login");
         InlineKeyboardButton createUserButton = new InlineKeyboardButton("Sign in").callbackData("signin");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(loginButton, createUserButton);
