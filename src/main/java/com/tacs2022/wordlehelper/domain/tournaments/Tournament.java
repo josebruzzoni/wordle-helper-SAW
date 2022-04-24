@@ -50,7 +50,7 @@ public class Tournament {
 
     public int daysPassedToDate(LocalDate date){
         long days = inProgressToDate(date)? startDate.datesUntil(date).count()
-                : endedToDate(date)? startDate.datesUntil(endDate).count()
+                : endedToDate(date)? 1+startDate.datesUntil(endDate).count()
                 : 0;
 
         return (int) days;
@@ -69,7 +69,7 @@ public class Tournament {
     }
 
     public boolean endedToDate(LocalDate date) {
-        return !endDate.isAfter(date);
+        return date.isAfter(endDate);
     }
 
     public boolean startedToDate(LocalDate date) {

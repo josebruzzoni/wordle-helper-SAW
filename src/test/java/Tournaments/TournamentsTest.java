@@ -26,8 +26,8 @@ public class TournamentsTest {
     }
 
     @Test
-    public void tournamentFinishedOnSameDayIsAlreadyFinished(){
-        assertTrue(tournament.endedToDate(endDate));
+    public void tournamentIsNotEndedAtLastDay(){
+        assertFalse(tournament.endedToDate(endDate));
     }
 
     @Test
@@ -56,7 +56,7 @@ public class TournamentsTest {
         assertEquals(0, tournament.daysPassedToDate(startDate));
         assertEquals(1, tournament.daysPassedToDate(startDate.plusDays(1)));
         assertEquals(2, tournament.daysPassedToDate(endDate));
-        assertEquals(2, tournament.daysPassedToDate(endDate));
+        assertEquals(3, tournament.daysPassedToDate(endDate.plusDays(1)));
     }
 
     @Test
