@@ -14,15 +14,7 @@ public class DictionaryService {
     @Autowired
     DictionaryAPI dictionaryAPI;
 
-    public Word findByNameAndLanguage(String name, String language) {
-        Language l;
-
-        try {
-            l = Language.valueOf(language.toUpperCase());
-        }catch (IllegalArgumentException e){
-            throw new NotFoundException("Language not found");
-        }
-
-        return dictionaryAPI.getWordDefinition(name, l);
+    public Word findByNameAndLanguage(String name, Language language) {
+        return dictionaryAPI.getWordDefinition(name, language);
     }
 }
