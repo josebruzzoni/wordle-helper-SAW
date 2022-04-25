@@ -30,9 +30,8 @@ public class OxfordDictionaryAPI implements DictionaryAPI{
         HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<Word> response = restTemplate.exchange(String.format(API_URL, language.toString().toLowerCase(), word), HttpMethod.GET, requestEntity, Word.class);
-            return response.getBody();
-
+            ResponseEntity<OxfordDictionaryWord> response = restTemplate.exchange(String.format(API_URL, language.toString().toLowerCase(), word), HttpMethod.GET, requestEntity, OxfordDictionaryWord.class);
+            return response.getBody().asWord();
         }catch (HttpClientErrorException e){
             throw new NotFoundException(String.format("No dictionary entry found for language: %s and word: %s", language, word));
         }
