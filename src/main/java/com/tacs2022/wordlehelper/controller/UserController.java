@@ -1,26 +1,37 @@
 package com.tacs2022.wordlehelper.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
+import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
+import com.tacs2022.wordlehelper.domain.tournaments.TournamentType;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
+import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentsDto;
 import com.tacs2022.wordlehelper.dtos.user.NewResultDto;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputUsersDto;
+import com.tacs2022.wordlehelper.exceptions.NotFoundException;
+import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
     @Autowired
     UserService userService;
+    
+    @Autowired
+    TournamentService tournamentService;
 
     @GetMapping()
     public OutputUsersDto getAllUsers() {
@@ -53,5 +64,27 @@ public class UserController {
         Result savedResult = result.fromDto();
         userService.addResult(userId, savedResult);
     }
-
+    
+    @GetMapping("{userId}/tournaments")
+    public OutputTournamentsDto getTournaments(@PathVariable(value = "userId") Long userId, @RequestParam(required = false) TournamentType type, @RequestParam(required = false) TournamentStatus status, @RequestHeader(required = true) String Authorization) {
+    	User user = userService.getUserFromToken(Authorization);
+    	
+    	if(user.getId() != userId) {
+    		throw new NotFoundException("El usuario no puede ver los torneos de otro usuario");
+    	}
+    	
+    	List<Tournament> tournaments =  null;
+    	
+    	if(type != null && status != null) {
+    		tournaments = tournamentService.findByTypeAndStatus(type, status, user.getId());
+        } else if( type != null ) {
+        	tournaments = tournamentService.findByType(type, user);
+        } else if( status != null) {
+        	tournaments = tournamentService.findByStatus(status, user.getId());
+        } else {
+        	tournaments = tournamentService.findTournamentsInWhichUserIsRegistered(user);
+        }
+    	
+    	return new OutputTournamentsDto(tournaments);
+    }
 }

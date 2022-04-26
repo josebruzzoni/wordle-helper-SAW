@@ -6,6 +6,7 @@ import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.exceptions.ExistingUserException;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.repos.UserRepository;
+import com.tacs2022.wordlehelper.security.jwt.TokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,12 +87,18 @@ public class UserService {
             user.addResult(result);
     }
 
-    /*public String getUsernameFromToken(String token){
+    public String getUsernameFromToken(String token){
         return TokenProvider.getUsername(token);
     }
 
     public Long getUserIdFromToken(String token){
         return TokenProvider.getId(token);
-    }*/
+    }
+    
+    public User getUserFromToken(String auth) {
+    	String token = auth.substring(7);
+    	Long userId = this.getUserIdFromToken(token);
+    	return this.findById(userId);
+    }
 
 }

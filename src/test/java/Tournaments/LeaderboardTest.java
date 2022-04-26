@@ -67,7 +67,7 @@ public class LeaderboardTest {
         assertEquals(19, new Scoreboard(user1, tournament).getBadScoreToDate(endDateModified));
     }
 
-    @Test
+    /*@Test
     public void leaderboardGeneratesCorrectly(){
 
         User user2 = new User("miguelito", null, null);
@@ -82,11 +82,11 @@ public class LeaderboardTest {
         assertThat(getFromLeaderBoard(leaderboard, Scoreboard::getUser), is(List.of(user1, user2)));
         assertThat(getFromLeaderBoard(leaderboard, s->s.getBadScoreToDate(endDate)), is(List.of(5, 9)));
         assertThat(getFromLeaderBoard(leaderboard, Scoreboard::getFailedAttempts), is(List.of(5, 9)));
-    }
+    }*/
 
 
 
-    private <T> List<T> getFromLeaderBoard(List<Scoreboard> leaderboard, Function<Scoreboard, T> getter){
+   /* private <T> List<T> getFromLeaderBoard(List<Scoreboard> leaderboard, Function<Scoreboard, T> getter){
         return leaderboard.stream().map(getter).collect(Collectors.toList());
-    }
+    }*/
 }
