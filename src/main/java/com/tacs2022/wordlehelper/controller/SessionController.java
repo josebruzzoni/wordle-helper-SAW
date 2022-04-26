@@ -21,7 +21,7 @@ public class SessionController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public OutputSessionDto login(@Valid @RequestBody NewUserDto body) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public OutputSessionDto login(@Valid @RequestBody NewUserDto body) {
         String token = sessionService.getToken(body.getUsername(), body.getPassword());
         if (token == null){
             throw new InvalidSessionException();
@@ -32,7 +32,6 @@ public class SessionController {
     @DeleteMapping(path = "/{token}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void logout(@PathVariable(value = "token") String token) {
-
         sessionService.removeToken(token);
     }
 }

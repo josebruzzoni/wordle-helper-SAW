@@ -1,10 +1,9 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
-import com.tacs2022.wordlehelper.domain.tournaments.TournamentType;
 import com.tacs2022.wordlehelper.domain.user.User;
+import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewParticipantDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
@@ -16,10 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @RequestMapping("/tournaments")
 @RestController()
@@ -59,8 +60,13 @@ public class TournamentController {
     }
 
     @GetMapping("/{id}/leaderboard")
-    public Leaderboard getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId){
-        return tournamentService.getTournamentLeaderboard(tournamentId);
+    public Map<String, List<Scoreboard>> getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId){
+        Map<String, List<Scoreboard>> response = new HashMap<>();
+        response.put(
+               "leaderboard", tournamentService.getTournamentLeaderboard(tournamentId, LocalDate.now())
+        );
+
+        return response;
     }
 
 	@PostMapping(value="/{id}/participants")

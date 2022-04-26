@@ -1,7 +1,7 @@
 package com.tacs2022.wordlehelper.service;
 
 import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
-import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
+import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentType;
@@ -57,8 +57,8 @@ public class TournamentService {
         return tournament;
     }
 
-    public Leaderboard getTournamentLeaderboard(Long id) {
-        return findById(id).generateLeaderboard();
+    public List<Scoreboard> getTournamentLeaderboard(Long id, LocalDate date) {
+        return findById(id).generateLeaderboardToDate(date);
     }
 
     @Transactional

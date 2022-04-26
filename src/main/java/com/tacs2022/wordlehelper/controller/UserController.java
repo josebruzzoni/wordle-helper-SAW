@@ -1,7 +1,5 @@
 package com.tacs2022.wordlehelper.controller;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,13 +36,13 @@ public class UserController {
     @GetMapping()
     public OutputUsersDto getAllUsers() {
         List<User> users = userService.findAll();
-        List<OutputUserDto> userDtos = users.stream().map(u -> new OutputUserDto(u)).collect(Collectors.toList());
+        List<OutputUserDto> userDtos = users.stream().map(OutputUserDto::new).collect(Collectors.toList());
         return new OutputUsersDto(userDtos);
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public OutputUserDto create(@Valid @RequestBody NewUserDto newUserDto) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public OutputUserDto create(@Valid @RequestBody NewUserDto newUserDto) {
         User user = userService.save(newUserDto.getUsername(), newUserDto.getPassword());
         return new OutputUserDto(user);
     }
@@ -63,7 +61,8 @@ public class UserController {
     @PostMapping("{userId}/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addUserResults(@Valid @RequestBody NewResultDto result, @PathVariable(value = "userId") Long userId){
-        userService.addResult(userId, new Result(result));
+        Result savedResult = result.fromDto();
+        userService.addResult(userId, savedResult);
     }
     
     @GetMapping("{userId}/tournaments")
