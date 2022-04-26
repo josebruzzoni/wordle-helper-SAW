@@ -6,7 +6,7 @@ import com.tacs2022.wordlehelper.domain.play.LetterPlay;
 import com.tacs2022.wordlehelper.domain.play.WordPlay;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;

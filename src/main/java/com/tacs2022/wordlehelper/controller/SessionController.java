@@ -1,8 +1,8 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.controller.Exceptions.InvalidSessionException;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputSessionDto;
+import com.tacs2022.wordlehelper.exceptions.InvalidSessionException;
 import com.tacs2022.wordlehelper.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

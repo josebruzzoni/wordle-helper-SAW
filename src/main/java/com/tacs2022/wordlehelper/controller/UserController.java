@@ -1,8 +1,5 @@
 package com.tacs2022.wordlehelper.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.user.NewResultDto;
@@ -10,13 +7,14 @@ import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputUsersDto;
 import com.tacs2022.wordlehelper.service.UserService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
