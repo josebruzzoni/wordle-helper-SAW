@@ -12,4 +12,7 @@ Execute in a terminal the following command to start the container
 ``docker run -p 8080:8080 <image-name>``
 
 ## API documentation
-https://app.swaggerhub.com/apis/TACS-WordleHelper/Wordle-Helper/1.0.1
+https://app.swaggerhub.com/apis/TACS-WordleHelper/Wordle-Helper/1.0.4
+
+## Frontend
+https://github.com/JulianSima/wordle-helper-front
