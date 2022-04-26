@@ -1,15 +1,12 @@
 package com.tacs2022.wordlehelper.service;
 
-import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
 import com.tacs2022.wordlehelper.domain.user.Session;
 import com.tacs2022.wordlehelper.domain.user.User;
+import com.tacs2022.wordlehelper.exceptions.ExpiredRequestException;
 import com.tacs2022.wordlehelper.repos.SessionRepository;
 import com.tacs2022.wordlehelper.security.jwt.TokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 
 @Service
 public class SessionService {

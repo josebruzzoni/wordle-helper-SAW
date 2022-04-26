@@ -3,7 +3,6 @@ package com.tacs2022.wordlehelper.controller;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewParticipantDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.OutputScoreboardsDto;
@@ -11,7 +10,6 @@ import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentsDto;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +18,6 @@ import java.util.List;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 @RequestMapping("/tournaments")
 @RestController()

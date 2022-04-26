@@ -1,12 +1,10 @@
 package com.tacs2022.wordlehelper.dtos.tournaments;
 
 import com.tacs2022.wordlehelper.domain.Language;
-import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import javax.persistence.ElementCollection;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;

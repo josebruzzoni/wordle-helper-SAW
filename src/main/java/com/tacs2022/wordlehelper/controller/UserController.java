@@ -13,9 +13,9 @@ import com.tacs2022.wordlehelper.dtos.user.NewResultDto;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputUsersDto;
+import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
-import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

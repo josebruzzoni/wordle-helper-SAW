@@ -2,9 +2,7 @@ package com.tacs2022.wordlehelper.service;
 
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.dictionary.Word;
-
 import com.tacs2022.wordlehelper.service.dictionaryapis.DictionaryAPI;
-import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
