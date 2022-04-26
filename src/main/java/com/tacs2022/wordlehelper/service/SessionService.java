@@ -20,7 +20,7 @@ public class SessionService {
     @Autowired
     SecurityService securityService;
 
-    public String getToken(String username, String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public String getToken(String username, String password) {
         if (securityService.validatePassword(username, password)){
             User user = userService.findByUsername(username);
             String token = TokenProvider.generateToken(user);
@@ -35,7 +35,6 @@ public class SessionService {
         Session session = this.sessionRepo.getByToken(token);
 
         if (session == null){
-            //TODO crear una exception 404 para esto
             throw new ExpiredRequestException();
         }
         this.sessionRepo.delete(session);

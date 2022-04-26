@@ -41,7 +41,7 @@ public class SecurityService {
         }
     }
 
-    public boolean validatePassword(String username, String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public boolean validatePassword(String username, String password) {
         User user = userService.findByUsername(username);
         String actualPass = new String(user.getHashedPass());
         String givenPass = new String(this.hash(password, user.getSalt()));

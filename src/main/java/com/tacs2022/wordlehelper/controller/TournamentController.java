@@ -1,6 +1,5 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.controller.Exceptions.MissingAttributesException;
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewParticipantDto;
@@ -11,11 +10,9 @@ import com.tacs2022.wordlehelper.service.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.Map;
 
 @RequestMapping("/tournaments")
 @RestController()

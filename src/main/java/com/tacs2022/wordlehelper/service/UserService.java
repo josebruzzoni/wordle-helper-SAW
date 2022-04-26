@@ -1,7 +1,5 @@
 package com.tacs2022.wordlehelper.service;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,7 +9,6 @@ import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.repos.UserRepository;
 
-import com.tacs2022.wordlehelper.security.jwt.TokenProvider;
 import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -80,21 +77,16 @@ public class UserService {
     }
 
     @Transactional
-    public void update(User existingUser){
-        userRepo.save(existingUser);
-    }
-
-    @Transactional
     public void addResult(Long userId, Result result){
         //TODO
     }
 
-    public String getUsernameFromToken(String token){
+    /*public String getUsernameFromToken(String token){
         return TokenProvider.getUsername(token);
     }
 
     public Long getUserIdFromToken(String token){
         return TokenProvider.getId(token);
-    }
+    }*/
 
 }
