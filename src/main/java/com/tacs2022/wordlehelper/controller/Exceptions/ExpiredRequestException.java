@@ -6,6 +6,6 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.NOT_FOUND)
 public class ExpiredRequestException extends RuntimeException {
     public ExpiredRequestException(){
-        super();
+        super("No session for token");
     }
 }

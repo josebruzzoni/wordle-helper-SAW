@@ -1,6 +1,6 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.controller.Exceptions.InvalidUserException;
+import com.tacs2022.wordlehelper.controller.Exceptions.InvalidSessionException;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputSessionDto;
 import com.tacs2022.wordlehelper.service.SessionService;
@@ -21,10 +21,10 @@ public class SessionController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public OutputSessionDto login(@Valid @RequestBody NewUserDto body) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public OutputSessionDto login(@Valid @RequestBody NewUserDto body) {
         String token = sessionService.getToken(body.getUsername(), body.getPassword());
         if (token == null){
-            throw new InvalidUserException();
+            throw new InvalidSessionException();
         }
         return new OutputSessionDto(token);
     }
