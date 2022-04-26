@@ -30,21 +30,16 @@ public class TournamentController {
     UserService userService;
 
     @GetMapping()
-    public OutputTournamentsDto getAllTournaments(@RequestParam(required = false) TournamentType role, @RequestParam(required = false) TournamentStatus status, @RequestHeader(required = true) String Authorization) {
+    public OutputTournamentsDto getAllTournaments( @RequestParam(required = false) TournamentStatus status, @RequestHeader(required = true) String Authorization) {
     	User user = userService.getUserFromToken(Authorization);
+    	
     	List<Tournament> tournaments =  null;
-    	//change role for type. Values = (PUBLIC, REGISTERED, SELF)
-    	/*
-    	if(role != null && status != null) {
-    		tournaments = tournamentService.findByTypeAndStatus(role, status, user);
-        } else if( role != null ) {
-        	tournaments = tournamentService.findByType(role, user);
-        } else if( status != null) {
-        	tournaments = tournamentService.findByStatus(status, user);
-        } else {
-        	tournaments = tournamentService.findTournamentsInWhichUserIsRegistered(user); // bad request
-        } 
-    	 */
+    	
+    	if(status == null) {
+    		tournaments = tournamentService.findPublicTournamentsInwhichNotRegistered(user);
+    	}else {
+    		tournaments = tournamentService.findPublicTournamentsInwhichNotRegisteredByStatus(user, status);
+    	}
     	
     	return new OutputTournamentsDto(tournaments);
     }

@@ -21,8 +21,6 @@ public interface TournamentRepository extends CrudRepository<Tournament, Long> {
 	@Query (value = "SELECT * FROM TOURNAMENT t INNER JOIN TOURNAMENT_PARTICIPANTS p ON t.ID = p.TOURNAMENT_ID WHERE p.PARTICIPANTS_ID = :userId", nativeQuery =true)
 	List<Tournament> findTournamentsInWhichUserIsRegistered(@Param("userId") Long userId);
 	
-	//-----------------------------------------
-	
 	@Query( value = QueryUtils.TOURNAMENT_REGISTERED + QueryUtils.TOURNAMENT_CONDITION_SELF + QueryUtils.TOURNAMENT_CONDITION_NOT_STARTED , nativeQuery = true )
 	List<Tournament> findMyUnstartedTournaments(@Param("userId") Long userId, @Param("today") LocalDate today);
 	
@@ -40,16 +38,5 @@ public interface TournamentRepository extends CrudRepository<Tournament, Long> {
 	
 	@Query( value = QueryUtils.TOURNAMENT_REGISTERED + QueryUtils.TOURNAMENT_CONDITION_FINISHED , nativeQuery = true )
 	List<Tournament> findMyFinishedRegisteredTournaments(@Param("userId") Long userId, @Param("today") LocalDate today);
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 }

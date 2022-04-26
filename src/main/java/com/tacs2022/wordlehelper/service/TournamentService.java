@@ -5,6 +5,7 @@ import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentType;
+import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
 import com.tacs2022.wordlehelper.service.exceptions.ForbiddenException;
@@ -20,6 +21,7 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TournamentService {
@@ -172,5 +174,19 @@ public class TournamentService {
 
 	public List<Tournament> findTournamentsInWhichUserIsRegistered(User user) {
 		return tournamentRepo.findTournamentsInWhichUserIsRegistered(user.getId());
+	}
+	
+	public List<Tournament> findPublicTournamentsInwhichNotRegistered(User user) {
+		List<Tournament> publics = tournamentRepo.findByVisibility(Visibility.PUBLIC);
+		return publics.stream()
+				.filter( (Tournament tournament) -> !tournament.isAParticipant(user) )
+				.collect(Collectors.toList()); //TODO hacer un query en el repo de tournaments
+	}
+	
+	public List<Tournament> findPublicTournamentsInwhichNotRegisteredByStatus(User user, TournamentStatus status) {
+		return findPublicTournamentsInwhichNotRegistered(user)
+				.stream()
+				.filter((Tournament tournament) -> tournament.getStatus().equals(status))
+				.collect(Collectors.toList()); //TODO hacer un query en el repo de tournaments
 	}
 }
