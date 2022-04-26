@@ -6,6 +6,7 @@ import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewParticipantDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
+import com.tacs2022.wordlehelper.dtos.tournaments.OutputScoreboardsDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentsDto;
 import com.tacs2022.wordlehelper.service.TournamentService;
@@ -60,13 +61,9 @@ public class TournamentController {
     }
 
     @GetMapping("/{id}/leaderboard")
-    public Map<String, List<Scoreboard>> getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId){
-        Map<String, List<Scoreboard>> response = new HashMap<>();
-        response.put(
-               "leaderboard", tournamentService.getTournamentLeaderboard(tournamentId, LocalDate.now())
-        );
-
-        return response;
+    public OutputScoreboardsDto getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId, @RequestHeader(required = true) String Authorization){
+    	User user = userService.getUserFromToken(Authorization);
+    	return new OutputScoreboardsDto(tournamentService.getTournamentLeaderboard(tournamentId, LocalDate.now(), user));
     }
 
 	@PostMapping(value="/{id}/participants")

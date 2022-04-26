@@ -57,8 +57,8 @@ public class TournamentService {
         return tournament;
     }
 
-    public List<Scoreboard> getTournamentLeaderboard(Long id, LocalDate date) {
-        return findById(id).generateLeaderboardToDate(date);
+    public List<Scoreboard> getTournamentLeaderboard(Long id, LocalDate date, User user) {
+        return getByIdAndValidateVisibility(id, user).generateLeaderboardToDate(date);
     }
 
     @Transactional
