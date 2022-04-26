@@ -2,6 +2,8 @@ package com.tacs2022.wordlehelper.controller;
 
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
+import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
+import com.tacs2022.wordlehelper.domain.tournaments.TournamentType;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewParticipantDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
@@ -14,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -27,11 +30,10 @@ public class TournamentController {
     UserService userService;
 
     @GetMapping()
-    public OutputTournamentsDto getAllTournaments(@RequestParam(required = false) String role, @RequestParam(required = false) String status, @RequestHeader(required = true) String Authorization) {
+    public OutputTournamentsDto getAllTournaments(@RequestParam(required = false) TournamentType role, @RequestParam(required = false) TournamentStatus status, @RequestHeader(required = true) String Authorization) {
     	User user = userService.getUserFromToken(Authorization);
-    	List<Tournament> tournaments = null;
-    	
-    	//change role for type. Values = (PUBLIC, REGISTERED, OWN)
+    	List<Tournament> tournaments =  null;
+    	//change role for type. Values = (PUBLIC, REGISTERED, SELF)
     	if(role != null && status != null) {
     		tournaments = tournamentService.findByTypeAndStatus(role, status, user);
         } else if( role != null ) {

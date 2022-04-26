@@ -4,6 +4,7 @@ import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
+import com.tacs2022.wordlehelper.domain.tournaments.TournamentType;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -112,19 +114,71 @@ public class TournamentService {
         	tournament.addParticipant(participant);
     }
 
-	public List<Tournament> findByTypeAndStatus(String type, String status, User user) {
+	public List<Tournament> findByTypeAndStatus(TournamentType type, TournamentStatus status, User user) {
 		return this.findAll(); //TODO
 	}
 
-	public List<Tournament> findByType(String type, User user) {
-		return this.findAll(); //TODO
+	public List<Tournament> findByType(TournamentType type, User user) {
+		List<Tournament> tournament;
+		
+		try {
+			switch(type) {
+				case PUBLIC:
+					tournament = tournamentRepo.findByVisibility(Visibility.PUBLIC);
+					break;
+				case SELF:
+					tournament = tournamentRepo.findByOwner(user);
+					break;
+				case REGISTERED:
+					tournament = tournamentRepo.findTournamentsInWhichUserIsRegistered(user.getId());
+					break;
+				default:
+					tournament = new ArrayList<>();
+			}
+		} catch (Exception e) {
+			logger.error("Error al intentar obtener los torneos desde la base de datos");
+			tournament = new ArrayList<>();
+		}
+		
+		return tournament;
 	}
 
-	public List<Tournament> findByStatus(String status, User user) {
-		return this.findAll(); //TODO
+	public List<Tournament> findByStatus(TournamentStatus status, User user) {
+		List<Tournament> tournament;
+		
+		try {
+			switch(status) {
+				case NOTSTARTED:
+					tournament = tournamentRepo.findUnstartedTournaments(LocalDate.now());
+					break;
+				case STARTED:
+					tournament = tournamentRepo.findStartedTournaments(LocalDate.now());
+					break;
+				case FINISHED:
+					tournament = tournamentRepo.findFinishedTournaments(LocalDate.now());
+					break;
+				default:
+					tournament = new ArrayList<>();
+			}
+		} catch (Exception e) {
+			logger.error("Error al intentar obtener los torneos desde la base de datos");
+			tournament = new ArrayList<>();
+		}
+		
+		return tournament;
 	}
 
 	public List<Tournament> findAllByUser(User user) {
-		return this.findAll(); //TODO
+		List<Tournament> tournaments = this.findTournamentsCreatedByUser(user);
+		tournaments.addAll(this.findAllPublic());
+		return tournaments; //TODO validate repeated
+	}
+	
+	private List<Tournament> findTournamentsCreatedByUser(User user){
+		return tournamentRepo.findByOwner(user);
+	}
+	
+	private List<Tournament> findAllPublic() {
+		return tournamentRepo.findByVisibility(Visibility.PUBLIC);
 	}
 }

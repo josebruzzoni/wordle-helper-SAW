@@ -40,8 +40,10 @@ public class WordleHelperApplication {
 
 			List<Language> languages = asList(Language.ES, Language.EN);
 			
-			NewTournamentDto budokai = new NewTournamentDto("Budokai Tenkaichi", LocalDate.of(2022,10,2), LocalDate.of(2023, 2, 10), Visibility.PRIVATE, languages);
-			tournamentRepo.save(new Tournament(budokai, julian));
+			NewTournamentDto budokai = new NewTournamentDto("Budokai Tenkaichi", LocalDate.of(2022,2,2), LocalDate.of(2022, 3, 10), Visibility.PRIVATE, languages);
+			Tournament budo = new Tournament(budokai, julian);
+			budo.addParticipant(agustin);
+			tournamentRepo.save(budo);
 			
 			NewTournamentDto mundialito = new NewTournamentDto("Mundialito", LocalDate.of(2023, 2, 2), LocalDate.of(2025, 2, 11), Visibility.PUBLIC, languages);
 			tournamentRepo.save(new Tournament(mundialito, agustin));
