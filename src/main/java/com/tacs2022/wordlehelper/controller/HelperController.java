@@ -1,14 +1,17 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.controller.exceptions.InvalidPlayException;
-import com.tacs2022.wordlehelper.controller.exceptions.NullParametersException;
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.play.WordPlay;
 import com.tacs2022.wordlehelper.dtos.helper.OutputPossibleWordsDto;
+import com.tacs2022.wordlehelper.exceptions.InvalidPlayException;
+import com.tacs2022.wordlehelper.exceptions.NotFoundException;
+import com.tacs2022.wordlehelper.exceptions.NullParametersException;
 import com.tacs2022.wordlehelper.service.HelperService;
-import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;

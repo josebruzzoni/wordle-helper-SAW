@@ -2,7 +2,7 @@ package com.tacs2022.wordlehelper.service.dictionaryapis;
 
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.dictionary.Word;
-import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
+import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

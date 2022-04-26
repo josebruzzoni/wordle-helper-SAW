@@ -1,18 +1,17 @@
 package com.tacs2022.wordlehelper.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import com.tacs2022.wordlehelper.controller.Exceptions.ExistingUserException;
 import com.tacs2022.wordlehelper.domain.user.PasswordSecurity;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
+import com.tacs2022.wordlehelper.exceptions.ExistingUserException;
+import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.repos.UserRepository;
-
-import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
