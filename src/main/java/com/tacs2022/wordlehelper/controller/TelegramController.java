@@ -7,6 +7,7 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.LoginUrl;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.tacs2022.wordlehelper.service.SessionService;
@@ -52,9 +53,9 @@ public class TelegramController {
 
     private void handleQuery(CallbackQuery query){
         switch (query.data()){
-            case "login":
+            /*case "login":
                 this.handleLogin(query.message().chat().id());
-                break;
+                break;*/
             case "signin":
                 this.handleSignin(query.message().chat().id());
                 break;
@@ -171,16 +172,13 @@ public class TelegramController {
     }
 
     private void sendKeyboardForNotLogued(long chatId){
-        System.out.println("paso por sendKeyboardForNotLogued");
-        InlineKeyboardButton loginButton = new InlineKeyboardButton("Login").callbackData("login");
+        LoginUrl loginUrl = new LoginUrl("localhost:8080/sessions");
+        InlineKeyboardButton loginButton = new InlineKeyboardButton("Login").callbackData("login").loginUrl(loginUrl);
         InlineKeyboardButton createUserButton = new InlineKeyboardButton("Sign in").callbackData("signin");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(loginButton, createUserButton);
         String buttonMessage = "Seleccionar acción a realizar";
         SendMessage sendMessage = new SendMessage(chatId, buttonMessage).replyMarkup(keyboardMarkup);
-        SendResponse sendResponse = bot.execute(sendMessage);
-        /*System.out.println(sendResponse.isOk());
-        System.out.println(sendResponse.errorCode());
-        System.out.println(sendResponse.description());*/
+        this.executeMessage(sendMessage);
     }
 
     private void sendKeyboardForLogued(long chatId){
@@ -189,6 +187,11 @@ public class TelegramController {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(tournamentButton, dictionaryButton);
         String buttonMessage = "Seleccionar categoría de acción a realizar";
         SendMessage sendMessage = new SendMessage(chatId, buttonMessage).replyMarkup(keyboardMarkup);
-        SendResponse sendResponse = bot.execute(sendMessage);
+        this.executeMessage(sendMessage);
+    }
+
+    private void executeMessage(SendMessage message){
+        SendResponse response = bot.execute(message);
+        System.out.println("Response | is ok: " + response.isOk() + " | error code: " + response.errorCode() + " description: " + response.description());
     }
 }
