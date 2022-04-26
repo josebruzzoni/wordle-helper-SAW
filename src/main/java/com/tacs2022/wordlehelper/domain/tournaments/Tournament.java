@@ -1,23 +1,23 @@
 package com.tacs2022.wordlehelper.domain.tournaments;
 
 import com.tacs2022.wordlehelper.domain.Language;
+import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Tournament {
-    @Id @GeneratedValue
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
     private LocalDate startDate;
@@ -37,28 +37,43 @@ public class Tournament {
         this.visibility = visibility;
     }
 
-    public Tournament(NewTournamentDto newTournamentDto) {
-        this.name = newTournamentDto.getName();
-        this.startDate = newTournamentDto.getStartDate();
-        this.endDate = newTournamentDto.getEndDate();
-        this.languages.addAll(newTournamentDto.getLanguages());
-        this.visibility = newTournamentDto.getVisibility();
-    }
-
     public void addParticipant(User newParticipant) {
         this.participants.add(newParticipant);
     }
 
-    public Leaderboard generateLeaderboard(){
-        //TODO: generate leaderboard
-        return new Leaderboard();
+    public List<Scoreboard> generateLeaderboardToDate(LocalDate date){
+        return participants.stream()
+                .map(u->new Scoreboard(u, this))
+                .sorted(Comparator.comparing(s->s.getBadScoreToDate(date)))
+                .collect(Collectors.toList());
+    }
+
+    public int daysPassedToDate(LocalDate date){
+        long days = inProgressToDate(date)? startDate.datesUntil(date).count()
+                : endedToDate(date)? 1+startDate.datesUntil(endDate).count()
+                : 0;
+
+        return (int) days;
+    }
+
+    public boolean considers(Result result){
+        return this.supportsLanguage(result.getLanguage()) && inProgressToDate(result.getDate());
+    }
+
+    private boolean supportsLanguage(Language language) {
+        return languages.contains(language);
+    }
+
+    public boolean inProgressToDate(LocalDate date){
+        return startedToDate(date) && !endedToDate(date);
     }
 
     public boolean endedToDate(LocalDate date) {
-        return !endDate.isAfter(date);
+        return date.isAfter(endDate);
     }
 
     public boolean startedToDate(LocalDate date) {
         return !startDate.isAfter(date);
     }
+
 }
