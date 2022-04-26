@@ -1,16 +1,11 @@
 package Tournaments;
 
-import com.tacs2022.wordlehelper.domain.Language;
+import Utils.TournamentFactory;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
-import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
-import com.tacs2022.wordlehelper.service.TournamentService;
-import org.apache.tomcat.jni.Local;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.List;
 
 import static java.time.LocalDate.of;
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,12 +17,7 @@ public class TournamentsTest {
 
     @BeforeEach
     public void fixture(){
-        tournament = new Tournament(
-                "Luchemos por la vida"
-                , startDate, endDate
-                , List.of(Language.EN, Language.ES)
-                , Visibility.PUBLIC
-        );
+        tournament = TournamentFactory.tournamentBetweenDates(startDate, endDate);
     }
 
     @Test
@@ -36,8 +26,8 @@ public class TournamentsTest {
     }
 
     @Test
-    public void tournamentFinishedOnSameDayIsAlreadyFinished(){
-        assertTrue(tournament.endedToDate(endDate));
+    public void tournamentIsNotEndedAtLastDay(){
+        assertFalse(tournament.endedToDate(endDate));
     }
 
     @Test
@@ -59,6 +49,14 @@ public class TournamentsTest {
     @Test
     public void tournamentStartedOnSameDayIsAlreadyStarted(){
         assertTrue(tournament.startedToDate(startDate));
+    }
+
+    @Test
+    public void daysPassedUntilDate(){
+        assertEquals(0, tournament.daysPassedToDate(startDate));
+        assertEquals(1, tournament.daysPassedToDate(startDate.plusDays(1)));
+        assertEquals(2, tournament.daysPassedToDate(endDate));
+        assertEquals(3, tournament.daysPassedToDate(endDate.plusDays(1)));
     }
 
     @Test

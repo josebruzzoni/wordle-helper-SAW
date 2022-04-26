@@ -78,7 +78,13 @@ public class UserService {
 
     @Transactional
     public void addResult(Long userId, Result result){
-        //TODO
+        User user = findById(userId);
+
+        if(user.getResults().stream().anyMatch(result::match)){
+            throw new ResultAlreadyLoadedException();
+        }
+
+            user.addResult(result);
     }
 
     /*public String getUsernameFromToken(String token){

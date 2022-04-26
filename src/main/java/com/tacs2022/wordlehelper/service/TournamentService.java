@@ -1,7 +1,7 @@
 package com.tacs2022.wordlehelper.service;
 
 import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
-import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
+import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
@@ -44,8 +44,8 @@ public class TournamentService {
         return tournament;
     }
 
-    public Leaderboard getTournamentLeaderboard(Long id) {
-        return findById(id).generateLeaderboard();
+    public List<Scoreboard> getTournamentLeaderboard(Long id, LocalDate date) {
+        return findById(id).generateLeaderboardToDate(date);
     }
 
     //******************************************************************************************
@@ -53,7 +53,7 @@ public class TournamentService {
     public Predicate<Tournament> filterForStatus(String status){
         LocalDate today = LocalDate.now();
         return status==null? __ -> true
-                :  status.equalsIgnoreCase("InPROGRESS")?    t-> t.startedToDate(today) && !t.endedToDate(today)
+                :  status.equalsIgnoreCase("InPROGRESS")?    t-> t.inProgressToDate(today)
                 :  status.equalsIgnoreCase("NotStarted")? t->!t.startedToDate(today)
                 :  status.equalsIgnoreCase("Ended")?      t-> t.endedToDate(today)
                 :  __ -> false //TODO: A valor absurdo no devuelvo nada. Ver como validar

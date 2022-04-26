@@ -52,8 +52,8 @@ public class UserController {
     @PostMapping("{userId}/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addUserResults(@Valid @RequestBody NewResultDto result, @PathVariable(value = "userId") Long userId){
-        userService.addResult(userId, new Result(result));
+        Result savedResult = result.fromDto();
+        userService.addResult(userId, savedResult);
     }
-    
-    
+
 }
