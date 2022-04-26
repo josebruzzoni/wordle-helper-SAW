@@ -9,7 +9,7 @@ import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.exceptions.ExpiredRequestException;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
-import com.tacs2022.wordlehelper.service.exceptions.ForbiddenException;
+import com.tacs2022.wordlehelper.exceptions.ForbiddenException;
 import com.tacs2022.wordlehelper.utils.QueryUtils;
 
 import org.slf4j.Logger;

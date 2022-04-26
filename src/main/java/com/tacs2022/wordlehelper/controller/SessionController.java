@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/sessions")
+@RequestMapping("/v1/sessions")
 public class SessionController {
     @Autowired
     SessionService sessionService;

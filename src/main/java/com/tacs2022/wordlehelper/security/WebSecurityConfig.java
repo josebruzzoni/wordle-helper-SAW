@@ -35,8 +35,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .cors().and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/sessions").permitAll()
-                .antMatchers("/users").permitAll()
+                .antMatchers("/v1/sessions").permitAll()
+                .antMatchers("/v1/users").permitAll()
                 .antMatchers("/**").authenticated().and()
                 .addFilterAfter(jwtAuthorizationFilterBean(), UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling().authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));

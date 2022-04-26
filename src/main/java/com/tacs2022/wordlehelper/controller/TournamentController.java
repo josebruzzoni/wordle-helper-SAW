@@ -19,7 +19,7 @@ import java.util.List;
 import javax.validation.Valid;
 import java.time.LocalDate;
 
-@RequestMapping("/tournaments")
+@RequestMapping("/v1/tournaments")
 @RestController()
 public class TournamentController {
     @Autowired
