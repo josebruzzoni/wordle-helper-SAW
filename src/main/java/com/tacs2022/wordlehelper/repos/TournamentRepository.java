@@ -3,6 +3,7 @@ package com.tacs2022.wordlehelper.repos;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
+import com.tacs2022.wordlehelper.utils.QueryUtils;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,12 +21,35 @@ public interface TournamentRepository extends CrudRepository<Tournament, Long> {
 	@Query (value = "SELECT * FROM TOURNAMENT t INNER JOIN TOURNAMENT_PARTICIPANTS p ON t.ID = p.TOURNAMENT_ID WHERE p.PARTICIPANTS_ID = :userId", nativeQuery =true)
 	List<Tournament> findTournamentsInWhichUserIsRegistered(@Param("userId") Long userId);
 	
-	@Query( value = "SELECT * FROM TOURNAMENT WHERE CAST(:today AS date) < CAST(START_DATE AS date)", nativeQuery = true )
-	List<Tournament> findUnstartedTournaments(@Param("today") LocalDate today);
+	//-----------------------------------------
 	
-	@Query( value = "SELECT * FROM TOURNAMENT WHERE CAST(:today AS date) >= CAST(START_DATE AS date) AND CAST(:today AS date) <= CAST(END_DATE AS date)", nativeQuery = true)
-	List<Tournament> findStartedTournaments(@Param("today") LocalDate today);
+	@Query( value = QueryUtils.TOURNAMENT_REGISTERED + QueryUtils.TOURNAMENT_CONDITION_SELF + QueryUtils.TOURNAMENT_CONDITION_NOT_STARTED , nativeQuery = true )
+	List<Tournament> findMyUnstartedTournaments(@Param("userId") Long userId, @Param("today") LocalDate today);
 	
-	@Query( value = "SELECT * FROM TOURNAMENT WHERE CAST(:today AS date) > CAST(END_DATE AS date)", nativeQuery = true )
-	List<Tournament> findFinishedTournaments(@Param("today") LocalDate today);
+	@Query( value = QueryUtils.TOURNAMENT_REGISTERED + QueryUtils.TOURNAMENT_CONDITION_NOT_STARTED , nativeQuery = true )
+	List<Tournament> findMyUnstartedRegisteredTournaments(@Param("userId") Long userId, @Param("today") LocalDate today);
+	
+	@Query( value = QueryUtils.TOURNAMENT_REGISTERED + QueryUtils.TOURNAMENT_CONDITION_SELF + QueryUtils.TOURNAMENT_CONDITION_STARTED , nativeQuery = true )
+	List<Tournament> findMyStartedTournaments(@Param("userId") Long userId, @Param("today") LocalDate today);
+	
+	@Query( value = QueryUtils.TOURNAMENT_REGISTERED + QueryUtils.TOURNAMENT_CONDITION_STARTED , nativeQuery = true )
+	List<Tournament> findMyStartedRegisteredTournaments(@Param("userId") Long userId, @Param("today") LocalDate today);
+	
+	@Query( value = QueryUtils.TOURNAMENT_REGISTERED + QueryUtils.TOURNAMENT_CONDITION_SELF + QueryUtils.TOURNAMENT_CONDITION_FINISHED , nativeQuery = true )
+	List<Tournament> findMyFinishedTournaments(@Param("userId") Long userId, @Param("today") LocalDate today);
+	
+	@Query( value = QueryUtils.TOURNAMENT_REGISTERED + QueryUtils.TOURNAMENT_CONDITION_FINISHED , nativeQuery = true )
+	List<Tournament> findMyFinishedRegisteredTournaments(@Param("userId") Long userId, @Param("today") LocalDate today);
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

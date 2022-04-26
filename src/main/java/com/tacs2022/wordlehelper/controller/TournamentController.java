@@ -34,6 +34,7 @@ public class TournamentController {
     	User user = userService.getUserFromToken(Authorization);
     	List<Tournament> tournaments =  null;
     	//change role for type. Values = (PUBLIC, REGISTERED, SELF)
+    	/*
     	if(role != null && status != null) {
     		tournaments = tournamentService.findByTypeAndStatus(role, status, user);
         } else if( role != null ) {
@@ -41,8 +42,9 @@ public class TournamentController {
         } else if( status != null) {
         	tournaments = tournamentService.findByStatus(status, user);
         } else {
-        	tournaments = tournamentService.findAllByUser(user);
-        }
+        	tournaments = tournamentService.findTournamentsInWhichUserIsRegistered(user); // bad request
+        } 
+    	 */
     	
     	return new OutputTournamentsDto(tournaments);
     }

@@ -5,11 +5,11 @@ import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentType;
-import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
 import com.tacs2022.wordlehelper.service.exceptions.ForbiddenException;
 import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
+import com.tacs2022.wordlehelper.utils.QueryUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +20,6 @@ import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Service
 public class TournamentService {
@@ -32,13 +30,6 @@ public class TournamentService {
 
     public List<Tournament> findAll(){
         return (List<Tournament>) tournamentRepo.findAll();
-    }
-
-    public List<Tournament> findAll(String role, String status) {
-
-        return findAll().stream()
-                .filter(filterForRole(role).and(filterForStatus(status)))
-                .collect(Collectors.toList());
     }
 
     public Tournament findById(Long id) {
@@ -68,27 +59,6 @@ public class TournamentService {
         return findById(id).generateLeaderboard();
     }
 
-    //******************************************************************************************
-    //auxiliares - TODO: Ver si conviene mover a clase aparte
-    public Predicate<Tournament> filterForStatus(String status){
-        LocalDate today = LocalDate.now();
-        return status==null? __ -> true
-                :  status.equalsIgnoreCase("InPROGRESS")?    t-> t.startedToDate(today) && !t.endedToDate(today)
-                :  status.equalsIgnoreCase("NotStarted")? t->!t.startedToDate(today)
-                :  status.equalsIgnoreCase("Ended")?      t-> t.endedToDate(today)
-                :  __ -> false //TODO: A valor absurdo no devuelvo nada. Ver como validar
-                ;
-    }
-
-    private Predicate<Tournament> filterForRole(String role){
-        User user = new User(); //TODO: Ver como sacar al usuario y si vale la pena que sea enum
-        return role==null? t -> t.getVisibility().equals(Visibility.PUBLIC)
-//                : role.equalsIgnoreCase("OWNER")? user::isOwner
-//                : role.equalsIgnoreCase("PARTICIPANT")? user::isParticipant
-                : __ -> false
-                ;
-    }
-
     @Transactional
     public void addParticipant(Long tournamentId, User postulator, User participant) {
         Tournament tournament = findById(tournamentId);
@@ -114,8 +84,16 @@ public class TournamentService {
         	tournament.addParticipant(participant);
     }
 
-	public List<Tournament> findByTypeAndStatus(TournamentType type, TournamentStatus status, User user) {
-		return this.findAll(); //TODO
+	public List<Tournament> findByTypeAndStatus(TournamentType type, TournamentStatus status, Long userId) {
+		List<Tournament> tournament;
+		
+		if(type.equals(TournamentType.REGISTERED)) {
+			tournament = findByStatus(status, userId);
+		}else {
+			tournament = findMyTournamentsByStatus(status, userId);
+		}
+		
+		return tournament;
 	}
 
 	public List<Tournament> findByType(TournamentType type, User user) {
@@ -123,9 +101,6 @@ public class TournamentService {
 		
 		try {
 			switch(type) {
-				case PUBLIC:
-					tournament = tournamentRepo.findByVisibility(Visibility.PUBLIC);
-					break;
 				case SELF:
 					tournament = tournamentRepo.findByOwner(user);
 					break;
@@ -143,19 +118,46 @@ public class TournamentService {
 		return tournament;
 	}
 
-	public List<Tournament> findByStatus(TournamentStatus status, User user) {
+	public List<Tournament> findByStatus(TournamentStatus status, Long userId) {
 		List<Tournament> tournament;
-		
+		LocalDate today = LocalDate.now();
 		try {
 			switch(status) {
 				case NOTSTARTED:
-					tournament = tournamentRepo.findUnstartedTournaments(LocalDate.now());
+					System.out.println(userId);
+					System.out.println(QueryUtils.TOURNAMENT_REGISTERED + QueryUtils.TOURNAMENT_CONDITION_NOT_STARTED);
+					tournament = tournamentRepo.findMyUnstartedRegisteredTournaments(userId, today);
 					break;
 				case STARTED:
-					tournament = tournamentRepo.findStartedTournaments(LocalDate.now());
+					tournament = tournamentRepo.findMyStartedRegisteredTournaments(userId, today);
 					break;
 				case FINISHED:
-					tournament = tournamentRepo.findFinishedTournaments(LocalDate.now());
+					tournament = tournamentRepo.findMyFinishedRegisteredTournaments(userId, today);
+					break;
+				default:
+					tournament = new ArrayList<>();
+			}
+		} catch (Exception e) {
+			logger.error("Error al intentar obtener los torneos desde la base de datos");
+			tournament = new ArrayList<>();
+		}
+		
+		return tournament;
+	}
+	
+	private List<Tournament> findMyTournamentsByStatus(TournamentStatus status, Long userId) {
+		List<Tournament> tournament;
+		LocalDate today = LocalDate.now();
+		try {
+			switch(status) {
+				case NOTSTARTED:
+					tournament = tournamentRepo.findMyUnstartedTournaments(userId, today);
+					break;
+				case STARTED:
+					tournament = tournamentRepo.findMyStartedTournaments(userId, today);
+					break;
+				case FINISHED:
+					tournament = tournamentRepo.findMyFinishedTournaments(userId, today);
 					break;
 				default:
 					tournament = new ArrayList<>();
@@ -168,17 +170,7 @@ public class TournamentService {
 		return tournament;
 	}
 
-	public List<Tournament> findAllByUser(User user) {
-		List<Tournament> tournaments = this.findTournamentsCreatedByUser(user);
-		tournaments.addAll(this.findAllPublic());
-		return tournaments; //TODO validate repeated
-	}
-	
-	private List<Tournament> findTournamentsCreatedByUser(User user){
-		return tournamentRepo.findByOwner(user);
-	}
-	
-	private List<Tournament> findAllPublic() {
-		return tournamentRepo.findByVisibility(Visibility.PUBLIC);
+	public List<Tournament> findTournamentsInWhichUserIsRegistered(User user) {
+		return tournamentRepo.findTournamentsInWhichUserIsRegistered(user.getId());
 	}
 }
