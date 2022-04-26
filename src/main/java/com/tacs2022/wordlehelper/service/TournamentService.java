@@ -1,6 +1,6 @@
 package com.tacs2022.wordlehelper.service;
 
-import com.tacs2022.wordlehelper.controller.exceptions.ExpiredRequestException;
+import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
 import com.tacs2022.wordlehelper.domain.tournaments.Leaderboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;

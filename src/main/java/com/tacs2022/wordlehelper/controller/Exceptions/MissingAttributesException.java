@@ -1,4 +1,4 @@
-package com.tacs2022.wordlehelper.controller.exceptions;
+package com.tacs2022.wordlehelper.controller.Exceptions;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,6 +1,6 @@
 package com.tacs2022.wordlehelper.controller;
 
-import com.tacs2022.wordlehelper.controller.exceptions.InvalidUserException;
+import com.tacs2022.wordlehelper.controller.Exceptions.InvalidUserException;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
 import com.tacs2022.wordlehelper.dtos.user.OutputSessionDto;
 import com.tacs2022.wordlehelper.service.SessionService;
