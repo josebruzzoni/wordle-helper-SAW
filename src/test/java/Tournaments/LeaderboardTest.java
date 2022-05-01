@@ -8,13 +8,10 @@ import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import static org.hamcrest.CoreMatchers.*;
 
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static java.time.LocalDate.of;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -43,20 +40,20 @@ public class LeaderboardTest {
 
     @Test
     public void userPlaysAllDaysAndHisScoreEqualsToHisFailAttempts() {
-        assertEquals(failedAttempts, new Scoreboard(user1, tournament).getBadScoreToDate(endDate));
+        assertEquals(failedAttempts, new Scoreboard(user1, tournament).getScoreAtDate(endDate));
     }
 
     @Test
     public void scoreIgnoresResultsOfExcludedLanguages(){
         user1.addResult(new Result(3, Language.EN, startDate));
-        assertEquals(5, new Scoreboard(user1, tournament).getBadScoreToDate(endDate));
+        assertEquals(5, new Scoreboard(user1, tournament).getScoreAtDate(endDate));
     }
 
     @Test
     public void scoreIgnoresResultsOutOfTournamentsPeriod(){
         user1.addResult(new Result(1, Language.ES, startDate.minusDays(1)));
         user1.addResult(new Result(0, Language.ES, endDate.plusDays(1)));
-        assertEquals(5, new Scoreboard(user1, tournament).getBadScoreToDate(endDate));
+        assertEquals(5, new Scoreboard(user1, tournament).getScoreAtDate(endDate));
     }
 
     @Test
@@ -64,7 +61,7 @@ public class LeaderboardTest {
         LocalDate endDateModified = endDate.plusDays(2);
         tournament.setEndDate(endDateModified);
 
-        assertEquals(19, new Scoreboard(user1, tournament).getBadScoreToDate(endDateModified));
+        assertEquals(19, new Scoreboard(user1, tournament).getScoreAtDate(endDateModified));
     }
 
     /*@Test

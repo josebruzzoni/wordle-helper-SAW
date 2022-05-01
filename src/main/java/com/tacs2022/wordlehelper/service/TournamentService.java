@@ -44,7 +44,7 @@ public class TournamentService {
     public Tournament getByIdAndValidateVisibility(Long id, User user) {
     	Tournament tournament = findById(id);
     	
-    	if(tournament.isPrivate() && !tournament.isOwner(user) && !tournament.isAParticipant(user)) {
+    	if(tournament.isPrivate() && !tournament.userIsOwner(user) && !tournament.hasParticipant(user)) {
     		logger.info("El usuario no tiene permisos para ver este torneo");
         	throw new ForbiddenException("El usuario no tiene permisos para ver este torneo");
     	}
@@ -59,21 +59,24 @@ public class TournamentService {
     }
 
     public List<Scoreboard> getTournamentLeaderboard(Long id, LocalDate date, User user) {
-        return getByIdAndValidateVisibility(id, user).generateLeaderboardToDate(date);
+        return getByIdAndValidateVisibility(id, user).generateLeaderboardAtDate(date);
     }
 
     @Transactional
     public void addParticipant(Long tournamentId, User postulator, User participant) {
+		//TODO: Este metodo quedo medio raro, siento que estamos tratando de atrapar varios casos bajo un unico endpoint
+		// REVISAR
         Tournament tournament = findById(tournamentId);
         
         TournamentStatus status = tournament.getStatus();
         
         if(status.equals(TournamentStatus.STARTED) || status.equals(TournamentStatus.FINISHED)){
         	logger.info("Intento agregar a un usuario a un torneo que ya empezo o ya ha finalizado");
+			//TODO: Create new exception for this. ExpiredRequestException is not appropriate. Also response should not be NOT_FOUND
             throw new ExpiredRequestException();
         }
         
-        if(tournament.isPrivate() && !tournament.isOwner(postulator)) {
+        if(tournament.isPrivate() && !tournament.userIsOwner(postulator)) {
         	logger.info("Intento agregar un usuario a un torneo privado sin ser owner");
         	throw new ForbiddenException("No podes agregar usuario a este torneo porque es privado");
         }
@@ -83,7 +86,7 @@ public class TournamentService {
         	throw new ForbiddenException("No podes agregar a otro usuario a este torneo, solo podes unirte vos mismo");
         }
         
-        if(!tournament.isAParticipant(participant))
+        if(!tournament.hasParticipant(participant))
         	tournament.addParticipant(participant);
     }
 
@@ -180,7 +183,7 @@ public class TournamentService {
 	public List<Tournament> findPublicTournamentsInwhichNotRegistered(User user) {
 		List<Tournament> publics = tournamentRepo.findByVisibility(Visibility.PUBLIC);
 		return publics.stream()
-				.filter( (Tournament tournament) -> !tournament.isAParticipant(user) )
+				.filter( (Tournament tournament) -> !tournament.hasParticipant(user) )
 				.collect(Collectors.toList()); //TODO hacer un query en el repo de tournaments
 	}
 	

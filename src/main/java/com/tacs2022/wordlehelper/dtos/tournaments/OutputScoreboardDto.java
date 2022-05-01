@@ -17,8 +17,8 @@ public class OutputScoreboardDto {
 		this.user = new HashMap<>();
 		this.user.put("id", scoreboard.getUser().getId());
 		this.user.put("username", scoreboard.getUser().getUsername());
-		this.badScore = scoreboard.getBadScore();
-		this.failedAttempts = scoreboard.getFailedAttempts();
+		this.badScore = scoreboard.getCurrentScore();
+		this.failedAttempts = scoreboard.getTotalAttempts();
 	}
 	
 	

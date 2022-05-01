@@ -80,7 +80,7 @@ public class UserService {
     public void addResult(Long userId, Result result){
         User user = findById(userId);
 
-        if(user.getResults().stream().anyMatch(result::match)){
+        if(user.getResults().stream().anyMatch(result::matches)){
             throw new ResultAlreadyLoadedException();
         }
 
