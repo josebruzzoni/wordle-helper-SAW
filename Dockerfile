@@ -5,7 +5,7 @@ FROM openjdk:16-alpine3.13
 WORKDIR /wordle-helper
 # We copy the mvnw and pom.xml files and also the .mvn folder to the image
 COPY .mvn/ .mvn
-COPY mvnw pom.xml ./
+COPY mvnw pom.xml .env ./
 # Install dos2unix package to convert file line ending from CRLF to LF
 RUN apk add dos2unix
 RUN dos2unix mvnw

@@ -19,7 +19,7 @@ import java.util.Objects;
 import static com.tacs2022.wordlehelper.service.HelperService.WORD_LENGTH;
 
 @RestController
-@RequestMapping("/helper")
+@RequestMapping("/v1/helper")
 public class HelperController {
     @Autowired
     private HelperService helperService;
