@@ -66,7 +66,7 @@ public class TournamentController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addParticipant(@Valid @RequestBody NewParticipantDto body, @PathVariable(value = "id") Long tournamentId, @RequestHeader(required = true) String Authorization ){
 		User postulator = userService.getUserFromToken(Authorization);
-		User participant = userService.findById(body.getIdParticipant());
+		User participant = userService.findByUsername(body.getParticipantName());
         tournamentService.addParticipant(tournamentId, postulator, participant);
     }
 
