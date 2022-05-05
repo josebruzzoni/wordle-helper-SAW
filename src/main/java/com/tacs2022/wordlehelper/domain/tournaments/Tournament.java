@@ -55,10 +55,6 @@ public class Tournament {
         this.participants.add(newParticipant);
     }
     
-    public Boolean isPrivate() {
-    	return visibility.equals(Visibility.PRIVATE);
-    }
-    
     public Boolean userIsOwner(User user) {
     	return this.owner.equals(user);
     }

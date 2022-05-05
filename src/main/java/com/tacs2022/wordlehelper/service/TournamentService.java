@@ -44,9 +44,9 @@ public class TournamentService {
     public Tournament getByIdAndValidateVisibility(Long id, User user) {
     	Tournament tournament = findById(id);
     	
-    	if(tournament.isPrivate() && !tournament.userIsOwner(user) && !tournament.hasParticipant(user)) {
-    		logger.info("El usuario no tiene permisos para ver este torneo");
-        	throw new ForbiddenException("El usuario no tiene permisos para ver este torneo");
+    	if(tournament.getVisibility().equals(Visibility.PRIVATE) && !tournament.userIsOwner(user) && !tournament.hasParticipant(user)) {
+    		logger.info("User does not have permissions to view this tournament");
+        	throw new ForbiddenException("User does not have permissions to view this tournament");
     	}
     	
     	return tournament;
@@ -62,30 +62,42 @@ public class TournamentService {
         return getByIdAndValidateVisibility(id, user).generateLeaderboardAtDate(date);
     }
 
+	/**
+	 * Adds a User participant to the given tournament.
+	 * If a tournament is private, only the owner is allowed to add participants
+	 * If a tournament is public, both the owner and the participant itself can add the participant to the tournament
+	 *
+	 * For both cases, a participant can be added to a tournament only if it hasn't started yet.
+	 *
+	 * @param tournamentId ID of tournament to add participant
+	 * @param user User that is trying to perform the action
+	 * @param participant User to add to the tournament
+	 */
     @Transactional
-    public void addParticipant(Long tournamentId, User postulator, User participant) {
-		//TODO: Este metodo quedo medio raro, siento que estamos tratando de atrapar varios casos bajo un unico endpoint
-		// REVISAR
+    public void addParticipant(Long tournamentId, User user, User participant) {
         Tournament tournament = findById(tournamentId);
         
         TournamentStatus status = tournament.getStatus();
-        
+
+		//check tournament has not started
         if(status.equals(TournamentStatus.STARTED) || status.equals(TournamentStatus.FINISHED)){
-        	logger.info("Intento agregar a un usuario a un torneo que ya empezo o ya ha finalizado");
-			//TODO: Create new exception for this. ExpiredRequestException is not appropriate. Also response should not be NOT_FOUND
-            throw new ExpiredRequestException();
+        	logger.info("User tried to add participant to a tournament with status {}", status);
+            throw new ForbiddenException("Participants cannot be added to this tournament once it has started or finished");
         }
-        
-        if(tournament.isPrivate() && !tournament.userIsOwner(postulator)) {
-        	logger.info("Intento agregar un usuario a un torneo privado sin ser owner");
-        	throw new ForbiddenException("No podes agregar usuario a este torneo porque es privado");
+
+		//check user is owner of private tournament
+        if(tournament.getVisibility().equals(Visibility.PRIVATE) && !tournament.userIsOwner(user)) {
+        	logger.info("User tried to add participant to private tournament without being the owner");
+        	throw new ForbiddenException("User cannot add participant to this private tournament without being the owner");
         }
-        
-        if(!tournament.isPrivate() && !postulator.equals(participant)) {
-        	logger.info("Intento agregar otro usuario a un torneo publico, solo puede unirse a si mismo");
-        	throw new ForbiddenException("No podes agregar a otro usuario a este torneo, solo podes unirte vos mismo");
+
+		//check if public tournament and user trying to add another participant while not being owner
+        if(tournament.getVisibility().equals(Visibility.PUBLIC) && !user.equals(participant) && !tournament.userIsOwner(user)) {
+        	logger.info("User tried to add participant to public tournament without being the owner, can only add self");
+        	throw new ForbiddenException("User can only add another participant to public tournament if owner");
         }
-        
+
+		//TODO: Alguna response distinta aca por ahi??
         if(!tournament.hasParticipant(participant))
         	tournament.addParticipant(participant);
     }
@@ -117,7 +129,7 @@ public class TournamentService {
 					tournament = new ArrayList<>();
 			}
 		} catch (Exception e) {
-			logger.error("Error al intentar obtener los torneos desde la base de datos");
+			logger.error("Error while retrieving tournaments from database");
 			tournament = new ArrayList<>();
 		}
 		
@@ -144,7 +156,7 @@ public class TournamentService {
 					tournament = new ArrayList<>();
 			}
 		} catch (Exception e) {
-			logger.error("Error al intentar obtener los torneos desde la base de datos");
+			logger.error("Error while retrieving tournaments from database");
 			tournament = new ArrayList<>();
 		}
 		
@@ -169,7 +181,7 @@ public class TournamentService {
 					tournament = new ArrayList<>();
 			}
 		} catch (Exception e) {
-			logger.error("Error al intentar obtener los torneos desde la base de datos");
+			logger.error("Error while retrieving tournaments from database");
 			tournament = new ArrayList<>();
 		}
 		
