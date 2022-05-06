@@ -3,14 +3,11 @@ package com.tacs2022.wordlehelper.service;
 import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
-import com.tacs2022.wordlehelper.domain.tournaments.TournamentType;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.exceptions.ExpiredRequestException;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
 import com.tacs2022.wordlehelper.exceptions.ForbiddenException;
-import com.tacs2022.wordlehelper.utils.QueryUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,9 +17,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class TournamentService {
@@ -31,16 +26,26 @@ public class TournamentService {
     
     Logger logger = LoggerFactory.getLogger(TournamentService.class);
 
-    public List<Tournament> findAll(){
-        return (List<Tournament>) tournamentRepo.findAll();
-    }
+	@Transactional
+	public Tournament save(Tournament tournament) {
+		tournamentRepo.save(tournament);
+		return tournament;
+	}
 
     public Tournament findById(Long id) {
         return tournamentRepo.findById(id).orElseThrow(
                 () -> new NotFoundException("No tournament with id "+id+" was found")
         );
     }
-    
+
+	/**
+	 * Finds a tournament by id, validating that the user requesting the tournament
+	 * is participating (if it is a private tournament).
+	 *
+	 * @param id Tournament id
+	 * @param user User that makes the request
+	 * @return Tournament that matches given id
+	 */
     public Tournament getByIdAndValidateVisibility(Long id, User user) {
     	Tournament tournament = findById(id);
     	
@@ -52,11 +57,6 @@ public class TournamentService {
     	return tournament;
     }
 
-    @Transactional
-    public Tournament save(Tournament tournament) {
-        tournamentRepo.save(tournament);
-        return tournament;
-    }
 
     public List<Scoreboard> getTournamentLeaderboard(Long id, LocalDate date, User user) {
         return getByIdAndValidateVisibility(id, user).generateLeaderboardAtDate(date);
@@ -102,107 +102,12 @@ public class TournamentService {
         	tournament.addParticipant(participant);
     }
 
-	public List<Tournament> findByTypeAndStatus(TournamentType type, TournamentStatus status, Long userId) {
-		List<Tournament> tournament;
-		
-		if(type.equals(TournamentType.REGISTERED)) {
-			tournament = findByStatus(status, userId);
-		}else {
-			tournament = findMyTournamentsByStatus(status, userId);
-		}
-		
-		return tournament;
-	}
-
-	public List<Tournament> findByType(TournamentType type, User user) {
-		List<Tournament> tournament;
-		
-		try {
-			switch(type) {
-				case SELF:
-					tournament = tournamentRepo.findByOwner(user);
-					break;
-				case REGISTERED:
-					tournament = tournamentRepo.findTournamentsInWhichUserIsRegistered(user.getId());
-					break;
-				default:
-					tournament = new ArrayList<>();
-			}
-		} catch (Exception e) {
-			logger.error("Error while retrieving tournaments from database");
-			tournament = new ArrayList<>();
-		}
-		
-		return tournament;
-	}
-
-	public List<Tournament> findByStatus(TournamentStatus status, Long userId) {
-		List<Tournament> tournament;
-		LocalDate today = LocalDate.now();
-		try {
-			switch(status) {
-				case NOTSTARTED:
-					System.out.println(userId);
-					System.out.println(QueryUtils.TOURNAMENT_REGISTERED + QueryUtils.TOURNAMENT_CONDITION_NOT_STARTED);
-					tournament = tournamentRepo.findMyUnstartedRegisteredTournaments(userId, today);
-					break;
-				case STARTED:
-					tournament = tournamentRepo.findMyStartedRegisteredTournaments(userId, today);
-					break;
-				case FINISHED:
-					tournament = tournamentRepo.findMyFinishedRegisteredTournaments(userId, today);
-					break;
-				default:
-					tournament = new ArrayList<>();
-			}
-		} catch (Exception e) {
-			logger.error("Error while retrieving tournaments from database");
-			tournament = new ArrayList<>();
-		}
-		
-		return tournament;
-	}
-	
-	private List<Tournament> findMyTournamentsByStatus(TournamentStatus status, Long userId) {
-		List<Tournament> tournament;
-		LocalDate today = LocalDate.now();
-		try {
-			switch(status) {
-				case NOTSTARTED:
-					tournament = tournamentRepo.findMyUnstartedTournaments(userId, today);
-					break;
-				case STARTED:
-					tournament = tournamentRepo.findMyStartedTournaments(userId, today);
-					break;
-				case FINISHED:
-					tournament = tournamentRepo.findMyFinishedTournaments(userId, today);
-					break;
-				default:
-					tournament = new ArrayList<>();
-			}
-		} catch (Exception e) {
-			logger.error("Error while retrieving tournaments from database");
-			tournament = new ArrayList<>();
-		}
-		
-		return tournament;
-	}
 
 	public List<Tournament> findTournamentsInWhichUserIsRegistered(User user) {
 		return tournamentRepo.findTournamentsInWhichUserIsRegistered(user.getId());
 	}
-	
-	public List<Tournament> findPublicTournamentsInwhichNotRegistered(User user) {
-		List<Tournament> publics = tournamentRepo.findByVisibility(Visibility.PUBLIC);
-		return publics.stream()
-				.filter( (Tournament tournament) -> !tournament.hasParticipant(user) )
-				.collect(Collectors.toList()); //TODO hacer un query en el repo de tournaments
-	}
-	
-	public List<Tournament> findPublicTournamentsInwhichNotRegisteredByStatus(User user, TournamentStatus status) {
-		return findPublicTournamentsInwhichNotRegistered(user)
-				.stream()
-				.filter((Tournament tournament) -> tournament.getStatus().equals(status))
-				.collect(Collectors.toList()); //TODO hacer un query en el repo de tournaments
+
+	public List<Tournament> findPublicTournaments(){
+		return tournamentRepo.findByVisibility(Visibility.PUBLIC);
 	}
 }

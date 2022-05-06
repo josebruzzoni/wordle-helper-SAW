@@ -43,11 +43,6 @@ class TournamentsTest {
 	void tournamentFinished() {
 		assertEquals(TournamentStatus.FINISHED, tournament.getStatus());
 	}
-
-	@Test
-	void tournamentPublic() {
-		assertFalse(tournament.isPrivate());
-	}
 	
     @Test
     void daysPassedUntilDate(){
