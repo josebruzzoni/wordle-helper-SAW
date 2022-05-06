@@ -26,21 +26,3 @@ public class JsonResponseDto {
         return Collections.singletonMap(fieldName, data);
     }
 }
-
-/*
-ESTADO DE LOS DTOs
-
-Tournaments
-NewTournamentDto ==> queda asi
-
-NewParticipantDto ==> se puede reemplazar por JsonResponseDto??? PROBAR SI FUNCIONA A LA INVERSA
-
-OutputScoreboardDto ==> habria que ver la parte de user, el resto se puede hacer con jsonproperty
-
-OutputTournamentDto ==> queda asi
-
-User
-NewUserDto ==> queda asi
-
-
- */
