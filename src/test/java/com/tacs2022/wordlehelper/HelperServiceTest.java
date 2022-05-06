@@ -28,46 +28,6 @@ class HelperServiceTest {
 
     //TODO: standardize test names
 
-    @Test
-    void whenGivenPlay_HelperMustBuildRegularExpression_AllInPosition(){
-        String regexFromGreen = helperService.buildAllInPositionRegularExpression(wordPlay.getLettersByColor(LetterColor.GREEN)).toUpperCase();
-        assertEquals("A.L..", regexFromGreen);
-    }
-
-    @Test
-    void whenGivenEmptyGreenPlay_HelperMustBuildRegularExpression_Any(){
-        String regexFromGreen = helperService.buildAllInPositionRegularExpression(emptyPlay.getLettersByColor(LetterColor.GREEN)).toUpperCase();
-        assertEquals(".....", regexFromGreen);
-    }
-
-    @Test
-    void whenGivenPlay_HelperMustBuildRegularExpression_NoneOf(){
-        String regexFromGray = helperService.buildNoneOfRegularExpression(wordPlay.getLettersByColor(LetterColor.GRAY)).toUpperCase();
-        assertEquals("[^KIR][^KIR][^KIR][^KIR][^KIR]", regexFromGray);
-    }
-
-    @Test
-    void whenGivenEmptyGrayPlay_HelperMustBuildRegularExpression_Any(){
-        String regexFromGray = helperService.buildNoneOfRegularExpression(emptyPlay.getLettersByColor(LetterColor.GRAY)).toUpperCase();
-        assertEquals(".....", regexFromGray);
-    }
-
-    @ParameterizedTest
-    @CsvSource({
-            "AGLOW, true", //contains both and not in position
-            "GAMES, false", //contains at least one in position
-            "WATER, false", //contains only one not in position
-            "PIZZA, false" //contains none
-    })
-    void test_hasEveryOf_NotInPosition(String word, boolean matches){
-        assertEquals(matches, helperService.hasEveryOfNotInPosition(word.toLowerCase(), wordPlay.getLettersByColor(LetterColor.YELLOW)));
-    }
-
-    @Test
-    void whenGivenEmptyYellowPlay_hasEveryOfNotInPosition_mustMatch(){
-        assertTrue(helperService.hasEveryOfNotInPosition("MATCH", emptyPlay.getLettersByColor(LetterColor.YELLOW)));
-    }
-
     //TODO: more tests
     @ParameterizedTest
     @MethodSource
