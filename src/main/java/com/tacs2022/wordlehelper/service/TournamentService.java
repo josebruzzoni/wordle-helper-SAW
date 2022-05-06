@@ -65,9 +65,9 @@ public class TournamentService {
     @Transactional
     public void addParticipant(Long tournamentId, User postulator, User participant) {
         Tournament tournament = findById(tournamentId);
-        
+
         TournamentStatus status = tournament.getStatus();
-        
+
         if(status.equals(TournamentStatus.STARTED) || status.equals(TournamentStatus.FINISHED)){
         	logger.info("Intento agregar a un usuario a un torneo que ya empezo o ya ha finalizado");
             throw new ExpiredRequestException();
@@ -77,8 +77,8 @@ public class TournamentService {
         	logger.info("Intento agregar un usuario a un torneo privado sin ser owner");
         	throw new ForbiddenException("No podes agregar usuario a este torneo porque es privado");
         }
-        
-        if(!tournament.isPrivate() && !postulator.equals(participant)) {
+
+        if(!postulator.equals(participant) && !tournament.isOwner(participant)) {
         	logger.info("Intento agregar otro usuario a un torneo publico, solo puede unirse a si mismo");
         	throw new ForbiddenException("No podes agregar a otro usuario a este torneo, solo podes unirte vos mismo");
         }
