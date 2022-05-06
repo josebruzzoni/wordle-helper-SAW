@@ -14,7 +14,7 @@ public class OutputScoreboardsDto {
 	public OutputScoreboardsDto(List<Scoreboard> leaderboard) {
 		this.leaderboard = leaderboard
 				.stream()
-				.map( (Scoreboard scoreboard) -> new OutputScoreboardDto(scoreboard))
+				.map(OutputScoreboardDto::new)
 				.collect(Collectors.toList());
 	}
 	

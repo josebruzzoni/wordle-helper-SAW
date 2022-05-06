@@ -34,7 +34,7 @@ public class OutputTournamentDto {
     	this.languages = tournament.getLanguages();
     	this.owner = tournament.getOwner().getUsername();
     	this.participants = tournament.getParticipants().stream()
-    			.map( (User user) -> user.getUsername() )
+    			.map(User::getUsername)
     			.collect(Collectors.toList());
 	}
     

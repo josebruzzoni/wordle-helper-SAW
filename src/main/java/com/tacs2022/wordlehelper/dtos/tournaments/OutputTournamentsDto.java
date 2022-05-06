@@ -13,7 +13,7 @@ public class OutputTournamentsDto {
 
 	public OutputTournamentsDto(List<Tournament> tournaments) {
 		this.tournaments = tournaments.stream()
-				.map((Tournament tournament) -> new OutputTournamentDto(tournament))
+				.map(OutputTournamentDto::new)
 				.collect(Collectors.toList());
 	}
 }

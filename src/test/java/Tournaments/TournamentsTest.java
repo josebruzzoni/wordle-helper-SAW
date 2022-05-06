@@ -43,10 +43,6 @@ public class TournamentsTest {
         assertFalse(tournament.endedToDate(endDate));
     }
 
-	/*@Test
-	public void tournamentFinishedOnSameDayIsAlreadyFinished() {
-		assertTrue(tournament.endedToDate(endDate));
-	}*/
 
 	@Test
 	public void tournamentFinishedInDaysBeforeIsAlreadyFinished() {
@@ -78,7 +74,8 @@ public class TournamentsTest {
 	public void tournamentFinished() {
 		assertEquals(tournament.getStatus(), TournamentStatus.FINISHED);
 	}
-	
+
+	@Test
 	public void tournamentPublic() {
 		assertFalse(tournament.isPrivate());
 	}
