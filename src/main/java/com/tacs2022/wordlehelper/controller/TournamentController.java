@@ -46,7 +46,7 @@ public class TournamentController {
     @ResponseStatus(HttpStatus.CREATED)
     public OutputTournamentDto create(@Valid @RequestBody NewTournamentDto tournament, @RequestHeader(required = true) String Authorization){
     	User owner = userService.getUserFromToken(Authorization);
-    	Tournament newTournament = new Tournament(tournament, owner);
+    	Tournament newTournament = tournament.fromDto(owner);
         return new OutputTournamentDto(tournamentService.save(newTournament));
     }
 

@@ -13,6 +13,7 @@ import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,20 +35,17 @@ public class Tournament {
     @ManyToOne
     private User owner;
     @ManyToMany
-    private List<User> participants;
+    private List<User> participants = new LinkedList<>();
 
-    public Tournament(NewTournamentDto newTournamentDto, User owner) {
-        this.name = newTournamentDto.getName();
-        this.startDate = newTournamentDto.getStartDate();
-        this.endDate = newTournamentDto.getEndDate();
-        this.languages = new ArrayList<>();
-        this.languages.addAll(newTournamentDto.getLanguages());
-        this.visibility = newTournamentDto.getVisibility();
-        this.participants = new ArrayList<>();
-        this.participants.add(owner);
+    public Tournament(String name, LocalDate startDate, LocalDate endDate, Visibility visibility, List<Language> languages, User owner) {
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.visibility = visibility;
+        this.languages = languages;
         this.owner = owner;
     }
-    
+
     public Boolean isAParticipant(User newParticipant) {
     	return this.participants.contains(newParticipant);
     }
