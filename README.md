@@ -9,6 +9,7 @@ A Wordle helper application design to help users organize tournaments and compar
 
 ## How to Run services
 5. Once built, at the root of the **wordle-helper** project run ``. start.sh``. This will start the services' containers.
+6. Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
 ## How to Stop services
 1. At the root of the **wordle-helper** project run ``. stop.sh``. This will stop the services' containers.
