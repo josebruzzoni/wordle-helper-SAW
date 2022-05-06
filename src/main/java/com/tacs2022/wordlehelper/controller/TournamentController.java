@@ -29,23 +29,17 @@ public class TournamentController {
     public JsonResponseDto getAllTournaments(@RequestParam(required = false) TournamentStatus status, @RequestHeader(required = true) String Authorization) {
     	User user = userService.getUserFromToken(Authorization);
     	
-//    	List<Tournament> tournaments =  null;
-//
-//    	if(status == null) {
-//    		tournaments = tournamentService.findPublicTournamentsInwhichNotRegistered(user);
-//    	}else {
-//    		tournaments = tournamentService.findPublicTournamentsInwhichNotRegisteredByStatus(user, status);
-//    	}
-        List<Tournament> tournaments = tournamentService.findAll();
+    	List<Tournament> tournaments =  null;
+
+    	if(status == null) {
+    		tournaments = tournamentService.findPublicTournamentsInwhichNotRegistered(user);
+    	}else {
+    		tournaments = tournamentService.findPublicTournamentsInwhichNotRegisteredByStatus(user, status);
+    	}
     	
     	return new JsonResponseDto("tournaments", OutputTournamentDto.list(tournaments));
     }
 
-
-    //TODO: tiene sentido mandar los results en user siempre?? o solo cuando estamos en la pag de results????????
-
-    //TODO: testear si con settear el json ignore en user se puede hacer lo de OutputUserDto, y si es en cascada
-    // para cualquier otro dto que tenga user o lo tengo que transformar a mano en ese dto tambien
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
