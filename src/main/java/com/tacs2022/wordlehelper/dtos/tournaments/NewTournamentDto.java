@@ -1,7 +1,9 @@
 package com.tacs2022.wordlehelper.dtos.tournaments;
 
 import com.tacs2022.wordlehelper.domain.Language;
+import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
+import com.tacs2022.wordlehelper.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -25,4 +27,8 @@ public class NewTournamentDto {
     @NotNull(message = "languages are mandatory")
     private List<Language> languages;
 
+
+    public Tournament asTournamentWithOwner(User owner){
+        return new Tournament(name, startDate, endDate, visibility, languages, owner);
+    }
 }

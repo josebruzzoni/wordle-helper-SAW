@@ -3,7 +3,6 @@ package com.tacs2022.wordlehelper.domain.tournaments;
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,18 +35,17 @@ public class Tournament {
     @ManyToMany
     private List<User> participants;
 
-    public Tournament(NewTournamentDto newTournamentDto, User owner) {
-        this.name = newTournamentDto.getName();
-        this.startDate = newTournamentDto.getStartDate();
-        this.endDate = newTournamentDto.getEndDate();
-        this.languages = new ArrayList<>();
-        this.languages.addAll(newTournamentDto.getLanguages());
-        this.visibility = newTournamentDto.getVisibility();
+    public Tournament(String name, LocalDate startDate, LocalDate endDate, Visibility visibility, List<Language> languages, User owner) {
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.visibility = visibility;
+        this.languages = languages;
+        this.owner = owner;
         this.participants = new ArrayList<>();
         this.participants.add(owner);
-        this.owner = owner;
     }
-    
+
     public Boolean isAParticipant(User newParticipant) {
     	return this.participants.contains(newParticipant);
     }

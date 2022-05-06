@@ -29,9 +29,8 @@ public class TournamentsTest {
 		byte[] salt = ss.getSalt();
 
 		User julian = new User("Julian", ss.hash("1234", salt), salt);
-		NewTournamentDto tournamentDto = new NewTournamentDto("Luchemos por la vida", startDate, endDate,
-				Visibility.PUBLIC, List.of(Language.EN, Language.ES));
-		tournament = new Tournament(tournamentDto, julian);
+		tournament = new Tournament("Luchemos por la vida", startDate, endDate,
+				Visibility.PUBLIC, List.of(Language.EN, Language.ES), julian);
 	}
 
 	@Test
