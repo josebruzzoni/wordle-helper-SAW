@@ -4,8 +4,9 @@ A Wordle helper application design to help users organize tournaments and compar
 ## How to Build Locally
 1. Make sure the **Frontend (wordle-helper-front)** and the **Backend (wordle-helper)** are placed at the same level folder
 2. Go to the root of the **wordle-helper** project
-3. Open a terminal and run ``. pull.sh``. This will pull from main the latest changes in both repositories.
-4. Run ``. build.sh``. This will build the docker images. The build logs are stored in *wordle-helper/docker-compose/logs* folder.
+3. Make sure you have your .env file
+4. Open a terminal and run ``. pull.sh``. This will pull from main the latest changes in both repositories.
+5. Run ``. build.sh``. This will build the docker images. The build logs are stored in *wordle-helper/docker-compose/logs* folder.
 
 ## How to Run services
 5. Once built, at the root of the **wordle-helper** project run ``. start.sh``. This will start the services' containers.
