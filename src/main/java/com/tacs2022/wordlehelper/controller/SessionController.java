@@ -22,9 +22,19 @@ public class SessionController {
     @Autowired
     SessionService sessionService;
 
+    @GetMapping()
+    @ResponseStatus(HttpStatus.OK)
+    public String login(@PathVariable(value = "first_name") String firstName){
+        System.out.println("entro al session");
+        System.out.println("first name: " + firstName);
+
+        return "sarasa";
+    }
+
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     public OutputSessionDto login(@Valid @RequestBody NewUserDto body) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        System.out.println("entro a login");
         String token = sessionService.getToken(body.getUsername(), body.getPassword());
         if (token == null){
             throw new InvalidUserException();

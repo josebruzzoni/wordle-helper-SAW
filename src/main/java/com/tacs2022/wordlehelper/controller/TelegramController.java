@@ -172,7 +172,7 @@ public class TelegramController {
     }
 
     private void sendKeyboardForNotLogued(long chatId){
-        LoginUrl loginUrl = new LoginUrl("localhost:8080/sessions");
+        LoginUrl loginUrl = new LoginUrl("https://d9a8-83-165-97-130.eu.ngrok.io/sessions");
         InlineKeyboardButton loginButton = new InlineKeyboardButton("Login").callbackData("login").loginUrl(loginUrl);
         InlineKeyboardButton createUserButton = new InlineKeyboardButton("Sign in").callbackData("signin");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(loginButton, createUserButton);
