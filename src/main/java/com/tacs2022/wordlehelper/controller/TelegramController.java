@@ -11,6 +11,7 @@ import com.pengrad.telegrambot.model.request.LoginUrl;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.tacs2022.wordlehelper.service.SessionService;
+import com.tacs2022.wordlehelper.service.TelegramSecurityService;
 import com.tacs2022.wordlehelper.service.UserService;
 import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -27,7 +28,7 @@ public class TelegramController {
     private Map<Long, String> lastMessageSentByChatId = new HashMap<>();
     private TelegramBot bot;
     @Autowired
-    private SessionService sessionService;
+    private TelegramSecurityService telegramSecurityService;
     @Autowired
     private UserService userService;
     public TelegramController(){
@@ -52,12 +53,14 @@ public class TelegramController {
     }
 
     private void handleQuery(CallbackQuery query){
+        Long chatId = query.message().chat().id();
+
         switch (query.data()){
-            /*case "login":
-                this.handleLogin(query.message().chat().id());
-                break;*/
+            case "login":
+                this.handleLogin(chatId);
+                break;
             case "signin":
-                this.handleSignin(query.message().chat().id());
+                this.handleSignin(chatId);
                 break;
         }
     }
@@ -123,22 +126,10 @@ public class TelegramController {
         String password = message.text();
 
         try {
-            String token = this.sessionService.getToken(username, password);
-
-            if (token == null) {
-                /* Nota: en realidad este caso se va a dar solo cuando me logueo para un usuario existente pero con una
-                 contraseña que no cumple los requisitos de validación. Es un caso medio raro pero lo mejor no sería
-                 devolver que la contraseña no cumple los requisitos porque sino así capaz el cliente puede saber que
-                 el usuari existe mediante prueba y error. */
-                SendMessage sendMessage = new SendMessage(chatId, "Usuario o contraseña inválido.");
-                this.bot.execute(sendMessage);
-                this.cleanMaps(chatId);
-                this.handleLogin(chatId);
-            } else {
-                SendMessage sendMessage = new SendMessage(chatId, "Logueado con éxito.");
-                this.bot.execute(sendMessage);
-                this.sendKeyboardForLogued(chatId);
-            }
+            this.telegramSecurityService.login(username, password, chatId);
+            SendMessage sendMessage = new SendMessage(chatId, "Logueado con éxito.");
+            this.bot.execute(sendMessage);
+            this.sendKeyboardForLogued(chatId);
         }catch(NotFoundException e){
             SendMessage sendMessage = new SendMessage(chatId, "Usuario o contraseña inválido.");
             this.bot.execute(sendMessage);
