@@ -24,7 +24,9 @@ public class TournamentService {
     TournamentRepository tournamentRepo;
 
     public List<Tournament> findAll(){
-        return (List<Tournament>) tournamentRepo.findAll();
+        List<Tournament> all = (List<Tournament>)tournamentRepo.findAll();
+        System.out.println(all);
+        return all;
     }
 
     public List<Tournament> findAll(String role, String status) {
