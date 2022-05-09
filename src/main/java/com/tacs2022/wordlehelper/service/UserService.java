@@ -1,17 +1,18 @@
 package com.tacs2022.wordlehelper.service;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
-import java.util.List;
-
+import com.tacs2022.wordlehelper.domain.user.PasswordSecurity;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
+import com.tacs2022.wordlehelper.exceptions.ExistingUserException;
+import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.repos.UserRepository;
-
-import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
+import com.tacs2022.wordlehelper.security.jwt.TokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -44,22 +45,60 @@ public class UserService {
     }
 
     @Transactional
-    public User save(String username, String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
-        SecurityService hasher = new SecurityService();
-        byte[] salt = hasher.getSalt();
-        byte[] hashedSaltedPassword = hasher.hash(password, salt);
-        User newUser = new User(username, hashedSaltedPassword, salt);
+    public User save(String username, String password) {
+        Optional<User> user = this.userRepo.findByUsername(username).stream().findFirst();
+
+        if(user.isPresent()){
+            throw new ExistingUserException();
+        }
+
+        PasswordSecurity passwordSecurity = this.getHashedSaltedPassword(password);
+
+        if(passwordSecurity == null){
+            System.out.println("Error getting salt and hash for password");
+            return null;
+        }
+
+        User newUser = new User(username, passwordSecurity.getHashedSaltedPassword(), passwordSecurity.getSalt());
         userRepo.save(newUser);
         return newUser;
     }
 
-    @Transactional
-    public void update(User existingUser){
-        userRepo.save(existingUser);
+    private PasswordSecurity getHashedSaltedPassword(String password){
+        SecurityService hasher = new SecurityService();
+        byte[] salt = hasher.getSalt();
+        byte[] hashedSaltedPassword = hasher.hash(password, salt);
+
+        if(salt == null || hashedSaltedPassword == null){
+            return null;
+        }
+
+        return new PasswordSecurity(salt, hashedSaltedPassword);
     }
 
     @Transactional
     public void addResult(Long userId, Result result){
-        //TODO
+        User user = findById(userId);
+
+        if(user.getResults().stream().anyMatch(result::match)){
+            throw new ResultAlreadyLoadedException();
+        }
+
+            user.addResult(result);
     }
+
+    public String getUsernameFromToken(String token){
+        return TokenProvider.getUsername(token);
+    }
+
+    public Long getUserIdFromToken(String token){
+        return TokenProvider.getId(token);
+    }
+    
+    public User getUserFromToken(String auth) {
+    	String token = auth.substring(7);
+    	Long userId = this.getUserIdFromToken(token);
+    	return this.findById(userId);
+    }
+
 }

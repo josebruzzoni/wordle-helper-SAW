@@ -1,14 +1,18 @@
 package com.tacs2022.wordlehelper.service;
 
-import java.util.List;
-
+import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.dictionary.Word;
-
+import com.tacs2022.wordlehelper.service.dictionaryapis.DictionaryAPI;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class DictionaryService {
-    public Word findByNameAndLanguage(String name, String language) {
-        return new Word("1", name, "definition", language);
+
+    @Autowired
+    DictionaryAPI dictionaryAPI;
+
+    public Word findByNameAndLanguage(String name, Language language) {
+        return dictionaryAPI.getWordDefinition(name, language);
     }
 }

@@ -26,14 +26,23 @@ public class SecurityService {
         return salt;
     }
 
-    public byte[] hash(String password, byte[] salt) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public byte[] hash(String password, byte[] salt) {
         KeySpec spec = new PBEKeySpec(password.toCharArray(), salt, ITERATIONS, KEY_LENGTH);
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        byte[] hash = factory.generateSecret(spec).getEncoded();
-        return hash;
+
+        try {
+            SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            return factory.generateSecret(spec).getEncoded();
+        }catch(NoSuchAlgorithmException e){
+            System.out.println("NoSuchAlgorithmException for hash method");
+            return null;
+        } catch(InvalidKeySpecException e){
+            System.out.println("InvalidKeySpecException for hash method");
+            return null;
+        }
     }
 
-    public boolean validatePassword(User user, String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    public boolean validatePassword(String username, String password) {
+        User user = userService.findByUsername(username);
         String actualPass = new String(user.getHashedPass());
         String givenPass = new String(this.hash(password, user.getSalt()));
         return actualPass.equals(givenPass);

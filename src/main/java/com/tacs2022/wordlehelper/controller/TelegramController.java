@@ -14,16 +14,18 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
+import com.tacs2022.wordlehelper.domain.user.User;
+import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.service.SessionService;
 import com.tacs2022.wordlehelper.service.TelegramSecurityService;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
-import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Controller
 public class TelegramController {
@@ -59,8 +61,9 @@ public class TelegramController {
 
     private void handleQuery(CallbackQuery query){
         Long chatId = query.message().chat().id();
+        String data = query.data();
 
-        switch (query.data()){
+        switch (data){
             case "login":
                 this.handleLogin(chatId);
                 break;
@@ -78,6 +81,11 @@ public class TelegramController {
             case "show-tournaments":
                 this.handleShowTournaments(chatId);
                 break;
+        }
+
+        if(query.data().startsWith("tournament-")){
+            String tournamentId = data.substring("tournament-".length());
+            this.handleShowTournament(chatId, tournamentId);
         }
     }
 
@@ -97,9 +105,11 @@ public class TelegramController {
         InlineKeyboardButton createTournamentButton = new InlineKeyboardButton("Ver torneos").callbackData("show-tournaments");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(createTournamentButton);
         String buttonMessage = "Seleccione la acción a realizar";
-        EditMessageText editMessageText = new EditMessageText(messageId, buttonMessage).replyMarkup(keyboardMarkup);
+        /*EditMessageText editMessageText = new EditMessageText(messageId, buttonMessage).replyMarkup(keyboardMarkup);
         System.out.println("parameters" + editMessageText.getParameters());
-        this.executeMessage(editMessageText);
+        this.executeMessage(editMessageText);*/
+        SendMessage sendMessage = new SendMessage(chatId, buttonMessage).replyMarkup(keyboardMarkup);
+        this.executeMessage(sendMessage);
     }
 
     private void handleShowTournaments(Long chatId){
@@ -107,7 +117,7 @@ public class TelegramController {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
 
         tournaments.forEach(tournament -> {
-            String label = String.format("Nombre: %s", tournament.getName());
+            String label = tournament.getName();
             String callbackData = String.format("tournament-%s", tournament.getId());
             InlineKeyboardButton tournamentButton = new InlineKeyboardButton(label).callbackData(callbackData);
             keyboardMarkup.addRow(tournamentButton);
@@ -196,6 +206,23 @@ public class TelegramController {
         } catch(Exception e){
             System.out.println(e);
         }
+    }
+
+    public void handleShowTournament(long chatId, String tournamentId){
+        Long tournamentIdCasted = Long.parseLong(tournamentId);
+
+        Tournament tournament = this.tournamentService.findById(tournamentIdCasted);
+        List<String> allParticipants = tournament.getParticipants().stream().map(User::getUsername).collect(Collectors.toList());
+        String participants = String.join(",", allParticipants);
+        String message = String.format("Nombre: %s\n Inicio: %s\n Fin: %s\nModo: %s\n Idiomas: %s\n Creador: %s\n Participantes: %s\n",
+                tournament.getName(), tournament.getStartDate(), tournament.getEndDate(), tournament.getVisibility(), tournament.getLanguages(),
+                tournament.getOwner().getUsername(), participants);
+        this.sendMessageAndExecute(chatId, message);
+    }
+
+    private void sendMessageAndExecute(Long chatId, String message){
+        SendMessage sendMessage = new SendMessage(chatId, message);
+        bot.execute(sendMessage);
     }
 
     private void cleanMaps(long chatId){

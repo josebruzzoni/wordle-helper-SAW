@@ -11,4 +11,3 @@ public class LetterPlay {
     private Integer position;
     private LetterColor color;
 }
-

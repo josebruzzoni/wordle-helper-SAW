@@ -1,13 +1,8 @@
 package com.tacs2022.wordlehelper.service;
 
-import com.tacs2022.wordlehelper.controller.Exceptions.ExpiredRequestException;
-import com.tacs2022.wordlehelper.controller.Exceptions.InvalidUserException;
-import com.tacs2022.wordlehelper.domain.user.Session;
 import com.tacs2022.wordlehelper.domain.user.TelegramSession;
-import com.tacs2022.wordlehelper.domain.user.User;
+import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.repos.TelegramSessionRepository;
-import com.tacs2022.wordlehelper.security.jwt.TokenProvider;
-import com.tacs2022.wordlehelper.service.exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

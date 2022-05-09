@@ -1,7 +1,6 @@
-package com.tacs2022.wordlehelper.controller.Exceptions;
+package com.tacs2022.wordlehelper.exceptions;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
