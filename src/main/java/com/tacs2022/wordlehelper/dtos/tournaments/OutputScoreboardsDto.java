@@ -9,6 +9,7 @@ import lombok.Data;
 
 @Data
 public class OutputScoreboardsDto {
+	//TODO: arreglar todo este desastre, NORMALIZAR como nos vamos a manejar con los dtos (sobre todo los de output)
 	private List<OutputScoreboardDto> leaderboard;
 
 	public OutputScoreboardsDto(List<Scoreboard> leaderboard) {
