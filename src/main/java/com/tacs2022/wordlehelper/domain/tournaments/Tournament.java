@@ -1,7 +1,6 @@
 package com.tacs2022.wordlehelper.domain.tournaments;
 
 import com.tacs2022.wordlehelper.domain.Language;
-import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 
@@ -48,77 +47,57 @@ public class Tournament {
         this.owner = owner;
     }
     
-    public Boolean isAParticipant(User newParticipant) {
-    	return this.participants.contains(newParticipant);
+    public Boolean hasParticipant(User participant) {
+    	return this.participants.contains(participant);
     }
 
     public void addParticipant(User newParticipant) {
         this.participants.add(newParticipant);
     }
     
-    public Boolean isPrivate() {
-    	return visibility.equals(Visibility.PRIVATE);
-    }
-    
-    public Boolean isOwner(User possibleOwner) {
-    	return this.owner.equals(possibleOwner);
+    public Boolean userIsOwner(User user) {
+    	return this.owner.equals(user);
     }
 
-    public List<Scoreboard> generateLeaderboardToDate(LocalDate date){
+    public List<Scoreboard> generateLeaderboardAtDate(LocalDate date){
         return participants.stream()
                 .map(u->new Scoreboard(u, this))
-                .sorted(Comparator.comparing(s->s.getBadScoreToDate(date)))
+                .sorted(Comparator.comparing(s->s.getScoreAtDate(date)))
                 .collect(Collectors.toList());
     }
 
-    public int daysPassedToDate(LocalDate date){
-        long days = inProgressToDate(date)? startDate.datesUntil(date).count()
-                : endedToDate(date)? 1+startDate.datesUntil(endDate).count()
-                : 0;
+    /**
+     * Returns the amount of days that were played since the tournament started until
+     * the given date.
+     * If tournament has not started, returns 0.
+     * @param date Date to count played days by.
+     * @return Days played until date
+     */
+    public int getDaysPlayedAtDate(LocalDate date){
+        TournamentStatus status = getStatusByDate(date);
 
-        return (int) days;
+        if (status == TournamentStatus.NOTSTARTED)
+            return 0;
+        else if (status == TournamentStatus.STARTED)
+            return (int) startDate.datesUntil(date).count();
+        else
+            return (int) (startDate.datesUntil(endDate).count() + 1);
     }
 
-    public boolean considers(Result result){
-        return this.supportsLanguage(result.getLanguage()) && inProgressToDate(result.getDate());
-    }
-
-    private boolean supportsLanguage(Language language) {
+    public boolean supportsLanguage(Language language) {
         return languages.contains(language);
-    }
-
-    public boolean inProgressToDate(LocalDate date){
-        return startedToDate(date) && !endedToDate(date);
     }
     
     public TournamentStatus getStatus() {
-    	TournamentStatus status;
-    	
-    	if(isNotStarted()) {
-    		status = TournamentStatus.NOTSTARTED;
-    	}else if(isFinished()) {
-    		status = TournamentStatus.FINISHED;
-    	}else {
-    		status = TournamentStatus.STARTED;
-    	}
-    	
-    	return status;
-    }
-    
-    private Boolean isNotStarted() {
-    	return LocalDate.now().isBefore(startDate);
-    }
-    
-    private Boolean isFinished() {
-    	return endDate.isBefore(LocalDate.now());
+    	return getStatusByDate(LocalDate.now());
     }
 
-    public boolean endedToDate(LocalDate date) {
-        return date.isAfter(endDate);
+    public TournamentStatus getStatusByDate(LocalDate date){
+        if (date.isBefore(startDate))
+            return TournamentStatus.NOTSTARTED;
+        else if (date.isAfter(endDate))
+            return TournamentStatus.FINISHED;
+        else
+            return TournamentStatus.STARTED;
     }
-
-    public boolean startedToDate(LocalDate date) {
-        return !startDate.isAfter(date);
-    }
-
 }
