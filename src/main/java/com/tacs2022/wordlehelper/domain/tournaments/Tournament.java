@@ -7,6 +7,9 @@ import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -22,17 +25,22 @@ import java.util.stream.Collectors;
 public class Tournament {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
+    @Column(name="name")
     private String name;
+    @Column(name="start_date", columnDefinition = "DATE")
     private LocalDate startDate;
+    @Column(name="end_date", columnDefinition = "DATE")
     private LocalDate endDate;
+    @Column(name="visibility")
+    @Enumerated(EnumType.STRING)
     private Visibility visibility;
     @ElementCollection
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<Language> languages;
-    
     @ManyToOne
     private User owner;
     @ManyToMany
+    @LazyCollection(LazyCollectionOption.FALSE)
     private List<User> participants;
 
     public Tournament(NewTournamentDto newTournamentDto, User owner) {

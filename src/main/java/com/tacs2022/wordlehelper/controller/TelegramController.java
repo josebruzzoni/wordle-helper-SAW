@@ -212,8 +212,14 @@ public class TelegramController {
         Long tournamentIdCasted = Long.parseLong(tournamentId);
 
         Tournament tournament = this.tournamentService.findById(tournamentIdCasted);
-        List<String> allParticipants = tournament.getParticipants().stream().map(User::getUsername).collect(Collectors.toList());
-        String participants = String.join(",", allParticipants);
+        List<User> allParticipants = tournament.getParticipants();
+        String participants = "";
+
+        if(!allParticipants.isEmpty()) {
+            List<String> allParticipantsUsernames = allParticipants.stream().map(User::getUsername).collect(Collectors.toList());
+            participants = String.join(",", allParticipantsUsernames);
+        }
+
         String message = String.format("Nombre: %s\n Inicio: %s\n Fin: %s\nModo: %s\n Idiomas: %s\n Creador: %s\n Participantes: %s\n",
                 tournament.getName(), tournament.getStartDate(), tournament.getEndDate(), tournament.getVisibility(), tournament.getLanguages(),
                 tournament.getOwner().getUsername(), participants);
