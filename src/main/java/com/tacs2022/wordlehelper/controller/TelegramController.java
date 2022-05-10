@@ -14,6 +14,7 @@ import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
 import com.pengrad.telegrambot.response.SendResponse;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
+import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.service.SessionService;
@@ -38,6 +39,7 @@ public class TelegramController {
     private UserService userService;
     @Autowired
     private TournamentService tournamentService;
+    private User currentUser;
 
     public TelegramController(){
         Dotenv dotenv = Dotenv.configure().load();
@@ -83,9 +85,12 @@ public class TelegramController {
                 break;
         }
 
-        if(query.data().startsWith("tournament-")){
+        if(data.startsWith("tournament-")){
             String tournamentId = data.substring("tournament-".length());
             this.handleShowTournament(chatId, tournamentId);
+        } else if(data.startsWith("join-tournament-")){
+            String tournamentId = data.substring("join-tournament-".length());
+            this.handleJoinTournament(chatId, tournamentId);
         }
     }
 
@@ -117,16 +122,62 @@ public class TelegramController {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
 
         tournaments.forEach(tournament -> {
-            String label = tournament.getName();
+            // TODO: Traducir los lenguajes.
+            String label = String.format("%s | %s to %s | %s | %s", tournament.getName(), tournament.getStartDate(),
+                    tournament.getEndDate(), tournament.getLanguages(), this.capitalize(tournament.getVisibility().toString()));
             String callbackData = String.format("tournament-%s", tournament.getId());
             InlineKeyboardButton tournamentButton = new InlineKeyboardButton(label).callbackData(callbackData);
             keyboardMarkup.addRow(tournamentButton);
         });
 
         String buttonsMessage = "Clickee un torneo para ver opciones";
-        SendMessage sendMessage = new SendMessage(chatId, buttonsMessage).replyMarkup(keyboardMarkup);
-        this.executeMessage(sendMessage);
+        this.sendMessageAndExecute(chatId, buttonsMessage, keyboardMarkup);
+    }
 
+    public void handleShowTournament(long chatId, String tournamentId){
+        Long tournamentIdCasted = Long.parseLong(tournamentId);
+
+        Tournament tournament = this.tournamentService.findById(tournamentIdCasted);
+        List<User> allParticipants = tournament.getParticipants();
+        String participants = "";
+
+        if(!allParticipants.isEmpty()) {
+            List<String> allParticipantsUsernames = allParticipants.stream().map(User::getUsername).collect(Collectors.toList());
+            participants = String.join(",", allParticipantsUsernames);
+        }
+
+        String message = String.format("Name: %s\nFrom: %s\nTo: %s\nVisibility: %s\nLanguages: %s\nOwner: %s\nParticipants: %s\n",
+                tournament.getName(), tournament.getStartDate(), tournament.getEndDate(), this.capitalize(tournament.getVisibility().toString()), tournament.getLanguages(),
+                tournament.getOwner().getUsername(), participants);
+
+        InlineKeyboardMarkup keyboardMarkup = null;
+
+        if(tournament.getStatus() == TournamentStatus.NOTSTARTED) {
+            String data = String.format("join-tournament-%s", tournament.getId());
+            InlineKeyboardButton tournamentButton = new InlineKeyboardButton("Join").callbackData(data);
+            keyboardMarkup = new InlineKeyboardMarkup(tournamentButton);
+
+        }
+
+        this.sendMessageAndExecute(chatId, message, keyboardMarkup);
+    }
+
+    private void handleJoinTournament(long chatId, String tournamentId) {
+        Long tournamentIdCasted = Long.parseLong(tournamentId);
+        Tournament tournament = this.tournamentService.findById(tournamentIdCasted);
+
+        this.tournamentService.addParticipant(tournament.getId(), this.currentUser, this.currentUser);
+        this.sendMessageAndExecute(chatId, "Joined successfuly", null);
+    }
+
+    private String capitalize(String str) {
+        if(str == null || str.isEmpty()) {
+            return str;
+        }
+
+        String strLowerCase = str.toLowerCase();
+
+        return strLowerCase.substring(0, 1).toUpperCase() + strLowerCase.substring(1);
     }
 
     private void handleMessage(Message message){
@@ -177,18 +228,23 @@ public class TelegramController {
         String password = message.text();
 
         try {
-            this.telegramSecurityService.login(username, password, chatId);
-            SendMessage sendMessage = new SendMessage(chatId, "Logueado con éxito.");
-            this.bot.execute(sendMessage);
-            this.sendKeyboardForLogued(chatId);
+            this.currentUser = this.telegramSecurityService.login(username, password, chatId);
+
+            if(this.currentUser == null){
+                this.sendMessageAndExecute(chatId, "Usuario o contraseña inválido.", null);
+                this.cleanMaps(chatId);
+                this.handleLogin(chatId);
+            } else {
+                this.sendMessageAndExecute(chatId, "Logueado con éxito.", null);
+                this.sendKeyboardForLogued(chatId);
+            }
         }catch(NotFoundException e){
-            SendMessage sendMessage = new SendMessage(chatId, "Usuario o contraseña inválido.");
-            this.bot.execute(sendMessage);
+            this.sendMessageAndExecute(chatId, "Usuario o contraseña inválido.", null);
             this.cleanMaps(chatId);
             this.handleLogin(chatId);
         } catch(Exception e){
-            SendMessage sendMessage = new SendMessage(chatId, "Ocurrió un error.");
-            this.bot.execute(sendMessage);
+            System.out.printf("error en logueo: %s", e);
+            this.sendMessageAndExecute(chatId, "Ocurrió un error.", null);
             this.cleanMaps(chatId);
             this.handleLogin(chatId);
         }
@@ -208,26 +264,13 @@ public class TelegramController {
         }
     }
 
-    public void handleShowTournament(long chatId, String tournamentId){
-        Long tournamentIdCasted = Long.parseLong(tournamentId);
+    private void sendMessageAndExecute(Long chatId, String message, InlineKeyboardMarkup markup){
+        SendMessage sendMessage = new SendMessage(chatId, message);
 
-        Tournament tournament = this.tournamentService.findById(tournamentIdCasted);
-        List<User> allParticipants = tournament.getParticipants();
-        String participants = "";
-
-        if(!allParticipants.isEmpty()) {
-            List<String> allParticipantsUsernames = allParticipants.stream().map(User::getUsername).collect(Collectors.toList());
-            participants = String.join(",", allParticipantsUsernames);
+        if(markup != null){
+            sendMessage.replyMarkup(markup);
         }
 
-        String message = String.format("Nombre: %s\n Inicio: %s\n Fin: %s\nModo: %s\n Idiomas: %s\n Creador: %s\n Participantes: %s\n",
-                tournament.getName(), tournament.getStartDate(), tournament.getEndDate(), tournament.getVisibility(), tournament.getLanguages(),
-                tournament.getOwner().getUsername(), participants);
-        this.sendMessageAndExecute(chatId, message);
-    }
-
-    private void sendMessageAndExecute(Long chatId, String message){
-        SendMessage sendMessage = new SendMessage(chatId, message);
         bot.execute(sendMessage);
     }
 
