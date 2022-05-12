@@ -1,12 +1,10 @@
 package com.tacs2022.wordlehelper.controller;
 
+import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.tournaments.NewParticipantDto;
-import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
-import com.tacs2022.wordlehelper.dtos.tournaments.OutputScoreboardsDto;
-import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
-import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentsDto;
+import com.tacs2022.wordlehelper.dtos.JsonResponseDto;
+import com.tacs2022.wordlehelper.dtos.tournaments.*;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
+import java.util.List;
 
 @RequestMapping("/v1/tournaments")
 @RestController()
@@ -25,15 +24,16 @@ public class TournamentController {
     UserService userService;
 
     @GetMapping()
-    public OutputTournamentsDto getAllPublicTournaments() {
-        return new OutputTournamentsDto(tournamentService.findPublicTournaments());
+    public JsonResponseDto getAllPublicTournaments() {
+        return new JsonResponseDto("tournaments", tournamentService.findPublicTournaments());
     }
+
 
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public OutputTournamentDto create(@Valid @RequestBody NewTournamentDto tournament, @RequestHeader(required = true) String authorization){
     	User owner = userService.getUserFromToken(authorization);
-    	Tournament newTournament = new Tournament(tournament, owner);
+    	Tournament newTournament = tournament.asTournamentWithOwner(owner);
         return new OutputTournamentDto(tournamentService.save(newTournament));
     }
 
@@ -44,9 +44,11 @@ public class TournamentController {
     }
 
     @GetMapping("/{id}/leaderboard")
-    public OutputScoreboardsDto getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId, @RequestHeader(required = true) String authorization){
+    public JsonResponseDto getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId, @RequestHeader(required = true) String authorization){
     	User user = userService.getUserFromToken(authorization);
-    	return new OutputScoreboardsDto(tournamentService.getTournamentLeaderboard(tournamentId, LocalDate.now(), user));
+        List<Scoreboard> scoreboards = tournamentService.getTournamentLeaderboard(tournamentId, LocalDate.now(), user);
+        return new JsonResponseDto("leaderboard", OutputScoreboardDto.list(scoreboards));
+
     }
 
 	@PostMapping(value="/{id}/participants")

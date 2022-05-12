@@ -1,15 +1,13 @@
 package com.tacs2022.wordlehelper.controller;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentsDto;
-import com.tacs2022.wordlehelper.dtos.user.NewResultDto;
+import com.tacs2022.wordlehelper.dtos.JsonResponseDto;
+import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
-import com.tacs2022.wordlehelper.dtos.user.OutputUserDto;
-import com.tacs2022.wordlehelper.dtos.user.OutputUsersDto;
 import com.tacs2022.wordlehelper.exceptions.ForbiddenException;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
@@ -31,22 +29,19 @@ public class UserController {
     TournamentService tournamentService;
 
     @GetMapping()
-    public OutputUsersDto getAllUsers() {
-        List<User> users = userService.findAll();
-        List<OutputUserDto> userDtos = users.stream().map(OutputUserDto::new).collect(Collectors.toList());
-        return new OutputUsersDto(userDtos);
+    public JsonResponseDto getAllUsers() {
+        return new JsonResponseDto("users", userService.findAll());
     }
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public OutputUserDto create(@Valid @RequestBody NewUserDto newUserDto) {
-        User user = userService.save(newUserDto.getUsername(), newUserDto.getPassword());
-        return new OutputUserDto(user);
+    public User create(@Valid @RequestBody NewUserDto newUserDto) {
+        return userService.save(newUserDto.getUsername(), newUserDto.getPassword());
     }
 
     @GetMapping("/{id}")
-    public OutputUserDto getUserById(@PathVariable(value = "id") Long id) {
-        return new OutputUserDto(userService.findById(id));
+    public User getUserById(@PathVariable(value = "id") Long id) {
+        return userService.findById(id);
     }
 
     @DeleteMapping(path = "/{id}")
@@ -57,19 +52,19 @@ public class UserController {
     
     @PostMapping("{userId}/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addUserResults(@Valid @RequestBody NewResultDto result, @PathVariable(value = "userId") Long userId){
-        Result savedResult = result.fromDto();
+    public void addUserResults(@Valid @RequestBody Result savedResult, @PathVariable(value = "userId") Long userId){
         userService.addResult(userId, savedResult);
     }
     
     @GetMapping("{userId}/tournaments")
-    public OutputTournamentsDto getTournaments(@PathVariable(value = "userId") Long userId, @RequestHeader(required = true) String authorization) {
+    public JsonResponseDto getTournaments(@PathVariable(value = "userId") Long userId, @RequestHeader(required = true) String authorization) {
     	User user = userService.getUserFromToken(authorization);
     	
     	if(!user.getId().equals(userId)) {
     		throw new ForbiddenException("A user cannot view other users tournaments");
     	}
-    	
-    	return new OutputTournamentsDto(tournamentService.findTournamentsInWhichUserIsRegistered(user));
+
+    	List<Tournament> tournaments = tournamentService.findTournamentsInWhichUserIsRegistered(user);
+    	return new JsonResponseDto("tournaments", OutputTournamentDto.list(tournaments));
     }
 }

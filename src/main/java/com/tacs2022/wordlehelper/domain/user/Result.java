@@ -1,5 +1,7 @@
 package com.tacs2022.wordlehelper.domain.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tacs2022.wordlehelper.domain.Language;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,11 +15,12 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 public class Result {
-    @Id @GeneratedValue
+    @Id @GeneratedValue @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
     private Integer attempts;
     private Language language;
-    private LocalDate date;
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private LocalDate date = LocalDate.now();
 
     public Result(Integer attempts, Language language, LocalDate date) {
         this.attempts = attempts;

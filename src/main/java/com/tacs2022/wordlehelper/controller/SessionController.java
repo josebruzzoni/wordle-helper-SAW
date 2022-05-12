@@ -1,7 +1,7 @@
 package com.tacs2022.wordlehelper.controller;
 
+import com.tacs2022.wordlehelper.dtos.JsonResponseDto;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
-import com.tacs2022.wordlehelper.dtos.user.OutputSessionDto;
 import com.tacs2022.wordlehelper.exceptions.InvalidSessionException;
 import com.tacs2022.wordlehelper.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +19,12 @@ public class SessionController {
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public OutputSessionDto login(@Valid @RequestBody NewUserDto body) {
+    public JsonResponseDto login(@Valid @RequestBody NewUserDto body) {
         String token = sessionService.getToken(body.getUsername(), body.getPassword());
         if (token == null){
             throw new InvalidSessionException();
         }
-        return new OutputSessionDto(token);
+        return new JsonResponseDto("token", token);
     }
 
     @DeleteMapping(path = "/{token}")

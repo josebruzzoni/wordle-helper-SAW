@@ -49,7 +49,7 @@ public class TournamentService {
     public Tournament getByIdAndValidateVisibility(Long id, User user) {
     	Tournament tournament = findById(id);
     	
-    	if(tournament.getVisibility().equals(Visibility.PRIVATE) && !tournament.userIsOwner(user) && !tournament.hasParticipant(user)) {
+    	if(tournament.getVisibility().equals(Visibility.PRIVATE) && !tournament.userIsOwner(user) && !tournament.isAParticipant(user)) {
     		logger.info("User does not have permissions to view this tournament");
         	throw new ForbiddenException("User does not have permissions to view this tournament");
     	}
@@ -98,7 +98,7 @@ public class TournamentService {
         }
 
 		//TODO: Alguna response distinta aca por ahi??
-        if(!tournament.hasParticipant(participant))
+        if(!tournament.isAParticipant(participant))
         	tournament.addParticipant(participant);
     }
 
