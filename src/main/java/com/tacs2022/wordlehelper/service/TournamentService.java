@@ -101,7 +101,8 @@ public class TournamentService {
 		}
 
         if(tournament.isAParticipant(participant)){
-			throw new ParticipantAlreadyAddedException(participant, participant.equals(user), tournament);
+			boolean isUser = user.equals(participant);
+			throw new ParticipantAlreadyAddedException((isUser? participant.getUsername() + " is": "You are ")+ "already a participant of "+tournament.getName());
 		}
 
 		tournament.addParticipant(participant);

@@ -23,7 +23,7 @@ class TournamentsTest {
 	LocalDate endDate = of(2016, 6, 12);
 
 	@BeforeEach
-	public void fixture() throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public void fixture() {
 		SecurityService ss = new SecurityService();
 		byte[] salt = ss.getSalt();
 
@@ -64,12 +64,6 @@ class TournamentsTest {
 	public void tournamentStartedInDaysBeforeIsAlreadyStarted() {
 		assertEquals(TournamentStatus.STARTED, tournament.getStatusByDate(startDate.plusDays(1)));
 	}
-
-	@Test
-	public void tournamentPublic() { //lo dejo por las dudas, no es mio
-		assertNotEquals(Visibility.PRIVATE, tournament.getVisibility());
-	}
-
 	
     @Test
     void daysPassedUntilDate(){

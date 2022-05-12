@@ -8,9 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(HttpStatus.CONFLICT)
 public class ParticipantAlreadyAddedException extends RuntimeException{
 
-    public ParticipantAlreadyAddedException(User participant, boolean isUser, Tournament tournament) {
-        super(
-                (isUser? participant.getUsername() + " is": "You are ")+ "already a participant of "+tournament.getName()
-        );
+    public ParticipantAlreadyAddedException(String message) {
+        super(message);
     }
 }
