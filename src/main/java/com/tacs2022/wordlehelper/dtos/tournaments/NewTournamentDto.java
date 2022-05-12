@@ -32,13 +32,12 @@ public class NewTournamentDto {
     @NotNull(message = "languages are mandatory")
     private List<Language> languages;
 
-    public Tournament fromDto(User owner){
+
+    public Tournament asTournamentWithOwner(User owner){
         if(startDate.isAfter(endDate)){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "endDate must be the same or after startDate value");
         }
 
-        return new Tournament(
-            name, startDate, endDate, visibility, languages, owner
-        );
+        return new Tournament(name, startDate, endDate, visibility, languages, owner);
     }
 }

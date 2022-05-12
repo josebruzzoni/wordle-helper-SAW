@@ -5,7 +5,6 @@ import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import com.tacs2022.wordlehelper.service.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,7 @@ import java.util.List;
 import static java.time.LocalDate.of;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TournamentsTest {
+class TournamentsTest {
 	Tournament tournament;
 	LocalDate startDate = of(2016, 6, 10);
 	LocalDate endDate = of(2016, 6, 12);
@@ -29,45 +28,41 @@ public class TournamentsTest {
 		byte[] salt = ss.getSalt();
 
 		User julian = new User("Julian", ss.hash("1234", salt), salt);
-		NewTournamentDto tournamentDto = new NewTournamentDto("Luchemos por la vida", startDate, endDate,
-				Visibility.PUBLIC, List.of(Language.EN, Language.ES));
-		tournament = tournamentDto.fromDto(julian);
+
+		tournament = new Tournament("Luchemos por la vida", startDate, endDate,
+				Visibility.PUBLIC, List.of(Language.EN, Language.ES), julian);
 	}
 
-	@Test
-	public void validateInmutability() {
-		assertNotEquals(endDate, endDate.plusDays(1));
-	}
     @Test
     public void tournamentIsNotEndedAtLastDay(){
-        assertFalse(tournament.endedToDate(endDate));
+        assertEquals(TournamentStatus.STARTED, tournament.getStatusByDate(endDate));
     }
 
 
 	@Test
 	public void tournamentFinishedInDaysBeforeIsAlreadyFinished() {
 		LocalDate date = LocalDate.now();
-		assertTrue(tournament.endedToDate(date));
+		assertEquals(TournamentStatus.FINISHED, tournament.getStatusByDate(date));
 	}
 
 	@Test
 	public void tournamentThatStartsInTheFutureIsNotStarted() {
-		assertFalse(tournament.startedToDate(startDate.minusDays(1)));
+		assertEquals(TournamentStatus.NOT_STARTED, tournament.getStatusByDate(startDate.minusDays(1)));
 	}
 
 	@Test
 	public void tournamentThatEndsInTheFutureIsNotEnded() {
-		assertFalse(tournament.endedToDate(endDate.minusDays(1)));
+		assertNotEquals(TournamentStatus.FINISHED, tournament.getStatusByDate(endDate.minusDays(1)));
 	}
 
 	@Test
 	public void tournamentStartedOnSameDayIsAlreadyStarted() {
-		assertTrue(tournament.startedToDate(startDate));
+		assertEquals(TournamentStatus.STARTED, tournament.getStatusByDate(startDate));
 	}
 
 	@Test
 	public void tournamentStartedInDaysBeforeIsAlreadyStarted() {
-		assertTrue(tournament.startedToDate(startDate.plusDays(1)));
+		assertEquals(TournamentStatus.STARTED, tournament.getStatusByDate(startDate.plusDays(1)));
 	}
 
 	@Test
@@ -76,15 +71,16 @@ public class TournamentsTest {
 	}
 
 	@Test
-	public void tournamentPublic() {
-		assertFalse(tournament.isPrivate());
+	public void tournamentPublic() { //lo dejo por las dudas, no es mio
+		assertNotEquals(Visibility.PRIVATE, tournament.getVisibility());
 	}
+
 	
     @Test
-    public void daysPassedUntilDate(){
-        assertEquals(0, tournament.daysPassedToDate(startDate));
-        assertEquals(1, tournament.daysPassedToDate(startDate.plusDays(1)));
-        assertEquals(2, tournament.daysPassedToDate(endDate));
-        assertEquals(3, tournament.daysPassedToDate(endDate.plusDays(1)));
+    void daysPassedUntilDate(){
+        assertEquals(0, tournament.getDaysPlayedAtDate(startDate));
+        assertEquals(1, tournament.getDaysPlayedAtDate(startDate.plusDays(1)));
+        assertEquals(2, tournament.getDaysPlayedAtDate(endDate));
+        assertEquals(3, tournament.getDaysPlayedAtDate(endDate.plusDays(1)));
     }
 }

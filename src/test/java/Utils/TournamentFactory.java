@@ -19,6 +19,7 @@ public class TournamentFactory {
 
 		User julian = new User("Julian", ss.hash("1234", salt), salt);
 
-        return new Tournament("Luchemos por la vida", startDate, endDate, Visibility.PUBLIC, List.of(Language.ES), julian);
+        return new Tournament("Luchemos por la vida", startDate, endDate,
+				Visibility.PUBLIC, List.of(Language.ES), julian);
     }
 }

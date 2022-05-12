@@ -40,13 +40,11 @@ public class WordleHelperApplication {
 
 			List<Language> languages = asList(Language.ES, Language.EN);
 			
-			NewTournamentDto budokai = new NewTournamentDto("Budokai Tenkaichi", LocalDate.of(2022,2,2), LocalDate.of(2022, 3, 10), Visibility.PRIVATE, languages);
-			Tournament budo = budokai.fromDto(julian);
-			budo.addParticipant(agustin);
-			tournamentRepo.save(budo);
-			
-			NewTournamentDto mundialito = new NewTournamentDto("Mundialito", LocalDate.of(2023, 2, 2), LocalDate.of(2025, 2, 11), Visibility.PUBLIC, languages);
-			tournamentRepo.save(mundialito.fromDto(agustin));
+			Tournament budokai = new Tournament("Budokai Tenkaichi", LocalDate.of(2022,2,2), LocalDate.of(2022, 3, 10), Visibility.PRIVATE, languages, julian);
+			budokai.addParticipant(agustin);
+			tournamentRepo.save(budokai);
+
+			tournamentRepo.save(new Tournament("Mundialito", LocalDate.of(2023, 2, 2), LocalDate.of(2025, 2, 11), Visibility.PUBLIC, languages, agustin));
 		};
 	}
 }

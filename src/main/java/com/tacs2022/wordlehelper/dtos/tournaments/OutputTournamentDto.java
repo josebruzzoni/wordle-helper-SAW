@@ -38,5 +38,7 @@ public class OutputTournamentDto {
     			.collect(Collectors.toList());
 	}
     
-    
+    public static List<OutputTournamentDto> list(List<Tournament> tournaments){
+		return tournaments.stream().map(OutputTournamentDto::new).collect(Collectors.toList());
+	}
 }

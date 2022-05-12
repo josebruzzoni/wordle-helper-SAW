@@ -5,6 +5,7 @@ import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.exceptions.ExistingUserException;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
+import com.tacs2022.wordlehelper.exceptions.ResultAlreadyLoadedException;
 import com.tacs2022.wordlehelper.repos.UserRepository;
 import com.tacs2022.wordlehelper.security.jwt.TokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,24 +81,16 @@ public class UserService {
     public void addResult(Long userId, Result result){
         User user = findById(userId);
 
-        if(user.getResults().stream().anyMatch(result::match)){
+        if(user.getResults().stream().anyMatch(result::matches)){
             throw new ResultAlreadyLoadedException();
         }
 
             user.addResult(result);
     }
-
-    public String getUsernameFromToken(String token){
-        return TokenProvider.getUsername(token);
-    }
-
-    public Long getUserIdFromToken(String token){
-        return TokenProvider.getId(token);
-    }
     
     public User getUserFromToken(String auth) {
     	String token = auth.substring(7);
-    	Long userId = this.getUserIdFromToken(token);
+    	Long userId = TokenProvider.getId(token);
     	return this.findById(userId);
     }
 
