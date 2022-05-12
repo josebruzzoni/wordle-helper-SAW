@@ -22,7 +22,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         try {
-            if (existeJWTToken(request, response)) {
+            if (jwtTokenExists(request)) {
                 Claims claims = validateToken(request);
                 if (claims.get(AUTHORITIES_KEY) != null) {
                     setUpSpringAuthentication(claims);
@@ -35,8 +35,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
         } catch (ExpiredJwtException | UnsupportedJwtException | MalformedJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            ((HttpServletResponse) response).sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
-            return;
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, e.getMessage());
         }
     }
 
@@ -45,25 +44,17 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         return Jwts.parser().setSigningKey(SIGNING_KEY).parseClaimsJws(jwtToken).getBody();
     }
 
-    /**
-     * Metodo para autenticarnos dentro del flujo de Spring
-     *
-     * @param claims
-     */
     private void setUpSpringAuthentication(Claims claims) {
         @SuppressWarnings("unchecked")
-        List<String> authorities = (List) claims.get(AUTHORITIES_KEY);
+        List<String> authorities = (List<String>) claims.get(AUTHORITIES_KEY);
 
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(claims.getSubject(), null,
                 authorities.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()));
         SecurityContextHolder.getContext().setAuthentication(auth);
-
     }
 
-    private boolean existeJWTToken(HttpServletRequest request, HttpServletResponse res) {
+    private boolean jwtTokenExists(HttpServletRequest request) {
         String authenticationHeader = request.getHeader(HEADER_AUTHORIZATION_KEY);
-        if (authenticationHeader == null || !authenticationHeader.startsWith(TOKEN_BEARER_PREFIX))
-            return false;
-        return true;
+        return authenticationHeader != null && authenticationHeader.startsWith(TOKEN_BEARER_PREFIX);
     }
 }
