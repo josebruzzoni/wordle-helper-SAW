@@ -6,6 +6,6 @@ import javax.validation.constraints.NotNull;
 
 @Data
 public class NewParticipantDto {
-    @NotNull(message = "idParticipant is mandatory")
-    private Long idParticipant;
+    @NotNull(message = "participantName is mandatory")
+    private String participantName;
 }

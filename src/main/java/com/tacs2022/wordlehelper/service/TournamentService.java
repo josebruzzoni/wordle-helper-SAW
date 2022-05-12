@@ -6,6 +6,7 @@ import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
+import com.tacs2022.wordlehelper.exceptions.ParticipantAlreadyAddedException;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
 import com.tacs2022.wordlehelper.exceptions.ForbiddenException;
 
@@ -76,7 +77,7 @@ public class TournamentService {
     @Transactional
     public void addParticipant(Long tournamentId, User user, User participant) {
         Tournament tournament = findById(tournamentId);
-        
+
         TournamentStatus status = tournament.getStatus();
 
 		//check tournament has not started
@@ -85,21 +86,26 @@ public class TournamentService {
             throw new ForbiddenException("Participants cannot be added to this tournament once it has started or finished");
         }
 
-		//check user is owner of private tournament
-        if(tournament.getVisibility().equals(Visibility.PRIVATE) && !tournament.userIsOwner(user)) {
-        	logger.info("User tried to add participant to private tournament without being the owner");
-        	throw new ForbiddenException("User cannot add participant to this private tournament without being the owner");
-        }
+		if(!tournament.userIsOwner(user)){
+			//check user is owner of private tournament
+			if(tournament.getVisibility().equals(Visibility.PRIVATE)) {
+				logger.info("User tried to add participant to private tournament without being the owner");
+				throw new ForbiddenException("User cannot add participant to this private tournament without being the owner");
+			}
 
-		//check if public tournament and user trying to add another participant while not being owner
-        if(tournament.getVisibility().equals(Visibility.PUBLIC) && !user.equals(participant) && !tournament.userIsOwner(user)) {
-        	logger.info("User tried to add participant to public tournament without being the owner, can only add self");
-        	throw new ForbiddenException("User can only add another participant to public tournament if owner");
-        }
+			//check if public tournament and user trying to add another participant while not being owner
+			if(!user.equals(participant)) {
+				logger.info("User tried to add participant to public tournament without being the owner, can only add self");
+				throw new ForbiddenException("User can only add another participant to public tournament if owner");
+			}
+		}
 
-		//TODO: Alguna response distinta aca por ahi??
-        if(!tournament.isAParticipant(participant))
-        	tournament.addParticipant(participant);
+        if(tournament.isAParticipant(participant)){
+			boolean isUser = user.equals(participant);
+			throw new ParticipantAlreadyAddedException((isUser? participant.getUsername() + " is": "You are ")+ "already a participant of "+tournament.getName());
+		}
+
+		tournament.addParticipant(participant);
     }
 
 

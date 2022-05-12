@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,7 +32,7 @@ public class Tournament {
     @ManyToOne
     private User owner;
     @ManyToMany
-    private List<User> participants;
+    private List<User> participants = new LinkedList<>();
 
     public Tournament(String name, LocalDate startDate, LocalDate endDate, Visibility visibility, List<Language> languages, User owner) {
         this.name = name;
@@ -41,7 +41,6 @@ public class Tournament {
         this.visibility = visibility;
         this.languages = languages;
         this.owner = owner;
-        this.participants = new ArrayList<>();
         this.participants.add(owner);
     }
 
@@ -74,7 +73,7 @@ public class Tournament {
     public int getDaysPlayedAtDate(LocalDate date){
         TournamentStatus status = getStatusByDate(date);
 
-        if (status == TournamentStatus.NOTSTARTED)
+        if (status == TournamentStatus.NOT_STARTED)
             return 0;
         else if (status == TournamentStatus.STARTED)
             return (int) startDate.datesUntil(date).count();
@@ -92,7 +91,7 @@ public class Tournament {
 
     public TournamentStatus getStatusByDate(LocalDate date){
         if (date.isBefore(startDate))
-            return TournamentStatus.NOTSTARTED;
+            return TournamentStatus.NOT_STARTED;
         else if (date.isAfter(endDate))
             return TournamentStatus.FINISHED;
         else

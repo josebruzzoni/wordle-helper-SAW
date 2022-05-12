@@ -54,9 +54,9 @@ public class TournamentController {
 	@PostMapping(value="/{id}/participants")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addParticipant(@Valid @RequestBody NewParticipantDto body, @PathVariable(value = "id") Long tournamentId, @RequestHeader(required = true) String authorization ){
-		User user = userService.getUserFromToken(authorization); //user that requests the addition of participant to the tournament
-		User participant = userService.findById(body.getIdParticipant()); //user that is added to the tournament
-        tournamentService.addParticipant(tournamentId, user, participant);
+		User postulator = userService.getUserFromToken(authorization);
+		User participant = userService.findByUsername(body.getParticipantName());
+        tournamentService.addParticipant(tournamentId, postulator, participant);
     }
 
 }

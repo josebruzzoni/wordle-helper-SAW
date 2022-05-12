@@ -5,7 +5,6 @@ import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import com.tacs2022.wordlehelper.service.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,23 +23,46 @@ class TournamentsTest {
 	LocalDate endDate = of(2016, 6, 12);
 
 	@BeforeEach
-	public void fixture() throws NoSuchAlgorithmException, InvalidKeySpecException {
+	public void fixture() {
 		SecurityService ss = new SecurityService();
 		byte[] salt = ss.getSalt();
 
 		User julian = new User("Julian", ss.hash("1234", salt), salt);
+
 		tournament = new Tournament("Luchemos por la vida", startDate, endDate,
 				Visibility.PUBLIC, List.of(Language.EN, Language.ES), julian);
 	}
 
+    @Test
+    public void tournamentIsNotEndedAtLastDay(){
+        assertEquals(TournamentStatus.STARTED, tournament.getStatusByDate(endDate));
+    }
+
+
 	@Test
-	void validateInmutability() {
-		assertNotEquals(endDate, endDate.plusDays(1));
+	public void tournamentFinishedInDaysBeforeIsAlreadyFinished() {
+		LocalDate date = LocalDate.now();
+		assertEquals(TournamentStatus.FINISHED, tournament.getStatusByDate(date));
 	}
 
 	@Test
-	void tournamentFinished() {
-		assertEquals(TournamentStatus.FINISHED, tournament.getStatus());
+	public void tournamentThatStartsInTheFutureIsNotStarted() {
+		assertEquals(TournamentStatus.NOT_STARTED, tournament.getStatusByDate(startDate.minusDays(1)));
+	}
+
+	@Test
+	public void tournamentThatEndsInTheFutureIsNotEnded() {
+		assertNotEquals(TournamentStatus.FINISHED, tournament.getStatusByDate(endDate.minusDays(1)));
+	}
+
+	@Test
+	public void tournamentStartedOnSameDayIsAlreadyStarted() {
+		assertEquals(TournamentStatus.STARTED, tournament.getStatusByDate(startDate));
+	}
+
+	@Test
+	public void tournamentStartedInDaysBeforeIsAlreadyStarted() {
+		assertEquals(TournamentStatus.STARTED, tournament.getStatusByDate(startDate.plusDays(1)));
 	}
 	
     @Test
