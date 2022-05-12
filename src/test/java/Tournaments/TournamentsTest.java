@@ -66,11 +66,6 @@ class TournamentsTest {
 	}
 
 	@Test
-	public void tournamentFinished() {
-		assertEquals(tournament.getStatus(), TournamentStatus.FINISHED);
-	}
-
-	@Test
 	public void tournamentPublic() { //lo dejo por las dudas, no es mio
 		assertNotEquals(Visibility.PRIVATE, tournament.getVisibility());
 	}

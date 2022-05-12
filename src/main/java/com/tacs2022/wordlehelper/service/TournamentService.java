@@ -100,7 +100,6 @@ public class TournamentService {
 			}
 		}
 
-		//TODO: Alguna response distinta aca por ahi??
         if(tournament.isAParticipant(participant)){
 			throw new ParticipantAlreadyAddedException(participant, participant.equals(user), tournament);
 		}
