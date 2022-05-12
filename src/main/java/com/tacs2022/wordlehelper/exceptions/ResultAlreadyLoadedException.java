@@ -1,4 +1,4 @@
-package com.tacs2022.wordlehelper.service;
+package com.tacs2022.wordlehelper.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

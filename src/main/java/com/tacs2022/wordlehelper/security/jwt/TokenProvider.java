@@ -2,10 +2,8 @@ package com.tacs2022.wordlehelper.security.jwt;
 
 import com.tacs2022.wordlehelper.domain.user.User;
 import io.jsonwebtoken.*;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Date;
 import java.util.List;
@@ -15,8 +13,7 @@ import static com.tacs2022.wordlehelper.utils.Constants.*;
 
 public class TokenProvider {
     public static String generateToken(User usuario) {
-        // Genera el token con roles, issuer, fecha, expiración (8h)
-
+        // Generates token with roles, issuer, date, expiration (8h)
         List<GrantedAuthority> grantedAuthorities = AuthorityUtils.createAuthorityList("ROLE_USER");
 
         return Jwts.builder()
@@ -31,21 +28,6 @@ public class TokenProvider {
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_VALIDITY_SECONDS*1000))
                 .compact();
 
-    }
-
-    public static UsernamePasswordAuthenticationToken getAuthentication(final String token,
-                                                                        final UserDetails userDetails) {
-        final JwtParser jwtParser = Jwts.parser().setSigningKey(SIGNING_KEY);
-        final Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token);
-        final Claims claims = claimsJws.getBody();
-
-        return new UsernamePasswordAuthenticationToken(userDetails, "");
-    }
-
-    public static String getUsername(final String token) {
-        final JwtParser jwtParser = Jwts.parser().setSigningKey(SIGNING_KEY);
-        final Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token.replace(TOKEN_BEARER_PREFIX + " ", ""));
-        return claimsJws.getBody().getSubject();
     }
 
     public static Long getId(final String token) {
