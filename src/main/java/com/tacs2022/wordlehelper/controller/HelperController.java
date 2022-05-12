@@ -24,6 +24,24 @@ public class HelperController {
     @Autowired
     private HelperService helperService;
 
+    /**
+     * Generates a list of possible answers for the given combination of letters played based on
+     * the rules of the game.
+     *
+     * - Grey letters are those that are not contained in the winning word.
+     * - Yellow letters are those that are contained in the word, but not in the correct position they were played.
+     * - Green letters are contained in the answer in the exact position they were played.
+     *
+     * @param lan Language the game was played in.
+     * @param greyLettersPlayed Concatenated letters played that resulted colored grey (i.e.: "ARBLFUEGPS")
+     * @param yellowLettersPlayed A string of 5 characters that represent the letters and respective positions
+     *                            they were played of those that resulted colored yellow, using '_' where no
+     *                            yellow letter was played (i.e.: "_I_C_")
+     * @param greenLettersPlayed A string of 5 characters that represent the letters and respective positions
+     *                           they were played of those that resulted colored green, using '_' where no
+     *                           green letter was played (i.e.: "T__O_")
+     * @return A list of possible words that could be the winning word based on the provided play
+     */
     @GetMapping("/words")
     public JsonResponseDto getPossibleWords(@RequestParam(value = "language") String lan, @RequestParam(value = "grey") String greyLettersPlayed,
                                             @RequestParam(value = "yellow") String yellowLettersPlayed,

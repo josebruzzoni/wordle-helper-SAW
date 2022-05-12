@@ -3,14 +3,12 @@ package com.tacs2022.wordlehelper.controller;
 import java.util.List;
 
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
-import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
-import com.tacs2022.wordlehelper.domain.tournaments.TournamentType;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.JsonResponseDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
-import com.tacs2022.wordlehelper.exceptions.NotFoundException;
+import com.tacs2022.wordlehelper.exceptions.ForbiddenException;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
 
@@ -59,25 +57,14 @@ public class UserController {
     }
     
     @GetMapping("{userId}/tournaments")
-    public JsonResponseDto getTournaments(@PathVariable(value = "userId") Long userId, @RequestParam(required = false) TournamentType type, @RequestParam(required = false) TournamentStatus status, @RequestHeader(required = true) String Authorization) {
-    	User user = userService.getUserFromToken(Authorization);
+    public JsonResponseDto getTournaments(@PathVariable(value = "userId") Long userId, @RequestHeader(required = true) String authorization) {
+    	User user = userService.getUserFromToken(authorization);
     	
-    	if(user.getId() != userId) {
-    		throw new NotFoundException("El usuario no puede ver los torneos de otro usuario");
+    	if(!user.getId().equals(userId)) {
+    		throw new ForbiddenException("A user cannot view other users tournaments");
     	}
-    	
-    	List<Tournament> tournaments =  null;
-    	
-    	if(type != null && status != null) {
-    		tournaments = tournamentService.findByTypeAndStatus(type, status, user.getId());
-        } else if( type != null ) {
-        	tournaments = tournamentService.findByType(type, user);
-        } else if( status != null) {
-        	tournaments = tournamentService.findByStatus(status, user.getId());
-        } else {
-        	tournaments = tournamentService.findTournamentsInWhichUserIsRegistered(user);
-        }
-    	
+
+    	List<Tournament> tournaments = tournamentService.findTournamentsInWhichUserIsRegistered(user);
     	return new JsonResponseDto("tournaments", OutputTournamentDto.list(tournaments));
     }
 }

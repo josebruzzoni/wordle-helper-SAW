@@ -9,13 +9,13 @@ import lombok.Data;
 @Data
 public class OutputScoreboardDto {
 	private UsernameDto user;
-	private int badScore;
-	private int failedAttempts;
+	private int score;
+	private int attempts;
 	
 	public OutputScoreboardDto(Scoreboard scoreboard) {
 		this.user = new UsernameDto(scoreboard.getUser());
-		this.badScore = scoreboard.getBadScore();
-		this.failedAttempts = scoreboard.getFailedAttempts();
+		this.score = scoreboard.getCurrentScore();
+		this.attempts = scoreboard.getTotalAttempts();
 	}
 
 	public static List<OutputScoreboardDto> list(List<Scoreboard> scoreboards){
