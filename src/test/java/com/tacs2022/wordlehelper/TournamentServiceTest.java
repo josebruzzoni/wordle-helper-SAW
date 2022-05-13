@@ -57,12 +57,13 @@ public class TournamentServiceTest {
 		byte[] salt = ss.getSalt();
 
 		julian = new User("Julian", ss.hash("1234", salt), salt);
+		agus = new User("Agus", ss.hash("password", salt), salt);
+		
 		privateTournament = new Tournament("Superliga", LocalDate.now().plusWeeks(1), LocalDate.now().plusWeeks(2),
 				Visibility.PRIVATE, List.of(Language.EN, Language.ES), julian);
 		publicTournament = new Tournament("Ligue 1", LocalDate.now().plusWeeks(1), LocalDate.now().plusWeeks(2),
 				Visibility.PUBLIC, List.of(Language.EN, Language.ES), julian);
-		
-		agus = new User("Julian", ss.hash("1234", salt), salt);
+			
 	}
 	
 	@Test
@@ -97,20 +98,20 @@ public class TournamentServiceTest {
 			.hasMessage("User cannot add participant to this private tournament without being the owner");
 	}
 	
-	/*@Test
+	@Test
 	public void userTriedToAddParticipantToPublicTournamentWithoutBeingTheOwnerCanOnlyAddSelf() {
 		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(tournamentMock));
 		Mockito.when(tournamentMock.getStatus()).thenReturn(TournamentStatus.NOTSTARTED);
 		Mockito.when(tournamentMock.getVisibility()).thenReturn(Visibility.PUBLIC);
 		Mockito.when(tournamentMock.userIsOwner(any(User.class))).thenReturn(false);
 		Assertions
-			.assertThatThrownBy ( () -> { tournamentService.addParticipant(Long.valueOf(1), julian, agus); } )
+			.assertThatThrownBy ( () -> { tournamentService.addParticipant(Long.valueOf(1), agus, julian); } )
 			.isInstanceOf(ForbiddenException.class)
-			.hasMessage("User cannot add participant to this private tournament without being the owner");
-	}*/
+			.hasMessage("User can only add another participant to public tournament if owner");
+	}
 	
 	@Test
-	public void AsAUserIWantToBeAbleToAddAnotherUserToAPrivateTournamentThatICreated() {
+	public void asAUserIWantToBeAbleToAddAnotherUserToAPrivateTournamentThatICreated() {
 		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(privateTournament));
 		Assertions.assertThatNoException()
 			.isThrownBy(() -> { tournamentService.addParticipant(Long.valueOf(1), julian, agus); });
@@ -128,5 +129,10 @@ public class TournamentServiceTest {
 		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(publicTournament));
 		Assertions.assertThatNoException()
 			.isThrownBy(() -> { tournamentService.addParticipant(Long.valueOf(1), agus, agus); });
+	}
+	
+	@Test
+	public void a() {
+		
 	}
 }
