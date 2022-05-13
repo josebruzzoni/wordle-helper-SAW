@@ -25,7 +25,7 @@ public class TournamentController {
 
     @GetMapping()
     public JsonResponseDto getAllPublicTournaments() {
-        return new JsonResponseDto("tournaments", tournamentService.findPublicTournaments());
+        return new JsonResponseDto("tournaments", OutputTournamentDto.list(tournamentService.findPublicTournaments()));
     }
 
 
