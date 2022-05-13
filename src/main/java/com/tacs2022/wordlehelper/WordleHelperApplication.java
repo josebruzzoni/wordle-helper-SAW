@@ -4,13 +4,13 @@ import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
 import com.tacs2022.wordlehelper.repos.UserRepository;
 import com.tacs2022.wordlehelper.service.SecurityService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 
 import java.time.LocalDate;
@@ -19,6 +19,7 @@ import java.util.List;
 import static java.util.Arrays.asList;
 
 @SpringBootApplication
+@EnableCaching
 public class WordleHelperApplication {
 
 	public static void main(String[] args) {
