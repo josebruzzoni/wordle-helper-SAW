@@ -1,7 +1,7 @@
 package com.tacs2022.wordlehelper;
 
-import static java.time.LocalDate.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 
@@ -23,9 +23,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import com.tacs2022.wordlehelper.domain.Language;
+import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
+import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.exceptions.ForbiddenException;
 import com.tacs2022.wordlehelper.repos.TournamentRepository;
@@ -48,6 +50,9 @@ public class TournamentServiceTest {
 	Tournament privateTournament;
 	Tournament publicTournament;
 	
+	LocalDate startDate;
+	LocalDate endDate;
+	
 	User julian;
 	User agus;
 	
@@ -59,9 +64,20 @@ public class TournamentServiceTest {
 		julian = new User("Julian", ss.hash("1234", salt), salt);
 		agus = new User("Agus", ss.hash("password", salt), salt);
 		
-		privateTournament = new Tournament("Superliga", LocalDate.now().plusWeeks(1), LocalDate.now().plusWeeks(2),
+		startDate = LocalDate.now().plusWeeks(1);
+		endDate = LocalDate.now().plusWeeks(2);
+		
+		julian.addResult(new Result(2, Language.ES, startDate));
+		julian.addResult(new Result(3, Language.ES, startDate.plusDays(1)));
+		julian.addResult(new Result(4, Language.ES, startDate.plusDays(2)));
+		
+		agus.addResult(new Result(1, Language.ES, startDate));
+		agus.addResult(new Result(7, Language.ES, startDate.plusDays(1)));
+		agus.addResult(new Result(4, Language.ES, startDate.plusDays(2)));
+		
+		privateTournament = new Tournament("Superliga", startDate, endDate,
 				Visibility.PRIVATE, List.of(Language.EN, Language.ES), julian);
-		publicTournament = new Tournament("Ligue 1", LocalDate.now().plusWeeks(1), LocalDate.now().plusWeeks(2),
+		publicTournament = new Tournament("Ligue 1", startDate, endDate,
 				Visibility.PUBLIC, List.of(Language.EN, Language.ES), julian);
 			
 	}
@@ -132,7 +148,44 @@ public class TournamentServiceTest {
 	}
 	
 	@Test
-	public void a() {
-		
+	public void theParticipantWithTheFewestAttemptsWins() {
+		publicTournament.addParticipant(agus);
+		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(publicTournament));
+		List<Scoreboard> leaderboard = tournamentService.getTournamentLeaderboard(Long.valueOf(1) , startDate.plusDays(2), julian);
+		Scoreboard scoreboardOne = leaderboard.get(0);
+		Scoreboard scoreboardTwo = leaderboard.get(1);
+		assertTrue(scoreboardOne.getTotalAttempts() < scoreboardTwo.getTotalAttempts());
+		assertEquals(julian.getUsername(), scoreboardOne.getUser().getUsername());
+	}
+	
+	@Test
+	public void publicTournamentsTheyAreVisibleToAll() {
+		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(publicTournament));
+		Assertions.assertThatNoException()
+		.isThrownBy(() -> { tournamentService.getByIdAndValidateVisibility(Long.valueOf(1), agus); });
+	}
+	
+	@Test
+	public void privateTournamentsTheyAreVisibleOnlyByThePersonWhoCreatedThem() {
+		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(privateTournament));
+		Assertions
+			.assertThatThrownBy ( () -> { tournamentService.getByIdAndValidateVisibility(Long.valueOf(1), agus); } )
+			.isInstanceOf(ForbiddenException.class)
+			.hasMessage("User does not have permissions to view this tournament");
+	}
+	
+	@Test
+	public void privateTournamentsTheyAreVisibleByThePersonWhoCreatedThem() {
+		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(privateTournament));
+		Assertions.assertThatNoException()
+			.isThrownBy(() -> { tournamentService.getByIdAndValidateVisibility(Long.valueOf(1), julian); });
+	}
+	
+	@Test
+	public void privateTournamentsTheyAreVisibleByThoseWhoHaveJoined(){
+		privateTournament.addParticipant(agus);
+		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(privateTournament));
+		Assertions.assertThatNoException()
+			.isThrownBy(() -> { tournamentService.getByIdAndValidateVisibility(Long.valueOf(1), agus); });
 	}
 }
