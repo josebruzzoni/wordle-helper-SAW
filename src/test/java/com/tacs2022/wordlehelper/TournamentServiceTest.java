@@ -1,7 +1,6 @@
 package com.tacs2022.wordlehelper;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 
@@ -11,6 +10,10 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import com.tacs2022.wordlehelper.exceptions.ExistingUserException;
+import com.tacs2022.wordlehelper.exceptions.ResultAlreadyLoadedException;
+import com.tacs2022.wordlehelper.repos.UserRepository;
+import com.tacs2022.wordlehelper.service.UserService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,12 +43,20 @@ public class TournamentServiceTest {
 
 	@MockBean
 	TournamentRepository tournamentRepoMock;
+	@MockBean
+	UserRepository userRepoMock;
 	
 	@Mock
 	Tournament tournamentMock;
 	
 	@Autowired
 	TournamentService tournamentService;
+
+	@Autowired
+	UserService userService;
+
+	@Autowired
+	SecurityService securityService;
 	
 	Tournament privateTournament;
 	Tournament publicTournament;
@@ -145,6 +156,19 @@ public class TournamentServiceTest {
 		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(publicTournament));
 		Assertions.assertThatNoException()
 			.isThrownBy(() -> { tournamentService.addParticipant(Long.valueOf(1), agus, agus); });
+	}
+
+	@Test
+	public void asAUserIWantToSubmitResultsButOnlyOnceForLanguage(){
+		Mockito.when(userRepoMock.findById(anyLong())).thenReturn(Optional.of(agus));
+		Result otherSpanishResult = new Result(3, Language.ES, startDate);
+		Result englishResult = new Result(2, Language.EN, startDate);
+		Assertions
+				.assertThatNoException()
+				.isThrownBy(() -> { userService.addResult(Long.valueOf(1), englishResult); });
+		Assertions
+				.assertThatThrownBy ( () -> { userService.addResult(Long.valueOf(1), otherSpanishResult); } )
+				.isInstanceOf(ResultAlreadyLoadedException.class);
 	}
 	
 	@Test
