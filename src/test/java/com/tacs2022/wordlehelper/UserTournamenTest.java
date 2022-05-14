@@ -39,7 +39,7 @@ import com.tacs2022.wordlehelper.service.TournamentService;
 
 @ExtendWith(MockitoExtension.class)
 @SpringBootTest
-public class TournamentServiceTest {
+public class UserTournamenTest {
 
 	@MockBean
 	TournamentRepository tournamentRepoMock;
@@ -92,7 +92,29 @@ public class TournamentServiceTest {
 				Visibility.PUBLIC, List.of(Language.EN, Language.ES), julian);
 			
 	}
-	
+
+	@Test
+	public void userPasswordIsIncorrect() {
+		Mockito.when(userRepoMock.findByUsername("Julian")).thenReturn(List.of(julian));
+		String pass = "sarasa";
+		assertFalse(securityService.validatePassword("Julian", pass));
+	}
+
+	@Test
+	public void userPasswordIsCorrect() {
+		Mockito.when(userRepoMock.findByUsername("Julian")).thenReturn(List.of(julian));
+		String pass = "1234";
+		assertTrue(securityService.validatePassword("Julian", pass));
+	}
+
+	@Test
+	public void userAlreadyExists() {
+		Mockito.when(userRepoMock.findByUsername("Julian")).thenReturn(List.of(julian));
+		Assertions
+				.assertThatThrownBy ( () -> { userService.save("Julian", "123456"); } )
+				.isInstanceOf(ExistingUserException.class);
+	}
+
 	@Test
 	public void youCannotAddParticipantsToTournamentsThatHaveAStartedStatus() {
 		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(tournamentMock));
