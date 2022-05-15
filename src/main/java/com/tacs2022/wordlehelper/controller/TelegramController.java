@@ -638,13 +638,11 @@ public class TelegramController {
                 )
         );
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        List<InlineKeyboardButton> attemptsOptionsButtons = new ArrayList<>();
-
-        attemptsOptions.forEach(attemptOption -> {
+        List<InlineKeyboardButton> attemptsOptionsButtons = attemptsOptions.stream().map(attemptOption -> {
             String callbackData = String.format("attempts-%s", attemptOption.toString());
-            InlineKeyboardButton attemptOptionButton = new InlineKeyboardButton(attemptOption.toString()).callbackData(callbackData);
-            attemptsOptionsButtons.add(attemptOptionButton);
-        });
+
+            return new InlineKeyboardButton(attemptOption.toString()).callbackData(callbackData);
+        }).collect(Collectors.toList());
 
         keyboardMarkup.addRow(attemptsOptionsButtons.toArray(InlineKeyboardButton[]::new));
 
