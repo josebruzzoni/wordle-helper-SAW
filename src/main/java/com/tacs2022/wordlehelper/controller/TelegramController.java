@@ -20,12 +20,14 @@ import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.service.TelegramSecurityService;
 import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
+import com.tacs2022.wordlehelper.utils.LanguageUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -43,6 +45,20 @@ public class TelegramController {
     private TournamentService tournamentService;
     private User currentUser;
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private List<Command> commands = new ArrayList<>(
+            Arrays.asList(
+                    new Command("/start", false),
+                    new Command("/login", false),
+                    new Command("/logout", false)
+            )
+    );
+
+    List<String> messagesIdsToNotCheckAuthorization = new ArrayList<>(
+            Arrays.asList(
+                    "setUsernameForLogin",
+                    "setPasswordForLogin",
+                    "setUsernameForSignin",
+                    "setPasswordForSignin"));
 
     public TelegramController(){
         Dotenv dotenv = Dotenv.configure().load();
@@ -66,11 +82,24 @@ public class TelegramController {
 
     private void handleQuery(CallbackQuery query){
         Long chatId = query.message().chat().id();
-        String data = query.data();
+        String optionId = query.data();
 
-        switch (data){
+        List<String> optionsToNotCheckIfUserIsLogged = new ArrayList<>(Arrays.asList("login", "logout", "signin"));
+
+        if(!optionsToNotCheckIfUserIsLogged.contains(optionId)){
+            boolean isUserLogged = this.checkLoggedUser(chatId);
+
+            if(!isUserLogged){
+                return;
+            }
+        }
+
+        switch (optionId){
             case "login":
                 this.handleLogin(chatId);
+                break;
+            case "logout":
+                this.handleLogout(chatId);
                 break;
             case "signin":
                 this.handleSignin(chatId);
@@ -110,11 +139,11 @@ public class TelegramController {
                 break;
         }
 
-        if(data.startsWith("tournament-")){
-            String tournamentId = data.substring("tournament-".length());
+        if(optionId.startsWith("tournament-")){
+            String tournamentId = optionId.substring("tournament-".length());
             this.handleShowTournament(chatId, tournamentId);
-        } else if(data.startsWith("join-tournament-")){
-            String tournamentId = data.substring("join-tournament-".length());
+        } else if(optionId.startsWith("join-tournament-")){
+            String tournamentId = optionId.substring("join-tournament-".length());
             this.handleJoinTournament(chatId, tournamentId);
         }
     }
@@ -122,9 +151,15 @@ public class TelegramController {
     // Begin handle query methods
 
     private void handleLogin(Long chatId){
-        SendMessage sendMessage = new SendMessage(chatId, "What's your username?");
         this.lastMessageSentByChatId.put(chatId, "setUsernameForLogin");
-        this.bot.execute(sendMessage);
+        this.sendSimpleMessageAndExecute(chatId, "What's your username?");
+    }
+
+    private void handleLogout(Long chatId){
+        this.lastMessageSentByChatId.remove(chatId);
+        this.telegramSecurityService.logout(chatId);
+        this.sendSimpleMessageAndExecute(chatId, "Logged out successfuly");
+        this.sendKeyboardForNotLogued(chatId);
     }
 
     private void handleSignin(Long chatId){
@@ -209,8 +244,8 @@ public class TelegramController {
 
         String messageText = String.format("Allright. This will be your tournament:\nName: %s\nStart date: %s\nEnd date: %s\nVisibility: %s\nLanguages: %s\n\n Is everything ok?",
                 tournamentInProcess.getName(), tournamentInProcess.getStartDate().format(this.formatter),
-                tournamentInProcess.getEndDate().format(this.formatter), this.capitalize(tournamentInProcess.getVisibility().toString()),
-                tournamentInProcess.getLanguages().stream().map(Language::getLanguage).collect(Collectors.joining(", ")));
+                tournamentInProcess.getEndDate().format(this.formatter), tournamentInProcess.getVisibility().getCapitalized(),
+                LanguageUtils.format(tournamentInProcess.getLanguages()));
 
         this.lastMessageSentByChatId.replace(chatId, "confirmTournament");
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
@@ -245,7 +280,8 @@ public class TelegramController {
         }
 
         String message = String.format("Name: %s\nFrom: %s\nTo: %s\nVisibility: %s\nLanguages: %s\nOwner: %s\nParticipants: %s\n",
-                tournament.getName(), tournament.getStartDate(), tournament.getEndDate(), this.capitalize(tournament.getVisibility().toString()), tournament.getLanguages(),
+                tournament.getName(), tournament.getStartDate(), tournament.getEndDate(),
+                tournament.getVisibility().getCapitalized(), LanguageUtils.format(tournament.getLanguages()),
                 tournament.getOwner().getUsername(), participants);
 
         InlineKeyboardMarkup keyboardMarkup = null;
@@ -270,74 +306,117 @@ public class TelegramController {
 
     // End handle query methods
 
-    private String capitalize(String str) {
-        if(str == null || str.isEmpty()) {
-            return str;
+    private void handleMessage(Message message){
+        if(message == null){
+            return;
         }
 
-        String strLowerCase = str.toLowerCase();
+        long chatId = message.chat().id();
+        String text = message.text();
+        System.out.printf("text: %s\n", text);
 
-        return strLowerCase.substring(0, 1).toUpperCase() + strLowerCase.substring(1);
-    }
+        List<String> commandNames = this.commands.stream().map(Command::getName).collect(Collectors.toList());
+        System.out.println(commandNames);
+        boolean isCommand = commandNames.contains(text);
 
-    private void handleMessage(Message message){
-        if (message != null) {
-            long chatId = message.chat().id();
+        // if is not a message that belongs to a flow and is not a command, then the bot doesn't understand the message.
+        if (!this.lastMessageSentByChatId.containsKey(chatId) && !isCommand) {
+            this.sendSimpleMessageAndExecute(chatId, "I don't understand your message");
+            this.sendKeyboard(chatId);
+            return;
+        }
 
-            if (this.lastMessageSentByChatId.containsKey(chatId)) {
-                String lastMessage = this.lastMessageSentByChatId.get(chatId);
-                String text = message.text();
 
-                switch (lastMessage){
-                    case "setUsernameForLogin":
-                        handleUsernameForLogin(chatId, message);
-                        break;
-                    case "setPasswordForLogin":
-                        handlePasswordForLogin(chatId, message);
-                        break;
-                    case "setUsernameForSignin":
-                        handleUsernameForSignin(chatId, message);
-                        break;
-                    case "setPasswordForSignin":
-                        handlePasswordForSignin(chatId, text);
-                        break;
-                    case "setNameForTournament":
-                        handleNameForTournament(chatId, text);
-                        break;
-                    case "setStartDateForTournament":
-                        handleStartDateForTournament(chatId, text);
-                        break;
-                    case "setEndDateForTournament":
-                        handleEndDateForTournament(chatId, text);
-                        break;
-                }
-            } else if (Objects.equals(message.text(), "/start")){
-                this.sendKeyboardForNotLogued(chatId);
+        boolean isAuthorizationRequiredForCommand;
+        String lastMessageId = null;
+
+        if(isCommand){
+            Command selectedCommand = this.commands.stream().filter(command -> command.getName().equals(text)).findFirst().get();
+
+            isAuthorizationRequiredForCommand = selectedCommand.isNeedsAuthorization();
+        } else {
+            lastMessageId = this.lastMessageSentByChatId.get(chatId);
+            isAuthorizationRequiredForCommand = !messagesIdsToNotCheckAuthorization.contains(lastMessageId);
+        }
+
+        if(isAuthorizationRequiredForCommand){
+            boolean isUserLogged = this.checkLoggedUser(chatId);
+
+            if(!isUserLogged){
+                return;
+            }
+        }
+
+        if(isCommand) {
+            switch(text){
+                case "/login":
+                    if(this.telegramSecurityService.isUserLogged(chatId)){
+                        this.sendSimpleMessageAndExecute(chatId, "User is already logged");
+                        return;
+                    }
+
+                    this.handleLogin(chatId);
+                    break;
+                case "/logout":
+                    if(!this.telegramSecurityService.isUserLogged(chatId)){
+                        this.sendSimpleMessageAndExecute(chatId, "User is not logged");
+                        this.sendKeyboard(chatId);
+                        return;
+                    }
+
+                    this.handleLogout(chatId);
+                    break;
+                case "/start":
+                    this.sendKeyboard(chatId);
+                    break;
+            }
+        } else {
+            switch (lastMessageId){
+                case "setUsernameForLogin":
+                    handleUsernameForLogin(chatId, text);
+                    break;
+                case "setPasswordForLogin":
+                    handlePasswordForLogin(chatId, text);
+                    break;
+                case "setUsernameForSignin":
+                    handleUsernameForSignin(chatId, text);
+                    break;
+                case "setPasswordForSignin":
+                    handlePasswordForSignin(chatId, text);
+                    break;
+                case "setNameForTournament":
+                    handleNameForTournament(chatId, text);
+                    break;
+                case "setStartDateForTournament":
+                    handleStartDateForTournament(chatId, text);
+                    break;
+                case "setEndDateForTournament":
+                    handleEndDateForTournament(chatId, text);
+                    break;
             }
         }
     }
 
     // Begin handle message methods
 
-    private void handleUsernameForLogin(long chatId, Message message){
-        this.usernameByChatId.put(chatId, message.text());
+    private void handleUsernameForLogin(long chatId, String username){
+        this.usernameByChatId.put(chatId, username);
 
         SendMessage sendMessage = new SendMessage(chatId, "What is your password?");
         this.lastMessageSentByChatId.replace(chatId, "setPasswordForLogin");
         this.bot.execute(sendMessage);
     }
 
-    private void handleUsernameForSignin(long chatId, Message message){
-        this.usernameByChatId.put(chatId, message.text());
+    private void handleUsernameForSignin(long chatId, String username){
+        this.usernameByChatId.put(chatId, username);
 
         SendMessage sendMessage = new SendMessage(chatId, "What will be your password?");
         this.lastMessageSentByChatId.replace(chatId, "setPasswordForSignin");
         this.bot.execute(sendMessage);
     }
 
-    private void handlePasswordForLogin(long chatId, Message message) {
+    private void handlePasswordForLogin(long chatId, String password) {
         String username = this.usernameByChatId.get(chatId);
-        String password = message.text();
 
         try {
             this.currentUser = this.telegramSecurityService.login(username, password, chatId);
@@ -350,12 +429,12 @@ public class TelegramController {
                 this.sendMessageAndExecute(chatId, "Logged successfuly", null);
                 this.sendKeyboardForLogued(chatId);
             }
-        }catch(NotFoundException e){
+        } catch(NotFoundException e){
             this.sendMessageAndExecute(chatId, "Invalid user or password", null);
             this.cleanMaps(chatId);
             this.handleLogin(chatId);
         } catch(Exception e){
-            System.out.printf("error en logueo: %s", e);
+            System.out.printf("error trying to login: %s", e);
             this.sendMessageAndExecute(chatId, "An error occurred", null);
             this.cleanMaps(chatId);
             this.handleLogin(chatId);
@@ -384,31 +463,39 @@ public class TelegramController {
     }
 
     private void handleStartDateForTournament(long chatId, String startDate){
-        NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
+        boolean wasHandleDateSuccessful = this.handleDateForTournament(chatId, startDate);
 
-        try {
-            LocalDate localDate = LocalDate.parse(startDate, this.formatter);
-            tournamentInProcess.setStartDate(localDate);
+        if(wasHandleDateSuccessful){
             this.lastMessageSentByChatId.replace(chatId, "setEndDateForTournament");
             this.sendSimpleMessageAndExecute(chatId, "Great. Now please send me the end date of the tournament in this format: 20/05/2022");
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 
     private void handleEndDateForTournament(long chatId, String endDate){
-        NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
+        boolean wasHandleDateSuccessful = this.handleDateForTournament(chatId, endDate);
 
-        try {
-            LocalDate localDate = LocalDate.parse(endDate, this.formatter);
-            tournamentInProcess.setEndDate(localDate);
+        if(wasHandleDateSuccessful){
             this.lastMessageSentByChatId.replace(chatId, "setVisibilityForTournament");
             InlineKeyboardButton publicButton = new InlineKeyboardButton("Public").callbackData("public-tournament");
             InlineKeyboardButton privateButton = new InlineKeyboardButton("Private").callbackData("private-tournament");
             InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(publicButton, privateButton);
             this.sendMessageAndExecute(chatId, "Perfect. Will it be a public or a private tournament?", keyboardMarkup);
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+    }
+
+    // Returns if parse date was successful
+    private boolean handleDateForTournament(long chatId, String date){
+        NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
+
+        try {
+            LocalDate localDate = LocalDate.parse(date, this.formatter);
+            tournamentInProcess.setStartDate(localDate);
+
+            return true;
+        } catch (DateTimeParseException e) {
+            this.sendSimpleMessageAndExecute(chatId, "Date is not in correct format. Please try again.");
+
+            return false;
         }
     }
 
@@ -433,6 +520,14 @@ public class TelegramController {
         this.lastMessageSentByChatId.remove(chatId);
     }
 
+    private void sendKeyboard(long chatId){
+        if(this.telegramSecurityService.isUserLogged(chatId)){
+            this.sendKeyboardForLogued(chatId);
+        } else {
+            this.sendKeyboardForNotLogued(chatId);
+        }
+    }
+
     private void sendKeyboardForNotLogued(long chatId){
         InlineKeyboardButton loginButton = new InlineKeyboardButton("Login").callbackData("login");
         InlineKeyboardButton createUserButton = new InlineKeyboardButton("Sign in").callbackData("signin");
@@ -445,7 +540,8 @@ public class TelegramController {
     private void sendKeyboardForLogued(long chatId){
         InlineKeyboardButton tournamentButton = new InlineKeyboardButton("Tournament").callbackData("tournament");
         InlineKeyboardButton dictionaryButton = new InlineKeyboardButton("Dictionary").callbackData("dictionary");
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(tournamentButton, dictionaryButton);
+        InlineKeyboardButton logoutButton = new InlineKeyboardButton("Logout").callbackData("logout");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(tournamentButton, dictionaryButton, logoutButton);
         String buttonMessage = "Select action's category to perform";
         SendMessage sendMessage = new SendMessage(chatId, buttonMessage).replyMarkup(keyboardMarkup);
         this.executeMessage(sendMessage);
@@ -454,5 +550,16 @@ public class TelegramController {
     private <T extends BaseRequest<T, R>, R extends BaseResponse> void executeMessage(BaseRequest<T, R> message){
         R response = bot.execute(message);
         System.out.println("Response | is ok: " + response.isOk() + " | error code: " + response.errorCode() + " description: " + response.description());
+    }
+
+    private boolean checkLoggedUser(Long chatId){
+        boolean isUserLogged = this.telegramSecurityService.isUserLogged(chatId);
+
+        if(!isUserLogged){
+            this.sendSimpleMessageAndExecute(chatId, "You must be logged to perform this action");
+            this.sendKeyboardForNotLogued(chatId);
+        }
+
+        return isUserLogged;
     }
 }

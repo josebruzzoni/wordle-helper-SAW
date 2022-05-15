@@ -34,13 +34,16 @@ public class TelegramSecurityService {
     }
 
     public void logout(Long chatId) {
-        Optional<TelegramSession> telegramSession = this.telegramSessionRepository.findById(chatId);
+        Optional<TelegramSession> possibleTelegramSession = this.telegramSessionRepository.findById(chatId);
 
-        if(telegramSession.isEmpty()){
+        if(possibleTelegramSession.isEmpty()){
             throw new NotFoundException("Chat not found");
         }
 
-        this.sessionService.removeToken(telegramSession.get().getToken());
+        TelegramSession telegramSession = possibleTelegramSession.get();
+
+        this.sessionService.removeToken(telegramSession.getToken());
+        this.telegramSessionRepository.delete(telegramSession);
     }
 
     public User getUserFromToken(Long chatId){
@@ -53,5 +56,9 @@ public class TelegramSecurityService {
         String token = telegramSession.get().getToken();
         System.out.printf("token: %s\n", token);
         return userService.getUserFromToken(token);
+    }
+
+    public boolean isUserLogged(Long chatId){
+        return this.telegramSessionRepository.existsById(chatId);
     }
 }
