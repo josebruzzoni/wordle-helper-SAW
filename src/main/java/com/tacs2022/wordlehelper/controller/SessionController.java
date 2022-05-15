@@ -17,15 +17,6 @@ public class SessionController {
     @Autowired
     SessionService sessionService;
 
-    @GetMapping()
-    @ResponseStatus(HttpStatus.OK)
-    public String login(@PathVariable(value = "first_name") String firstName){
-        System.out.println("entro al session");
-        System.out.println("first name: " + firstName);
-
-        return "sarasa";
-    }
-
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
 

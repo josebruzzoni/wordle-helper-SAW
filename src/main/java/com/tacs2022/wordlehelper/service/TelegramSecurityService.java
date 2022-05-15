@@ -7,8 +7,6 @@ import com.tacs2022.wordlehelper.repos.TelegramSessionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
 
 @Service
@@ -43,5 +41,17 @@ public class TelegramSecurityService {
         }
 
         this.sessionService.removeToken(telegramSession.get().getToken());
+    }
+
+    public User getUserFromToken(Long chatId){
+        Optional<TelegramSession> telegramSession = this.telegramSessionRepository.findById(chatId);
+
+        if(telegramSession.isEmpty()){
+            return null;
+        }
+
+        String token = telegramSession.get().getToken();
+        System.out.printf("token: %s\n", token);
+        return userService.getUserFromToken(token);
     }
 }

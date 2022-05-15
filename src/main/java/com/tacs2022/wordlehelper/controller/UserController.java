@@ -64,7 +64,7 @@ public class UserController {
     
     @GetMapping("{userId}/tournaments")
     public OutputTournamentsDto getTournaments(@PathVariable(value = "userId") Long userId, @RequestHeader(required = true) String authorization) {
-    	User user = userService.getUserFromToken(authorization);
+    	User user = userService.getUserFromAuth(authorization);
     	
     	if(!user.getId().equals(userId)) {
     		throw new ForbiddenException("A user cannot view other users tournaments");
