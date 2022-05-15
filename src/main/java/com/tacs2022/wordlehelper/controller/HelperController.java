@@ -2,7 +2,7 @@ package com.tacs2022.wordlehelper.controller;
 
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.play.WordPlay;
-import com.tacs2022.wordlehelper.dtos.helper.OutputPossibleWordsDto;
+import com.tacs2022.wordlehelper.dtos.JsonResponseDto;
 import com.tacs2022.wordlehelper.exceptions.InvalidPlayException;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.exceptions.NullParametersException;
@@ -43,9 +43,9 @@ public class HelperController {
      * @return A list of possible words that could be the winning word based on the provided play
      */
     @GetMapping("/words")
-    public OutputPossibleWordsDto getPossibleWords(@RequestParam(value = "language") String lan, @RequestParam(value = "grey") String greyLettersPlayed,
-                                                      @RequestParam(value = "yellow") String yellowLettersPlayed,
-                                                      @RequestParam(value = "green") String greenLettersPlayed) {
+    public JsonResponseDto getPossibleWords(@RequestParam(value = "language") String lan, @RequestParam(value = "grey") String greyLettersPlayed,
+                                            @RequestParam(value = "yellow") String yellowLettersPlayed,
+                                            @RequestParam(value = "green") String greenLettersPlayed) {
 
         validateParams(greyLettersPlayed, yellowLettersPlayed, greenLettersPlayed);
         Language language = validateLanguage(lan);
@@ -53,7 +53,7 @@ public class HelperController {
         WordPlay attemptedPlay = new WordPlay(greyLettersPlayed, yellowLettersPlayed, greenLettersPlayed);
 
         List<String> possibleWords = helperService.getWordsByPlay(attemptedPlay, language);
-        return new OutputPossibleWordsDto(possibleWords);
+        return new JsonResponseDto("possibleWords", possibleWords);
     }
 
 

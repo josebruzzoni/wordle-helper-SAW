@@ -2,7 +2,6 @@ package com.tacs2022.wordlehelper.domain.tournaments;
 
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,8 +12,8 @@ import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,22 +40,20 @@ public class Tournament {
     private User owner;
     @ManyToMany
     @LazyCollection(LazyCollectionOption.FALSE)
-    private List<User> participants;
+    private List<User> participants = new LinkedList<>();
 
-    public Tournament(NewTournamentDto newTournamentDto, User owner) {
-        this.name = newTournamentDto.getName();
-        this.startDate = newTournamentDto.getStartDate();
-        this.endDate = newTournamentDto.getEndDate();
-        this.languages = new ArrayList<>();
-        this.languages.addAll(newTournamentDto.getLanguages());
-        this.visibility = newTournamentDto.getVisibility();
-        this.participants = new ArrayList<>();
-        this.participants.add(owner);
+    public Tournament(String name, LocalDate startDate, LocalDate endDate, Visibility visibility, List<Language> languages, User owner) {
+        this.name = name;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.visibility = visibility;
+        this.languages = languages;
         this.owner = owner;
+        this.participants.add(owner);
     }
-    
-    public Boolean hasParticipant(User participant) {
-    	return this.participants.contains(participant);
+
+    public Boolean isAParticipant(User newParticipant) {
+    	return this.participants.contains(newParticipant);
     }
 
     public void addParticipant(User newParticipant) {
@@ -84,7 +81,7 @@ public class Tournament {
     public int getDaysPlayedAtDate(LocalDate date){
         TournamentStatus status = getStatusByDate(date);
 
-        if (status == TournamentStatus.NOTSTARTED)
+        if (status == TournamentStatus.NOT_STARTED)
             return 0;
         else if (status == TournamentStatus.STARTED)
             return (int) startDate.datesUntil(date).count();
@@ -102,7 +99,7 @@ public class Tournament {
 
     public TournamentStatus getStatusByDate(LocalDate date){
         if (date.isBefore(startDate))
-            return TournamentStatus.NOTSTARTED;
+            return TournamentStatus.NOT_STARTED;
         else if (date.isAfter(endDate))
             return TournamentStatus.FINISHED;
         else

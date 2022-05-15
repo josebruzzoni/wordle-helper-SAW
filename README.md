@@ -2,14 +2,19 @@
 A Wordle helper application design to help users organize tournaments and compare their scores with other players.
 
 ## How to Build Locally
-Execute in a terminal the following command to generate the docker image
+1. Make sure the **Frontend (wordle-helper-front)** and the **Backend (wordle-helper)** are placed at the same level folder
+2. Go to the root of the **wordle-helper** project
+3. Make sure you have your .env file
+4. Open a terminal and run ``. pull.sh``. This will pull from main the latest changes in both repositories.
+5. Run ``. build.sh``. This will build the docker images. The build logs are stored in *wordle-helper/docker-compose/logs* folder.
 
-``docker build --tag <image-name> .``
+## How to Run services
+5. Once built, at the root of the **wordle-helper** project run ``. start.sh``. This will start the services' containers.
+6. Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-## How to Run
-Execute in a terminal the following command to start the container
+## How to Stop services
+1. At the root of the **wordle-helper** project run ``. stop.sh``. This will stop the services' containers.
 
-``docker run -p 8080:8080 <image-name>``
 
 ## API documentation
 https://app.swaggerhub.com/apis/TACS-WordleHelper/Wordle-Helper/1.0.4

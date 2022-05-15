@@ -373,7 +373,7 @@ public class TelegramController {
 
     private void handleConfirmTournament(Long chatId){
         NewTournamentDto tournament = this.tournamentBeingCreatedByChatId.get(chatId);
-        Tournament newTournament = new Tournament(tournament, this.currentUser);
+        Tournament newTournament = tournament.asTournamentWithOwner(this.currentUser);
 
         this.tournamentService.save(newTournament);
 
@@ -405,7 +405,7 @@ public class TelegramController {
 
         InlineKeyboardMarkup keyboardMarkup = null;
 
-        if(tournament.getStatus() == TournamentStatus.NOTSTARTED) {
+        if(tournament.getStatus() == TournamentStatus.NOT_STARTED) {
             String data = String.format("joinTournament-%s", tournament.getId());
             InlineKeyboardButton tournamentButton = new InlineKeyboardButton("Join").callbackData(data);
             keyboardMarkup = new InlineKeyboardMarkup(tournamentButton);
