@@ -7,7 +7,6 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
-import com.pengrad.telegrambot.model.request.ParseMode;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
@@ -207,9 +206,8 @@ public class TelegramController {
     }
 
     private void handleSignin(Long chatId){
-        SendMessage sendMessage = new SendMessage(chatId, "What will be your username?");
         this.lastMessageSentByChatId.put(chatId, "setUsernameForSignin");
-        this.bot.execute(sendMessage);
+        this.sendSimpleMessageAndExecute(chatId, "What will be your username?");
     }
 
     private void handleTournaments(Long chatId){
@@ -539,18 +537,14 @@ public class TelegramController {
 
     private void handleUsernameForLogin(long chatId, String username){
         this.usernameByChatId.put(chatId, username);
-
-        SendMessage sendMessage = new SendMessage(chatId, "What is your password?");
         this.lastMessageSentByChatId.put(chatId, "setPasswordForLogin");
-        this.bot.execute(sendMessage);
+        this.sendSimpleMessageAndExecute(chatId, "What is your password?");
     }
 
     private void handleUsernameForSignin(long chatId, String username){
         this.usernameByChatId.put(chatId, username);
-
-        SendMessage sendMessage = new SendMessage(chatId, "What will be your password?");
         this.lastMessageSentByChatId.put(chatId, "setPasswordForSignin");
-        this.bot.execute(sendMessage);
+        this.sendSimpleMessageAndExecute(chatId, "What will be your password?");
     }
 
     private void handlePasswordForLogin(long chatId, String password) {
@@ -716,9 +710,9 @@ public class TelegramController {
         InlineKeyboardButton loginButton = new InlineKeyboardButton("Login").callbackData("login");
         InlineKeyboardButton createUserButton = new InlineKeyboardButton("Sign in").callbackData("signin");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(loginButton, createUserButton);
-        String buttonMessage = "Select action to perform";
-        SendMessage sendMessage = new SendMessage(chatId, buttonMessage).replyMarkup(keyboardMarkup);
-        this.executeMessage(sendMessage);
+        String messageText = "Select action to perform";
+
+        this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
     }
 
     private void sendKeyboardForLogued(long chatId){
@@ -728,6 +722,7 @@ public class TelegramController {
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(tournamentButton, dictionaryButton, logoutButton);
         String buttonMessage = "Select action's category to perform";
         SendMessage sendMessage = new SendMessage(chatId, buttonMessage).replyMarkup(keyboardMarkup);
+
         this.executeMessage(sendMessage);
     }
 
