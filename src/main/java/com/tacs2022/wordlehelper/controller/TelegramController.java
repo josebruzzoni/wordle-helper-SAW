@@ -595,39 +595,45 @@ public class TelegramController {
     }
 
     private void handleStartDateForTournament(long chatId, String startDate){
-        boolean wasHandleDateSuccessful = this.handleDateForTournament(chatId, startDate);
+        LocalDate localDate = this.handleDateForTournament(chatId, startDate);
 
-        if(wasHandleDateSuccessful){
-            this.lastMessageSentByChatId.put(chatId, "setEndDateForTournament");
-            this.sendSimpleMessageAndExecute(chatId, "Great. Now please send me the end date of the tournament in this format: 20/05/2022");
+        if(localDate == null) {
+            return;
         }
+
+        NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
+        tournamentInProcess.setStartDate(localDate);
+
+        this.lastMessageSentByChatId.put(chatId, "setEndDateForTournament");
+        this.sendSimpleMessageAndExecute(chatId, "Great. Now please send me the end date of the tournament in this format: 20/05/2022");
     }
 
     private void handleEndDateForTournament(long chatId, String endDate){
-        boolean wasHandleDateSuccessful = this.handleDateForTournament(chatId, endDate);
+        LocalDate localDate = this.handleDateForTournament(chatId, endDate);
 
-        if(wasHandleDateSuccessful){
-            this.lastMessageSentByChatId.put(chatId, "setVisibilityForTournament");
-            InlineKeyboardButton publicButton = new InlineKeyboardButton("Public").callbackData("publicTournament");
-            InlineKeyboardButton privateButton = new InlineKeyboardButton("Private").callbackData("privateTournament");
-            InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(publicButton, privateButton);
-            this.sendMessageAndExecute(chatId, "Perfect. Will it be a public or a private tournament?", keyboardMarkup);
+        if(localDate == null) {
+            return;
         }
+
+        NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
+        tournamentInProcess.setEndDate(localDate);
+        this.lastMessageSentByChatId.put(chatId, "setVisibilityForTournament");
+        InlineKeyboardButton publicButton = new InlineKeyboardButton("Public").callbackData("publicTournament");
+        InlineKeyboardButton privateButton = new InlineKeyboardButton("Private").callbackData("privateTournament");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(publicButton, privateButton);
+        this.sendMessageAndExecute(chatId, "Perfect. Will it be a public or a private tournament?", keyboardMarkup);
     }
 
     // Returns if parse date was successful
-    private boolean handleDateForTournament(long chatId, String date){
-        NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
-
+    private LocalDate handleDateForTournament(long chatId, String date){
         try {
             LocalDate localDate = LocalDate.parse(date, this.formatter);
-            tournamentInProcess.setStartDate(localDate);
 
-            return true;
+            return localDate;
         } catch (DateTimeParseException e) {
             this.sendSimpleMessageAndExecute(chatId, "Date is not in correct format. Please try again.");
 
-            return false;
+            return null;
         }
     }
 
