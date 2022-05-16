@@ -608,8 +608,8 @@ public class TelegramController {
 
         if(wasHandleDateSuccessful){
             this.lastMessageSentByChatId.put(chatId, "setVisibilityForTournament");
-            InlineKeyboardButton publicButton = new InlineKeyboardButton("Public").callbackData("public-tournament");
-            InlineKeyboardButton privateButton = new InlineKeyboardButton("Private").callbackData("private-tournament");
+            InlineKeyboardButton publicButton = new InlineKeyboardButton("Public").callbackData("publicTournament");
+            InlineKeyboardButton privateButton = new InlineKeyboardButton("Private").callbackData("privateTournament");
             InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(publicButton, privateButton);
             this.sendMessageAndExecute(chatId, "Perfect. Will it be a public or a private tournament?", keyboardMarkup);
         }
