@@ -345,7 +345,7 @@ public class TelegramController {
         resultInProcess.setLanguage(language);
 
         String messageText = String.format("Perfect. This is your result:\n\nAttempts: %s\nLanguage: %s\n\n Is everything ok?",
-                resultInProcess.getFailedAttempts().toString(), resultInProcess.getLanguage().getLanguage());
+                resultInProcess.getAttempts().toString(), resultInProcess.getLanguage().getLanguage());
 
         InlineKeyboardButton confirmButton = new InlineKeyboardButton("Confirm").callbackData("confirmResult");
         InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("cancelResult");
@@ -427,7 +427,7 @@ public class TelegramController {
         Integer attempts = Integer.parseInt(attemptsStr);
         NewResultDto results = new NewResultDto();
 
-        results.setFailedAttempts(attempts);
+        results.setAttempts(attempts);
         this.resultsBeingCreatedByChatId.put(chatId, results);
 
         InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguage-result");
