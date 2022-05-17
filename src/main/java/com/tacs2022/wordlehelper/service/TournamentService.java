@@ -27,6 +27,9 @@ public class TournamentService {
     
     Logger logger = LoggerFactory.getLogger(TournamentService.class);
 
+    public List<Tournament> findAll(){
+		return (List<Tournament>)tournamentRepo.findAll();
+    }
 	@Transactional
 	public Tournament save(Tournament tournament) {
 		tournamentRepo.save(tournament);

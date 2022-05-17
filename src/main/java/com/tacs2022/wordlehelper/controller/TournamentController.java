@@ -32,20 +32,20 @@ public class TournamentController {
     @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public OutputTournamentDto create(@Valid @RequestBody NewTournamentDto tournament, @RequestHeader(required = true) String authorization){
-    	User owner = userService.getUserFromToken(authorization);
+    	User owner = userService.getUserFromAuth(authorization);
     	Tournament newTournament = tournament.asTournamentWithOwner(owner);
         return new OutputTournamentDto(tournamentService.save(newTournament));
     }
 
     @GetMapping("/{id}")
     public OutputTournamentDto getTournamentById(@PathVariable(value = "id") Long id, @RequestHeader(required = true) String authorization) {
-        User user = userService.getUserFromToken(authorization);
+        User user = userService.getUserFromAuth(authorization);
     	return new OutputTournamentDto(tournamentService.getByIdAndValidateVisibility(id, user));
     }
 
     @GetMapping("/{id}/leaderboard")
     public JsonResponseDto getLeaderboardByTournamentId(@PathVariable(value = "id") Long tournamentId, @RequestHeader(required = true) String authorization){
-    	User user = userService.getUserFromToken(authorization);
+    	User user = userService.getUserFromAuth(authorization);
         List<Scoreboard> scoreboards = tournamentService.getTournamentLeaderboard(tournamentId, LocalDate.now(), user);
         return new JsonResponseDto("leaderboard", OutputScoreboardDto.list(scoreboards));
 
@@ -54,7 +54,7 @@ public class TournamentController {
 	@PostMapping(value="/{id}/participants")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void addParticipant(@Valid @RequestBody NewParticipantDto body, @PathVariable(value = "id") Long tournamentId, @RequestHeader(required = true) String authorization ){
-		User postulator = userService.getUserFromToken(authorization);
+		User postulator = userService.getUserFromAuth(authorization);
 		User participant = userService.findByUsername(body.getParticipantName());
         tournamentService.addParticipant(tournamentId, postulator, participant);
     }

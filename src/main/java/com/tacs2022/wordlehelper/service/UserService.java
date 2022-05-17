@@ -88,10 +88,14 @@ public class UserService {
         user.addResult(result);
     }
     
-    public User getUserFromToken(String auth) {
+    public User getUserFromAuth(String auth) {
     	String token = auth.substring(7);
-    	Long userId = TokenProvider.getId(token);
-    	return this.findById(userId);
+    	return this.getUserFromToken(token);
+    }
+
+    public User getUserFromToken(String token){
+        Long userId = TokenProvider.getId(token);
+        return this.findById(userId);
     }
 
 }

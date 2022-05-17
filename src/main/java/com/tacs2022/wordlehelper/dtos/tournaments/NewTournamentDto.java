@@ -6,10 +6,10 @@ import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -18,6 +18,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class NewTournamentDto {
     @NotBlank(message = "name is mandatory")
     private String name;
