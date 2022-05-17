@@ -1,9 +1,12 @@
 package Tournaments;
 
+import Utils.UserFactory;
 import com.tacs2022.wordlehelper.domain.Language;
+import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
+import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.service.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,6 +16,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.function.Function;
 
 import static java.time.LocalDate.of;
 import static org.junit.jupiter.api.Assertions.*;
@@ -71,5 +75,19 @@ class TournamentsTest {
         assertEquals(1, tournament.getDaysPlayedAtDate(startDate.plusDays(1)));
         assertEquals(2, tournament.getDaysPlayedAtDate(endDate));
         assertEquals(3, tournament.getDaysPlayedAtDate(endDate.plusDays(1)));
+		assertEquals(3, tournament.getDaysPlayedAtDate(endDate.plusDays(2)));
     }
+
+	@Test
+	public void scoreAtDate(){
+		User carlitos = UserFactory.userWithName("Carlitos");
+		Function<LocalDate, Integer> cuantosPuntosTendraCarlitos = fecha -> new Scoreboard(carlitos, tournament).getScoreAtDate(fecha);
+
+		assertEquals(0, cuantosPuntosTendraCarlitos.apply(startDate));
+		assertEquals(7, cuantosPuntosTendraCarlitos.apply(startDate.plusDays(1)));
+		assertEquals(14, cuantosPuntosTendraCarlitos.apply(startDate.plusDays(2)));
+		carlitos.addResult(new Result(1, Language.ES, startDate.plusDays(2)));
+
+		assertEquals(8, cuantosPuntosTendraCarlitos.apply(startDate.plusDays(2)));
+	}
 }
