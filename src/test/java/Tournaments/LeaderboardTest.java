@@ -1,6 +1,7 @@
 package Tournaments;
 
 import Utils.TournamentFactory;
+import Utils.UserFactory;
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.tournaments.Scoreboard;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
@@ -27,7 +28,7 @@ public class LeaderboardTest {
 
     @BeforeEach
     public void fixture(){
-        user1 = new User("felipe", null, null);
+        user1 = UserFactory.userWithName("felipe");
             user1.addResult(new Result(2, Language.ES, startDate));
             user1.addResult(new Result(3, Language.ES, startDate.plusDays(1)));
 
@@ -64,26 +65,4 @@ public class LeaderboardTest {
         assertEquals(19, new Scoreboard(user1, tournament).getScoreAtDate(endDateModified));
     }
 
-    /*@Test
-    public void leaderboardGeneratesCorrectly(){
-
-        User user2 = new User("miguelito", null, null);
-             user2.addResult(new Result(4, Language.ES, startDate));
-             user2.addResult(new Result(5, Language.ES, startDate));
-
-        tournament.addParticipant(user2);
-
-        assertEquals(9, new Scoreboard(user2, tournament).getBadScoreToDate(endDate));
-        List<Scoreboard> leaderboard = tournament.generateLeaderboardToDate(endDate);
-
-        assertThat(getFromLeaderBoard(leaderboard, Scoreboard::getUser), is(List.of(user1, user2)));
-        assertThat(getFromLeaderBoard(leaderboard, s->s.getBadScoreToDate(endDate)), is(List.of(5, 9)));
-        assertThat(getFromLeaderBoard(leaderboard, Scoreboard::getFailedAttempts), is(List.of(5, 9)));
-    }*/
-
-
-
-   /* private <T> List<T> getFromLeaderBoard(List<Scoreboard> leaderboard, Function<Scoreboard, T> getter){
-        return leaderboard.stream().map(getter).collect(Collectors.toList());
-    }*/
 }

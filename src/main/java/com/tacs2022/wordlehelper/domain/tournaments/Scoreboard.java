@@ -41,7 +41,7 @@ public class Scoreboard {
      * @return The player's score by the given date
      */
     public int getScoreAtDate(LocalDate date){
-        int notPlayedDays = tournament.getDaysPlayedAtDate(date) - getPlayedGames();
+        int notPlayedDays = Integer.max(0, tournament.getDaysPlayedAtDate(date) - getPlayedGames());
         return NOT_PLAYED_PENALIZATION_ATTEMPTS * notPlayedDays + getTotalAttempts();
     }
 
