@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Data
 public class NewResultDto {
     @NotNull(message = "failedAttempts is mandatory")
-    private Integer failedAttempts;
+    private Integer attempts;
     @NotNull(message = "Language is mandatory")
     private Language language;
 
@@ -19,7 +19,7 @@ public class NewResultDto {
     private LocalDate date = LocalDate.now();
 
     public Result fromDto() {
-        return new Result(failedAttempts, language, date);
+        return new Result(attempts, language, date);
     }
 }
 
