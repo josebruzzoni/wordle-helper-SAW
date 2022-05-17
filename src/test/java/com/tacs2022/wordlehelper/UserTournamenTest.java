@@ -138,7 +138,7 @@ public class UserTournamenTest {
 	@Test
 	public void userTriedToAddParticipantToPrivateTournamentWithoutBeingTheOwner() {
 		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(tournamentMock));
-		Mockito.when(tournamentMock.getStatus()).thenReturn(TournamentStatus.NOTSTARTED);
+		Mockito.when(tournamentMock.getStatus()).thenReturn(TournamentStatus.NOT_STARTED);
 		Mockito.when(tournamentMock.getVisibility()).thenReturn(Visibility.PRIVATE);
 		Mockito.when(tournamentMock.userIsOwner(any(User.class))).thenReturn(false);
 		Assertions
@@ -150,7 +150,7 @@ public class UserTournamenTest {
 	@Test
 	public void userTriedToAddParticipantToPublicTournamentWithoutBeingTheOwnerCanOnlyAddSelf() {
 		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(tournamentMock));
-		Mockito.when(tournamentMock.getStatus()).thenReturn(TournamentStatus.NOTSTARTED);
+		Mockito.when(tournamentMock.getStatus()).thenReturn(TournamentStatus.NOT_STARTED);
 		Mockito.when(tournamentMock.getVisibility()).thenReturn(Visibility.PUBLIC);
 		Mockito.when(tournamentMock.userIsOwner(any(User.class))).thenReturn(false);
 		Assertions
