@@ -7,11 +7,7 @@ WORKDIR /wordle-helper
 COPY .mvn/ .mvn
 COPY mvnw pom.xml .env ./
 # Install dos2unix package to convert file line ending from CRLF to LF
-RUN apk add dos2unix
-RUN dos2unix mvnw
-# We install the dependencies
-RUN chmod +x mvnw
-RUN ./mvnw dependency:go-offline
+RUN apk add dos2unix && dos2unix mvnw && chmod +x mvnw && ./mvnw dependency:go-offline
 # We now copy the source files
 COPY src ./src
 # We run the Springboot application inside the image
