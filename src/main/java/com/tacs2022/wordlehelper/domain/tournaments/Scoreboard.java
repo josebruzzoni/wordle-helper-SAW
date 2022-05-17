@@ -41,7 +41,7 @@ public class Scoreboard {
      * @return The player's score by the given date
      */
     public int getScoreAtDate(LocalDate date){
-        int notPlayedDays = Integer.max(0, tournament.getDaysPlayedAtDate(date) - getPlayedGames());
+        int notPlayedDays = tournament.getGamesPlayedUntilDate(date) - getPlayedGamesByUserBeforeDate(date);
         return NOT_PLAYED_PENALIZATION_ATTEMPTS * notPlayedDays + getTotalAttempts();
     }
 
@@ -53,7 +53,7 @@ public class Scoreboard {
         return results.stream().mapToInt(Result::getAttempts).sum();
     }
 
-    private int getPlayedGames(){
-        return results.size();
+    private int getPlayedGamesByUserBeforeDate(LocalDate date){
+        return (int) results.stream().filter(r->r.getDate().isBefore(date)).count();
     }
 }

@@ -9,11 +9,10 @@ import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.service.SecurityService;
+import org.hibernate.validator.constraints.Range;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;
@@ -24,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class TournamentsTest {
 	Tournament tournament;
 	LocalDate startDate = of(2016, 6, 10);
-	LocalDate endDate = of(2016, 6, 12);
+	LocalDate endDate = of(2016, 6, 13);
 
 	@BeforeEach
 	public void fixture() {
@@ -34,7 +33,7 @@ class TournamentsTest {
 		User julian = new User("Julian", ss.hash("1234", salt), salt);
 
 		tournament = new Tournament("Luchemos por la vida", startDate, endDate,
-				Visibility.PUBLIC, List.of(Language.EN, Language.ES), julian);
+				Visibility.PUBLIC, List.of(Language.EN), julian);
 	}
 
     @Test
@@ -68,26 +67,5 @@ class TournamentsTest {
 	public void tournamentStartedInDaysBeforeIsAlreadyStarted() {
 		assertEquals(TournamentStatus.STARTED, tournament.getStatusByDate(startDate.plusDays(1)));
 	}
-	
-    @Test
-    void daysPassedUntilDate(){
-        assertEquals(0, tournament.getDaysPlayedAtDate(startDate));
-        assertEquals(1, tournament.getDaysPlayedAtDate(startDate.plusDays(1)));
-        assertEquals(2, tournament.getDaysPlayedAtDate(endDate));
-        assertEquals(3, tournament.getDaysPlayedAtDate(endDate.plusDays(1)));
-		assertEquals(3, tournament.getDaysPlayedAtDate(endDate.plusDays(2)));
-    }
 
-	@Test
-	public void scoreAtDate(){
-		User carlitos = UserFactory.userWithName("Carlitos");
-		Function<LocalDate, Integer> cuantosPuntosTendraCarlitos = fecha -> new Scoreboard(carlitos, tournament).getScoreAtDate(fecha);
-
-		assertEquals(0, cuantosPuntosTendraCarlitos.apply(startDate));
-		assertEquals(7, cuantosPuntosTendraCarlitos.apply(startDate.plusDays(1)));
-		assertEquals(14, cuantosPuntosTendraCarlitos.apply(startDate.plusDays(2)));
-		carlitos.addResult(new Result(1, Language.ES, startDate.plusDays(2)));
-
-		assertEquals(8, cuantosPuntosTendraCarlitos.apply(startDate.plusDays(2)));
-	}
 }
