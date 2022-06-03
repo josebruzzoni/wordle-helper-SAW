@@ -4,15 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
 import javax.persistence.Id;
 
-@Entity
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document("telegramsessions")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TelegramSession {
     @Id
-    private Long chatId;
+    private String chatId;
     private String token;
 }

@@ -3,6 +3,7 @@ package com.tacs2022.wordlehelper;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -117,87 +118,87 @@ public class UserTournamenTest {
 
 	@Test
 	public void youCannotAddParticipantsToTournamentsThatHaveAStartedStatus() {
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(tournamentMock));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(tournamentMock));
 		Mockito.when(tournamentMock.getStatus()).thenReturn(TournamentStatus.STARTED);
 		Assertions
-			.assertThatThrownBy ( () -> { tournamentService.addParticipant(Long.valueOf(1), julian, agus); } )
+			.assertThatThrownBy ( () -> { tournamentService.addParticipant(anyString(), julian, agus); } )
 			.isInstanceOf(ForbiddenException.class)
 			.hasMessage("Participants cannot be added to this tournament once it has started or finished");
 	}
 	
 	@Test
 	public void youCannotAddParticipantsToTournamentsThatHaveAFinishedStatus() {
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(tournamentMock));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(tournamentMock));
 		Mockito.when(tournamentMock.getStatus()).thenReturn(TournamentStatus.FINISHED);
 		Assertions
-			.assertThatThrownBy ( () -> { tournamentService.addParticipant(Long.valueOf(1), julian, agus); } )
+			.assertThatThrownBy ( () -> { tournamentService.addParticipant(anyString(), julian, agus); } )
 			.isInstanceOf(ForbiddenException.class)
 			.hasMessage("Participants cannot be added to this tournament once it has started or finished");
 	}
 	
 	@Test
 	public void userTriedToAddParticipantToPrivateTournamentWithoutBeingTheOwner() {
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(tournamentMock));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(tournamentMock));
 		Mockito.when(tournamentMock.getStatus()).thenReturn(TournamentStatus.NOT_STARTED);
 		Mockito.when(tournamentMock.getVisibility()).thenReturn(Visibility.PRIVATE);
 		Mockito.when(tournamentMock.userIsOwner(any(User.class))).thenReturn(false);
 		Assertions
-			.assertThatThrownBy ( () -> { tournamentService.addParticipant(Long.valueOf(1), julian, agus); } )
+			.assertThatThrownBy ( () -> { tournamentService.addParticipant(anyString(), julian, agus); } )
 			.isInstanceOf(ForbiddenException.class)
 			.hasMessage("User cannot add participant to this private tournament without being the owner");
 	}
 	
 	@Test
 	public void userTriedToAddParticipantToPublicTournamentWithoutBeingTheOwnerCanOnlyAddSelf() {
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(tournamentMock));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(tournamentMock));
 		Mockito.when(tournamentMock.getStatus()).thenReturn(TournamentStatus.NOT_STARTED);
 		Mockito.when(tournamentMock.getVisibility()).thenReturn(Visibility.PUBLIC);
 		Mockito.when(tournamentMock.userIsOwner(any(User.class))).thenReturn(false);
 		Assertions
-			.assertThatThrownBy ( () -> { tournamentService.addParticipant(Long.valueOf(1), agus, julian); } )
+			.assertThatThrownBy ( () -> { tournamentService.addParticipant(anyString(), agus, julian); } )
 			.isInstanceOf(ForbiddenException.class)
 			.hasMessage("User can only add another participant to public tournament if owner");
 	}
 	
 	@Test
 	public void asAUserIWantToBeAbleToAddAnotherUserToAPrivateTournamentThatICreated() {
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(privateTournament));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(privateTournament));
 		Assertions.assertThatNoException()
-			.isThrownBy(() -> { tournamentService.addParticipant(Long.valueOf(1), julian, agus); });
+			.isThrownBy(() -> { tournamentService.addParticipant(anyString(), julian, agus); });
 	}
 	
 	@Test 
 	public void asAUserIWantToBeAbleToAddAnotherUserToAPublicTournamentThatICreated() {
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(publicTournament));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(publicTournament));
 		Assertions.assertThatNoException()
-			.isThrownBy(() -> { tournamentService.addParticipant(Long.valueOf(1), julian, agus); });
+			.isThrownBy(() -> { tournamentService.addParticipant(anyString(), julian, agus); });
 	}
 	
 	@Test
 	public void asAUserIWantToBeAbleToJoinAPublicTournamentThatHasNotStartedYet(){
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(publicTournament));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(publicTournament));
 		Assertions.assertThatNoException()
-			.isThrownBy(() -> { tournamentService.addParticipant(Long.valueOf(1), agus, agus); });
+			.isThrownBy(() -> { tournamentService.addParticipant(anyString(), agus, agus); });
 	}
 
 	@Test
 	public void asAUserIWantToSubmitResultsButOnlyOnceForLanguage(){
-		Mockito.when(userRepoMock.findById(anyLong())).thenReturn(Optional.of(agus));
+		Mockito.when(userRepoMock.findById(anyString())).thenReturn(Optional.of(agus));
 		Result otherSpanishResult = new Result(3, Language.ES, startDate);
 		Result englishResult = new Result(2, Language.EN, startDate);
 		Assertions
 				.assertThatNoException()
-				.isThrownBy(() -> { userService.addResult(Long.valueOf(1), englishResult); });
+				.isThrownBy(() -> { userService.addResult(agus.getId(), englishResult); });
 		Assertions
-				.assertThatThrownBy ( () -> { userService.addResult(Long.valueOf(1), otherSpanishResult); } )
+				.assertThatThrownBy ( () -> { userService.addResult(agus.getId(), otherSpanishResult); } )
 				.isInstanceOf(ResultAlreadyLoadedException.class);
 	}
 	
 	@Test
 	public void theParticipantWithTheFewestAttemptsWins() {
 		publicTournament.addParticipant(agus);
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(publicTournament));
-		List<Scoreboard> leaderboard = tournamentService.getTournamentLeaderboard(Long.valueOf(1) , startDate.plusDays(2), julian);
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(publicTournament));
+		List<Scoreboard> leaderboard = tournamentService.getTournamentLeaderboard(anyString() , startDate.plusDays(2), julian);
 		Scoreboard scoreboardOne = leaderboard.get(0);
 		Scoreboard scoreboardTwo = leaderboard.get(1);
 		assertTrue(scoreboardOne.getTotalAttempts() < scoreboardTwo.getTotalAttempts());
@@ -206,32 +207,32 @@ public class UserTournamenTest {
 	
 	@Test
 	public void publicTournamentsTheyAreVisibleToAll() {
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(publicTournament));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(publicTournament));
 		Assertions.assertThatNoException()
-		.isThrownBy(() -> { tournamentService.getByIdAndValidateVisibility(Long.valueOf(1), agus); });
+		.isThrownBy(() -> { tournamentService.getByIdAndValidateVisibility(anyString(), agus); });
 	}
 	
 	@Test
 	public void privateTournamentsTheyAreVisibleOnlyByThePersonWhoCreatedThem() {
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(privateTournament));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(privateTournament));
 		Assertions
-			.assertThatThrownBy ( () -> { tournamentService.getByIdAndValidateVisibility(Long.valueOf(1), agus); } )
+			.assertThatThrownBy ( () -> { tournamentService.getByIdAndValidateVisibility(anyString(), agus); } )
 			.isInstanceOf(ForbiddenException.class)
 			.hasMessage("User does not have permissions to view this tournament");
 	}
 	
 	@Test
 	public void privateTournamentsTheyAreVisibleByThePersonWhoCreatedThem() {
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(privateTournament));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(privateTournament));
 		Assertions.assertThatNoException()
-			.isThrownBy(() -> { tournamentService.getByIdAndValidateVisibility(Long.valueOf(1), julian); });
+			.isThrownBy(() -> { tournamentService.getByIdAndValidateVisibility(anyString(), julian); });
 	}
 	
 	@Test
 	public void privateTournamentsTheyAreVisibleByThoseWhoHaveJoined(){
 		privateTournament.addParticipant(agus);
-		Mockito.when(tournamentRepoMock.findById(anyLong())).thenReturn(Optional.of(privateTournament));
+		Mockito.when(tournamentRepoMock.findById(anyString())).thenReturn(Optional.of(privateTournament));
 		Assertions.assertThatNoException()
-			.isThrownBy(() -> { tournamentService.getByIdAndValidateVisibility(Long.valueOf(1), agus); });
+			.isThrownBy(() -> { tournamentService.getByIdAndValidateVisibility(anyString(), agus); });
 	}
 }

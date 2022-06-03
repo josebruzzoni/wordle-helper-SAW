@@ -13,6 +13,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,6 +22,7 @@ import static java.util.Arrays.asList;
 
 @SpringBootApplication
 @EnableCaching
+@EnableMongoRepositories
 public class WordleHelperApplication {
 
 	public static void main(String[] args) {

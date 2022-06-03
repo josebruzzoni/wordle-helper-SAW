@@ -1,29 +1,27 @@
 package com.tacs2022.wordlehelper.domain.user;
 
-import javax.persistence.*;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CascadeType;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.util.LinkedList;
 import java.util.List;
 
-@Entity
+@Document("users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
-    @Id @GeneratedValue
-    private Long id;
+    @Id
+    private String id;
     private String username;
     @JsonIgnore
     private byte[] hashedPass;
     @JsonIgnore
     private byte[] salt;
-    @OneToMany @Cascade(CascadeType.ALL)
     private List<Result> results = new LinkedList<>();
 
 

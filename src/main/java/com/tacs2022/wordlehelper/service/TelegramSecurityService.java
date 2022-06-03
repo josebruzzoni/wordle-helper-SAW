@@ -20,7 +20,7 @@ public class TelegramSecurityService {
     @Autowired
     SessionService sessionService;
 
-    public User login(String username, String password, Long chatId) {
+    public User login(String username, String password, String chatId) {
         String token = this.sessionService.getToken(username, password);
 
         if(token == null){
@@ -33,7 +33,7 @@ public class TelegramSecurityService {
         return this.userService.findByUsername(username);
     }
 
-    public void logout(Long chatId) {
+    public void logout(String chatId) {
         Optional<TelegramSession> possibleTelegramSession = this.telegramSessionRepository.findById(chatId);
 
         if(possibleTelegramSession.isEmpty()){
@@ -46,7 +46,7 @@ public class TelegramSecurityService {
         this.telegramSessionRepository.delete(telegramSession);
     }
 
-    public User getUserFromToken(Long chatId){
+    public User getUserFromToken(String chatId){
         Optional<TelegramSession> telegramSession = this.telegramSessionRepository.findById(chatId);
 
         if(telegramSession.isEmpty()){
@@ -58,7 +58,7 @@ public class TelegramSecurityService {
         return userService.getUserFromToken(token);
     }
 
-    public boolean isUserLogged(Long chatId){
+    public boolean isUserLogged(String chatId){
         return this.telegramSessionRepository.existsById(chatId);
     }
 }

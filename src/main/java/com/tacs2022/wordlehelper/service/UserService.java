@@ -25,7 +25,7 @@ public class UserService {
         return (List<User>) userRepo.findAll();
     }
 
-    public User findById(Long id) {
+    public User findById(String id) {
         return userRepo.findById(id).orElseThrow(
             () -> new NotFoundException("User with Id: " + id + " was not found")
         );
@@ -39,7 +39,7 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(Long id) {
+    public void delete(String id) {
         User user = userRepo.findById(id).orElseThrow(
                 () -> new NotFoundException("User with Id: " + id + " was not found")
         );
@@ -79,7 +79,7 @@ public class UserService {
     }
 
     @Transactional
-    public void addResult(Long userId, Result result){
+    public void addResult(String userId, Result result){
         User user = findById(userId);
         if(user.getResults().stream().anyMatch(result::matches)){
             throw new ResultAlreadyLoadedException();
@@ -94,7 +94,7 @@ public class UserService {
     }
 
     public User getUserFromToken(String token){
-        Long userId = TokenProvider.getId(token);
+        String userId = TokenProvider.getId(token);
         return this.findById(userId);
     }
 

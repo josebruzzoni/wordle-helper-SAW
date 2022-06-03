@@ -16,7 +16,7 @@ import lombok.Data;
 @AllArgsConstructor
 public class OutputTournamentDto {
 	
-	private Long id;
+	private String id;
 	private String name;
     private LocalDate startDate;
     private LocalDate endDate;

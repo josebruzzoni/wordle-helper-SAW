@@ -1,21 +1,18 @@
 package com.tacs2022.wordlehelper.domain.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.tacs2022.wordlehelper.domain.Language;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.time.LocalDate;
 
-@Entity
 @Data
 @NoArgsConstructor
 public class Result {
-    @Id @GeneratedValue @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
     private Integer attempts;
     private Language language;
