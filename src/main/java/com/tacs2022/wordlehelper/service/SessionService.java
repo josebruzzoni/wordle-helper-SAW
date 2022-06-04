@@ -19,6 +19,10 @@ public class SessionService {
 
     public String getToken(String username, String password) {
         if(securityService.validatePassword(username, password)){
+            Session lastSession = sessionRepo.findByUsername(username);
+            if(lastSession != null){
+                sessionRepo.delete(lastSession);
+            }
             User user = userService.findByUsername(username);
             String token = TokenProvider.generateToken(user);
             Session session = new Session(token, user);

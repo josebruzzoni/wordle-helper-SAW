@@ -109,6 +109,7 @@ public class TournamentService {
 		}
 
 		tournament.addParticipant(participant);
+		tournamentRepo.save(tournament);
     }
 
 

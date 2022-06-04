@@ -12,8 +12,6 @@ import com.tacs2022.wordlehelper.service.SecurityService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.function.Function;

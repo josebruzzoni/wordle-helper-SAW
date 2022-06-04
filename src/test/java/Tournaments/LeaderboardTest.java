@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static java.time.LocalDate.of;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class LeaderboardTest {

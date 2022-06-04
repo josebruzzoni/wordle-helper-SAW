@@ -4,7 +4,6 @@ import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import com.tacs2022.wordlehelper.service.SecurityService;
 
 import java.time.LocalDate;

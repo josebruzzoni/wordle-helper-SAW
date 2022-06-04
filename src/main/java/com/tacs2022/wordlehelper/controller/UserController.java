@@ -3,7 +3,6 @@ package com.tacs2022.wordlehelper.controller;
 import java.util.List;
 
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
-import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.JsonResponseDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
