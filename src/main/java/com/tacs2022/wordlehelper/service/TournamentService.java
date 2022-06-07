@@ -36,7 +36,7 @@ public class TournamentService {
 		return tournament;
 	}
 
-    public Tournament findById(Long id) {
+    public Tournament findById(String id) {
         return tournamentRepo.findById(id).orElseThrow(
                 () -> new NotFoundException("No tournament with id "+id+" was found")
         );
@@ -50,7 +50,7 @@ public class TournamentService {
 	 * @param user User that makes the request
 	 * @return Tournament that matches given id
 	 */
-    public Tournament getByIdAndValidateVisibility(Long id, User user) {
+    public Tournament getByIdAndValidateVisibility(String id, User user) {
     	Tournament tournament = findById(id);
     	
     	if(tournament.getVisibility().equals(Visibility.PRIVATE) && !tournament.userIsOwner(user) && !tournament.isAParticipant(user)) {
@@ -62,7 +62,7 @@ public class TournamentService {
     }
 
 
-    public List<Scoreboard> getTournamentLeaderboard(Long id, LocalDate date, User user) {
+    public List<Scoreboard> getTournamentLeaderboard(String id, LocalDate date, User user) {
         return getByIdAndValidateVisibility(id, user).generateLeaderboardAtDate(date);
     }
 
@@ -78,7 +78,7 @@ public class TournamentService {
 	 * @param participant User to add to the tournament
 	 */
     @Transactional
-    public void addParticipant(Long tournamentId, User user, User participant) {
+    public void addParticipant(String tournamentId, User user, User participant) {
         Tournament tournament = findById(tournamentId);
 
         TournamentStatus status = tournament.getStatus();
@@ -109,6 +109,7 @@ public class TournamentService {
 		}
 
 		tournament.addParticipant(participant);
+		tournamentRepo.save(tournament);
     }
 
 

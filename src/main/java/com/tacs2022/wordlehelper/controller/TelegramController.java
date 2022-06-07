@@ -47,10 +47,10 @@ public class TelegramController {
     @Autowired
     private DictionaryService dictionaryService;
 
-    private Map<Long, String> usernameByChatId = new HashMap<>();
-    private Map<Long, String> lastMessageSentByChatId = new HashMap<>();
-    private Map<Long, NewTournamentDto> tournamentBeingCreatedByChatId = new HashMap<>();
-    private Map<Long, Result> resultsBeingCreatedByChatId = new HashMap<>();
+    private Map<String, String> usernameByChatId = new HashMap<>();
+    private Map<String, String> lastMessageSentByChatId = new HashMap<>();
+    private Map<String, NewTournamentDto> tournamentBeingCreatedByChatId = new HashMap<>();
+    private Map<String, Result> resultsBeingCreatedByChatId = new HashMap<>();
 
     private User currentUser;
     private Language currentDictionaryLanguage;
@@ -91,7 +91,7 @@ public class TelegramController {
     }
 
     private void handleQuery(CallbackQuery query){
-        Long chatId = query.message().chat().id();
+        String chatId = query.message().chat().id().toString();
         String optionId = query.data();
 
         List<String> optionsToNotCheckIfUserIsLogged = new ArrayList<>(Arrays.asList("login", "logout", "signin"));
@@ -193,24 +193,24 @@ public class TelegramController {
 
     // Begin handle query methods
 
-    private void handleLogin(Long chatId){
+    private void handleLogin(String chatId){
         this.lastMessageSentByChatId.put(chatId, "setUsernameForLogin");
         this.sendSimpleMessageAndExecute(chatId, "What's your username?");
     }
 
-    private void handleLogout(Long chatId){
+    private void handleLogout(String chatId){
         this.lastMessageSentByChatId.remove(chatId);
         this.telegramSecurityService.logout(chatId);
         this.sendSimpleMessageAndExecute(chatId, "Logged out successfuly");
         this.sendKeyboardForNotLogued(chatId);
     }
 
-    private void handleSignin(Long chatId){
+    private void handleSignin(String chatId){
         this.lastMessageSentByChatId.put(chatId, "setUsernameForSignin");
         this.sendSimpleMessageAndExecute(chatId, "What will be your username?");
     }
 
-    private void handleTournaments(Long chatId){
+    private void handleTournaments(String chatId){
         InlineKeyboardButton myTournamentsButton = new InlineKeyboardButton("My tournaments").callbackData("showMyTournaments");
         InlineKeyboardButton showTournamentsButton = new InlineKeyboardButton("Public tournaments").callbackData("showPublicTournaments");
         InlineKeyboardButton createTournamentButton = new InlineKeyboardButton("Create tournament").callbackData("createTournament");
@@ -223,7 +223,7 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
     }
 
-    private void handleDictionary(Long chatId){
+    private void handleDictionary(String chatId){
         InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("setEnglishDictionary");
         InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("setSpanishDictionary");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton);
@@ -232,36 +232,36 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
     }
 
-    private void handleEnglishDictionary(Long chatId){
+    private void handleEnglishDictionary(String chatId){
         this.currentDictionaryLanguage = Language.EN;
         this.handleLanguageDictionary(chatId);
     }
 
-    private void handleSpanishDictionary(Long chatId){
+    private void handleSpanishDictionary(String chatId){
         this.currentDictionaryLanguage = Language.ES;
         this.handleLanguageDictionary(chatId);
     }
 
-    private void handleLanguageDictionary(Long chatId){
+    private void handleLanguageDictionary(String chatId){
         String messageText = String.format("Great. Now send me a word to search in %s.", this.currentDictionaryLanguage.getLanguage());
 
         this.lastMessageSentByChatId.put(chatId, "setDictionaryWord");
         this.sendSimpleMessageAndExecute(chatId, messageText);
     }
 
-    public void handleShowMyTournaments(Long chatId){
+    public void handleShowMyTournaments(String chatId){
         List<Tournament> tournaments = this.tournamentService.findTournamentsInWhichUserIsRegistered(this.currentUser);
 
         this.handleShowTournaments(chatId, tournaments);
     }
 
-    private void handleShowPublicTournaments(Long chatId){
+    private void handleShowPublicTournaments(String chatId){
         List<Tournament> tournaments = this.tournamentService.findPublicTournaments();
 
         this.handleShowTournaments(chatId, tournaments);
     }
 
-    public void handleShowTournaments(Long chatId,  List<Tournament> tournaments){
+    public void handleShowTournaments(String chatId,  List<Tournament> tournaments){
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
 
         tournaments.forEach(tournament -> {
@@ -275,7 +275,7 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, buttonsMessage, keyboardMarkup);
     }
 
-    private void handleCreateTournament(Long chatId){
+    private void handleCreateTournament(String chatId){
         this.sendMessageAndExecute(chatId, "What will be the name of the tournament?", null);
 
         NewTournamentDto tournament = new NewTournamentDto();
@@ -284,14 +284,14 @@ public class TelegramController {
         this.lastMessageSentByChatId.put(chatId, "setNameForTournament");
     }
 
-    private void handlePublicTournament(Long chatId){
+    private void handlePublicTournament(String chatId){
         handleTournamentVisibility(chatId, Visibility.PUBLIC);
     }
-    private void handlePrivateTournament(Long chatId) {
+    private void handlePrivateTournament(String chatId) {
         handleTournamentVisibility(chatId, Visibility.PRIVATE);
     }
 
-    private void handleTournamentVisibility(Long chatId, Visibility visibility){
+    private void handleTournamentVisibility(String chatId, Visibility visibility){
         NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
 
         tournamentInProcess.setVisibility(visibility);
@@ -304,27 +304,27 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, "Fine. Please select your tournament's languages", keyboardMarkup);
     }
 
-    private void handleTournamentEnglishLanguage(Long chatId){
+    private void handleTournamentEnglishLanguage(String chatId){
         this.handleTournamentLanguage(chatId, new ArrayList<>(Collections.singleton(Language.EN)));
     }
 
-    private void handleTournamentSpanishLanguage(Long chatId){
+    private void handleTournamentSpanishLanguage(String chatId){
         this.handleTournamentLanguage(chatId, new ArrayList<>(Collections.singleton(Language.ES)));
     }
 
-    private void handleTournamentEnglishAndSpanishLanguage(Long chatId){
+    private void handleTournamentEnglishAndSpanishLanguage(String chatId){
         this.handleTournamentLanguage(chatId, new ArrayList<>(Arrays.asList(Language.EN, Language.ES)));
     }
 
-    private void handleEnglishLanguageResult(Long chatId){
+    private void handleEnglishLanguageResult(String chatId){
         this.handleResultLanguage(chatId, Language.EN);
     }
 
-    private void handleSpanishLanguageResult(Long chatId){
+    private void handleSpanishLanguageResult(String chatId){
         this.handleResultLanguage(chatId, Language.ES);
     }
 
-    private void handleConfirmResult(Long chatId){
+    private void handleConfirmResult(String chatId){
         Result result = this.resultsBeingCreatedByChatId.get(chatId);
 
         this.userService.addResult(currentUser.getId(), result);
@@ -333,13 +333,13 @@ public class TelegramController {
         this.sendKeyboard(chatId);
     }
 
-    private void handleCancelResult(Long chatId){
+    private void handleCancelResult(String chatId){
         this.resultsBeingCreatedByChatId.remove(chatId);
 
         this.sendKeyboard(chatId);
     }
 
-    private void handleResultLanguage(Long chatId, Language language){
+    private void handleResultLanguage(String chatId, Language language){
         Result resultInProcess = this.resultsBeingCreatedByChatId.get(chatId);
 
         resultInProcess.setLanguage(language);
@@ -354,7 +354,7 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
     }
 
-    private void handleTournamentLanguage(Long chatId, List<Language> languages){
+    private void handleTournamentLanguage(String chatId, List<Language> languages){
         NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
 
         tournamentInProcess.setLanguages(languages);
@@ -371,7 +371,7 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
     }
 
-    private void handleConfirmTournament(Long chatId){
+    private void handleConfirmTournament(String chatId){
         NewTournamentDto tournament = this.tournamentBeingCreatedByChatId.get(chatId);
         Tournament newTournament = tournament.asTournamentWithOwner(this.currentUser);
 
@@ -381,15 +381,13 @@ public class TelegramController {
         this.sendKeyboardForLogued(chatId);
     }
 
-    private void handleCancelTournament(Long chatId){
+    private void handleCancelTournament(String chatId){
         this.tournamentBeingCreatedByChatId.remove(chatId);
         this.sendKeyboardForLogued(chatId);
     }
 
-    public void handleShowTournament(long chatId, String tournamentId){
-        Long tournamentIdCasted = Long.parseLong(tournamentId);
-
-        Tournament tournament = this.tournamentService.findById(tournamentIdCasted);
+    public void handleShowTournament(String chatId, String tournamentId){
+        Tournament tournament = this.tournamentService.findById(tournamentId);
         List<User> allParticipants = tournament.getParticipants();
         String participants = "";
 
@@ -415,15 +413,14 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, message, keyboardMarkup);
     }
 
-    private void handleJoinTournament(long chatId, String tournamentId) {
-        Long tournamentIdCasted = Long.parseLong(tournamentId);
-        Tournament tournament = this.tournamentService.findById(tournamentIdCasted);
+    private void handleJoinTournament(String chatId, String tournamentId) {
+        Tournament tournament = this.tournamentService.findById(tournamentId);
 
         this.tournamentService.addParticipant(tournament.getId(), this.currentUser, this.currentUser);
         this.sendMessageAndExecute(chatId, "Joined successfuly", null);
     }
 
-    private void handleAttempts(long chatId, String attemptsStr){
+    private void handleAttempts(String chatId, String attemptsStr){
         Integer attempts = Integer.parseInt(attemptsStr);
         Result results = new Result();
 
@@ -444,7 +441,7 @@ public class TelegramController {
             return;
         }
 
-        long chatId = message.chat().id();
+        String chatId = message.chat().id().toString();
         String text = message.text();
 
         List<String> commandNames = this.commands.stream().map(Command::getName).collect(Collectors.toList());
@@ -535,19 +532,19 @@ public class TelegramController {
 
     // Begin handle message methods
 
-    private void handleUsernameForLogin(long chatId, String username){
+    private void handleUsernameForLogin(String chatId, String username){
         this.usernameByChatId.put(chatId, username);
         this.lastMessageSentByChatId.put(chatId, "setPasswordForLogin");
         this.sendSimpleMessageAndExecute(chatId, "What is your password?");
     }
 
-    private void handleUsernameForSignin(long chatId, String username){
+    private void handleUsernameForSignin(String chatId, String username){
         this.usernameByChatId.put(chatId, username);
         this.lastMessageSentByChatId.put(chatId, "setPasswordForSignin");
         this.sendSimpleMessageAndExecute(chatId, "What will be your password?");
     }
 
-    private void handlePasswordForLogin(long chatId, String password) {
+    private void handlePasswordForLogin(String chatId, String password) {
         String username = this.usernameByChatId.get(chatId);
 
         try {
@@ -573,7 +570,7 @@ public class TelegramController {
         }
     }
 
-    private void handlePasswordForSignin(long chatId, String password){
+    private void handlePasswordForSignin(String chatId, String password){
         String username = this.usernameByChatId.get(chatId);
 
         try {
@@ -586,7 +583,7 @@ public class TelegramController {
         }
     }
 
-    private void handleNameForTournament(long chatId, String name){
+    private void handleNameForTournament(String chatId, String name){
         NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
         tournamentInProcess.setName(name);
 
@@ -594,7 +591,7 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, "Right. Now please send me the start date of the tournament in this format: 20/05/2022", null);
     }
 
-    private void handleStartDateForTournament(long chatId, String startDate){
+    private void handleStartDateForTournament(String chatId, String startDate){
         LocalDate localDate = this.handleDateForTournament(chatId, startDate);
 
         if(localDate == null) {
@@ -608,7 +605,7 @@ public class TelegramController {
         this.sendSimpleMessageAndExecute(chatId, "Great. Now please send me the end date of the tournament in this format: 20/05/2022");
     }
 
-    private void handleEndDateForTournament(long chatId, String endDate){
+    private void handleEndDateForTournament(String chatId, String endDate){
         LocalDate localDate = this.handleDateForTournament(chatId, endDate);
 
         if(localDate == null) {
@@ -625,7 +622,7 @@ public class TelegramController {
     }
 
     // Returns if parse date was successful
-    private LocalDate handleDateForTournament(long chatId, String date){
+    private LocalDate handleDateForTournament(String chatId, String date){
         try {
             LocalDate localDate = LocalDate.parse(date, this.formatter);
 
@@ -637,7 +634,7 @@ public class TelegramController {
         }
     }
 
-    private void handleSubmitResults(Long chatId){
+    private void handleSubmitResults(String chatId){
         List<Integer> attemptsOptions = new ArrayList<>(
                 Arrays.asList(
                         1, 2, 3, 4, 5, 6
@@ -655,7 +652,7 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, "Select amount of attempts", keyboardMarkup);
     }
 
-    private void handleDictionaryWord(Long chatId, String word){
+    private void handleDictionaryWord(String chatId, String word){
         try {
             Word resultWord = this.dictionaryService.findByNameAndLanguage(word, this.currentDictionaryLanguage);
             this.sendSimpleMessageAndExecute(chatId, resultWord.getDefinition());
@@ -672,21 +669,21 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, "Do you want to search again?", keyboardMarkup);
     }
 
-    private void handleConfirmSearchAgain(Long chatId){
+    private void handleConfirmSearchAgain(String chatId){
         this.handleDictionary(chatId);
     }
 
-    private void handleCancelSearchAgain(Long chatId){
+    private void handleCancelSearchAgain(String chatId){
         this.sendKeyboard(chatId);
     }
 
     // End handle message methods
 
-    private void sendSimpleMessageAndExecute(Long chatId, String message){
+    private void sendSimpleMessageAndExecute(String chatId, String message){
         this.sendMessageAndExecute(chatId, message, null);
     }
 
-    private void sendMessageAndExecute(Long chatId, String message, InlineKeyboardMarkup markup){
+    private void sendMessageAndExecute(String chatId, String message, InlineKeyboardMarkup markup){
         SendMessage sendMessage = new SendMessage(chatId, message);
 
         if(markup != null){
@@ -696,12 +693,12 @@ public class TelegramController {
         bot.execute(sendMessage);
     }
 
-    private void cleanMaps(long chatId){
+    private void cleanMaps(String chatId){
         this.usernameByChatId.remove(chatId);
         this.lastMessageSentByChatId.remove(chatId);
     }
 
-    private void sendKeyboard(long chatId){
+    private void sendKeyboard(String chatId){
         if(this.telegramSecurityService.isUserLogged(chatId)){
             this.sendKeyboardForLogued(chatId);
         } else {
@@ -709,7 +706,7 @@ public class TelegramController {
         }
     }
 
-    private void sendKeyboardForNotLogued(long chatId){
+    private void sendKeyboardForNotLogued(String chatId){
         InlineKeyboardButton loginButton = new InlineKeyboardButton("Login").callbackData("login");
         InlineKeyboardButton createUserButton = new InlineKeyboardButton("Sign in").callbackData("signin");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(loginButton, createUserButton);
@@ -718,7 +715,7 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
     }
 
-    private void sendKeyboardForLogued(long chatId){
+    private void sendKeyboardForLogued(String chatId){
         InlineKeyboardButton tournamentButton = new InlineKeyboardButton("Tournament").callbackData("tournament");
         InlineKeyboardButton dictionaryButton = new InlineKeyboardButton("Dictionary").callbackData("dictionary");
         InlineKeyboardButton logoutButton = new InlineKeyboardButton("Logout").callbackData("logout");
@@ -734,7 +731,7 @@ public class TelegramController {
         System.out.println("Response | is ok: " + response.isOk() + " | error code: " + response.errorCode() + " description: " + response.description());
     }
 
-    private boolean checkLoggedUser(Long chatId){
+    private boolean checkLoggedUser(String chatId){
         boolean isUserLogged = this.telegramSecurityService.isUserLogged(chatId);
 
         if(!isUserLogged){

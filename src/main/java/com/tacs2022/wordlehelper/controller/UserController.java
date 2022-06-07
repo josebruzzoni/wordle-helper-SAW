@@ -40,24 +40,24 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUserById(@PathVariable(value = "id") Long id) {
+    public User getUserById(@PathVariable(value = "id") String id) {
         return userService.findById(id);
     }
 
     @DeleteMapping(path = "/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable(value = "id") Long id) {
+    public void delete(@PathVariable(value = "id") String id) {
         userService.delete(id);
     }
     
     @PostMapping("{userId}/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addUserResults(@Valid @RequestBody Result savedResult, @PathVariable(value = "userId") Long userId){
+    public void addUserResults(@Valid @RequestBody Result savedResult, @PathVariable(value = "userId") String userId){
         userService.addResult(userId, savedResult);
     }
     
     @GetMapping("{userId}/tournaments")
-    public JsonResponseDto getTournaments(@PathVariable(value = "userId") Long userId, @RequestHeader(required = true) String authorization) {
+    public JsonResponseDto getTournaments(@PathVariable(value = "userId") String userId, @RequestHeader(required = true) String authorization) {
     	User user = userService.getUserFromAuth(authorization);
 
     	if(!user.getId().equals(userId)) {
