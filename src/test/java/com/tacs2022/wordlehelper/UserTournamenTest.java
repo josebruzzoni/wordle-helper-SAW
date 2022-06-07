@@ -187,9 +187,9 @@ public class UserTournamenTest {
 		Result englishResult = new Result(2, Language.EN, startDate);
 		Assertions
 				.assertThatNoException()
-				.isThrownBy(() -> { userService.addResult(agus.getId(), englishResult); });
+				.isThrownBy(() -> { userService.addResult(anyString(), englishResult); });
 		Assertions
-				.assertThatThrownBy ( () -> { userService.addResult(agus.getId(), otherSpanishResult); } )
+				.assertThatThrownBy ( () -> { userService.addResult(anyString(), otherSpanishResult); } )
 				.isInstanceOf(ResultAlreadyLoadedException.class);
 	}
 	
