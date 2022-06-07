@@ -18,7 +18,7 @@ public class SessionService {
     SecurityService securityService;
 
     public String getToken(String username, String password) {
-        if(securityService.validatePassword(username, password)){
+        if(userService.validatePassword(username, password)){
             User user = userService.findByUsername(username);
             String token = TokenProvider.generateToken(user);
             Session session = new Session(token, user);

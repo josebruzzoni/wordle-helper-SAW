@@ -13,8 +13,6 @@ import java.security.spec.KeySpec;
 
 @Service
 public class SecurityService {
-    @Autowired
-    UserService userService;
 
     private final SecureRandom random = new SecureRandom();
 
@@ -42,8 +40,7 @@ public class SecurityService {
         }
     }
 
-    public boolean validatePassword(String username, String password) {
-        User user = userService.findByUsername(username);
+    public boolean validatePassword(String password, User user) {
         String actualPass = new String(user.getHashedPass());
         String givenPass = new String(this.hash(password, user.getSalt()));
         return actualPass.equals(givenPass);
