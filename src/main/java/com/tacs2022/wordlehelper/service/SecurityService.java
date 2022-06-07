@@ -13,11 +13,13 @@ import java.security.spec.KeySpec;
 
 @Service
 public class SecurityService {
+
+    private final SecureRandom random = new SecureRandom();
+
     private static final int ITERATIONS = 10000;
     private static final int KEY_LENGTH = 256;
 
     public byte[] getSalt() {
-        SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);
         return salt;

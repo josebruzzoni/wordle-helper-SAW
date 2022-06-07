@@ -430,7 +430,7 @@ public class TelegramController {
         results.setAttempts(attempts);
         this.resultsBeingCreatedByChatId.put(chatId, results);
 
-        InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguage-result");
+        InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguageResult");
         InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("spanishLanguageResult");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton);
 
@@ -656,13 +656,12 @@ public class TelegramController {
     }
 
     private void handleDictionaryWord(Long chatId, String word){
-        Word resultWord = this.dictionaryService.findByNameAndLanguage(word, this.currentDictionaryLanguage);
-
-        if(resultWord == null){
+        try {
+            Word resultWord = this.dictionaryService.findByNameAndLanguage(word, this.currentDictionaryLanguage);
+            this.sendSimpleMessageAndExecute(chatId, resultWord.getDefinition());
+        } catch(NotFoundException e){
             String messageText = String.format("No results found for %s", word);
             this.sendSimpleMessageAndExecute(chatId, messageText);
-        } else {
-            this.sendSimpleMessageAndExecute(chatId, resultWord.getDefinition());
         }
 
         InlineKeyboardButton yesButton = new InlineKeyboardButton("Yes").callbackData("confirmSearchAgain");

@@ -30,11 +30,13 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
+        String[] SWAGGER_PATHS = {"/swagger-ui/", "/swagger-resources/**", "/v2/api-docs"};
         httpSecurity
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .cors().and()
                 .csrf().disable()
                 .authorizeRequests()
+                .antMatchers(SWAGGER_PATHS).permitAll()
                 .antMatchers("/v1/sessions").permitAll()
                 .antMatchers("/v1/users").permitAll()
                 .antMatchers("/**").authenticated().and()
