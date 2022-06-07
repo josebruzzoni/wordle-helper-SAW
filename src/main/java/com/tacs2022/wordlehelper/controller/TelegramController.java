@@ -15,9 +15,9 @@ import com.tacs2022.wordlehelper.domain.dictionary.Word;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
+import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
-import com.tacs2022.wordlehelper.dtos.user.NewResultDto;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.service.DictionaryService;
 import com.tacs2022.wordlehelper.service.TelegramSecurityService;
@@ -50,7 +50,7 @@ public class TelegramController {
     private Map<Long, String> usernameByChatId = new HashMap<>();
     private Map<Long, String> lastMessageSentByChatId = new HashMap<>();
     private Map<Long, NewTournamentDto> tournamentBeingCreatedByChatId = new HashMap<>();
-    private Map<Long, NewResultDto> resultsBeingCreatedByChatId = new HashMap<>();
+    private Map<Long, Result> resultsBeingCreatedByChatId = new HashMap<>();
 
     private User currentUser;
     private Language currentDictionaryLanguage;
@@ -325,9 +325,9 @@ public class TelegramController {
     }
 
     private void handleConfirmResult(Long chatId){
-        NewResultDto result = this.resultsBeingCreatedByChatId.get(chatId);
+        Result result = this.resultsBeingCreatedByChatId.get(chatId);
 
-        this.userService.addResult(currentUser.getId(), result.fromDto());
+        this.userService.addResult(currentUser.getId(), result);
 
         this.sendSimpleMessageAndExecute(chatId, "Result successfuly saved.");
         this.sendKeyboard(chatId);
@@ -340,7 +340,7 @@ public class TelegramController {
     }
 
     private void handleResultLanguage(Long chatId, Language language){
-        NewResultDto resultInProcess = this.resultsBeingCreatedByChatId.get(chatId);
+        Result resultInProcess = this.resultsBeingCreatedByChatId.get(chatId);
 
         resultInProcess.setLanguage(language);
 
@@ -425,7 +425,7 @@ public class TelegramController {
 
     private void handleAttempts(long chatId, String attemptsStr){
         Integer attempts = Integer.parseInt(attemptsStr);
-        NewResultDto results = new NewResultDto();
+        Result results = new Result();
 
         results.setAttempts(attempts);
         this.resultsBeingCreatedByChatId.put(chatId, results);

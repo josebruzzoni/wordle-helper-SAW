@@ -3,7 +3,6 @@ package com.tacs2022.wordlehelper.service;
 import com.tacs2022.wordlehelper.domain.user.PasswordSecurity;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
-import com.tacs2022.wordlehelper.dtos.user.NewResultDto;
 import com.tacs2022.wordlehelper.exceptions.ExistingUserException;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.exceptions.ResultAlreadyLoadedException;

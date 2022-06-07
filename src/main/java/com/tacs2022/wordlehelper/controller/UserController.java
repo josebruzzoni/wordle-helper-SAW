@@ -7,7 +7,6 @@ import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.JsonResponseDto;
 import com.tacs2022.wordlehelper.dtos.tournaments.OutputTournamentDto;
-import com.tacs2022.wordlehelper.dtos.user.NewResultDto;
 import com.tacs2022.wordlehelper.dtos.user.NewUserDto;
 import com.tacs2022.wordlehelper.exceptions.ForbiddenException;
 import com.tacs2022.wordlehelper.service.TournamentService;
@@ -53,8 +52,8 @@ public class UserController {
     
     @PostMapping("{userId}/results")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void addUserResults(@Valid @RequestBody NewResultDto savedResult, @PathVariable(value = "userId") Long userId){
-        userService.addResult(userId, savedResult.fromDto());
+    public void addUserResults(@Valid @RequestBody Result savedResult, @PathVariable(value = "userId") Long userId){
+        userService.addResult(userId, savedResult);
     }
     
     @GetMapping("{userId}/tournaments")

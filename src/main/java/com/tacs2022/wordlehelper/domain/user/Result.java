@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
@@ -17,7 +18,9 @@ import java.time.LocalDate;
 public class Result {
     @Id @GeneratedValue @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
+    @NotNull(message = "Attempts is mandatory")
     private Integer attempts;
+    @NotNull(message = "Language is mandatory")
     private Language language;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDate date = LocalDate.now();
