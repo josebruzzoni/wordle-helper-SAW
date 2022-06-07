@@ -13,14 +13,13 @@ import java.security.spec.KeySpec;
 
 @Service
 public class SecurityService {
-    @Autowired
-    UserService userService;
+
+    private final SecureRandom random = new SecureRandom();
 
     private static final int ITERATIONS = 10000;
     private static final int KEY_LENGTH = 256;
 
     public byte[] getSalt() {
-        SecureRandom random = new SecureRandom();
         byte[] salt = new byte[16];
         random.nextBytes(salt);
         return salt;
@@ -41,8 +40,7 @@ public class SecurityService {
         }
     }
 
-    public boolean validatePassword(String username, String password) {
-        User user = userService.findByUsername(username);
+    public boolean validatePassword(String password, User user) {
         String actualPass = new String(user.getHashedPass());
         String givenPass = new String(this.hash(password, user.getSalt()));
         return actualPass.equals(givenPass);
