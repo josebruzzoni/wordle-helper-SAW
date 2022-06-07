@@ -97,14 +97,14 @@ public class UserTournamenTest {
 	public void userPasswordIsIncorrect() {
 		Mockito.when(userRepoMock.findByUsername("Julian")).thenReturn(List.of(julian));
 		String pass = "sarasa";
-		assertFalse(securityService.validatePassword("Julian", pass));
+		assertFalse(userService.validatePassword("Julian", pass));
 	}
 
 	@Test
 	public void userPasswordIsCorrect() {
 		Mockito.when(userRepoMock.findByUsername("Julian")).thenReturn(List.of(julian));
 		String pass = "1234";
-		assertTrue(securityService.validatePassword("Julian", pass));
+		assertTrue(userService.validatePassword("Julian", pass));
 	}
 
 	@Test

@@ -66,7 +66,7 @@ public class Tournament {
      * @param date Date to count played days by.
      * @return Days played until date
      */
-    public int getDaysPlayedAtDate(LocalDate date){
+    public int getDaysPlayedUntilDate(LocalDate date){
         TournamentStatus status = getStatusByDate(date);
 
         if (status == TournamentStatus.NOT_STARTED)
@@ -75,6 +75,10 @@ public class Tournament {
             return (int) startDate.datesUntil(date).count();
         else
             return (int) (startDate.datesUntil(endDate).count() + 1);
+    }
+
+    public int getGamesPlayedUntilDate(LocalDate date){
+        return getDaysPlayedUntilDate(date)*getLanguages().size();
     }
 
     public boolean supportsLanguage(Language language) {

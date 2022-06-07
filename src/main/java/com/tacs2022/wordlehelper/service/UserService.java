@@ -19,6 +19,8 @@ import java.util.Optional;
 public class UserService {
     @Autowired
     UserRepository userRepo;
+    @Autowired
+    SecurityService securityService;
 
     public List<User> findAll() {
         return (List<User>) userRepo.findAll();
@@ -66,9 +68,8 @@ public class UserService {
     }
 
     private PasswordSecurity getHashedSaltedPassword(String password){
-        SecurityService hasher = new SecurityService();
-        byte[] salt = hasher.getSalt();
-        byte[] hashedSaltedPassword = hasher.hash(password, salt);
+        byte[] salt = securityService.getSalt();
+        byte[] hashedSaltedPassword = securityService.hash(password, salt);
 
         if(salt == null || hashedSaltedPassword == null){
             return null;
@@ -96,6 +97,11 @@ public class UserService {
     public User getUserFromToken(String token){
         String userId = TokenProvider.getId(token);
         return this.findById(userId);
+    }
+
+    public boolean validatePassword(String username, String password){
+        User user = this.findByUsername(username);
+        return this.securityService.validatePassword(password, user);
     }
 
 }

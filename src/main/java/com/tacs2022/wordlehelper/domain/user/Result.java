@@ -5,6 +5,7 @@ import com.tacs2022.wordlehelper.domain.Language;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Data
@@ -12,7 +13,9 @@ import java.time.LocalDate;
 public class Result {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
+    @NotNull(message = "Attempts is mandatory")
     private Integer attempts;
+    @NotNull(message = "Language is mandatory")
     private Language language;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDate date = LocalDate.now();
