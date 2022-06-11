@@ -34,9 +34,8 @@ public class HelperController {
      *
      * @param lan Language the game was played in.
      * @param greyLettersPlayed Concatenated letters played that resulted colored grey (i.e.: "ARBLFUEGPS")
-     * @param yellowLettersPlayed A string of 5 characters that represent the letters and respective positions
-     *                            they were played of those that resulted colored yellow, using '_' where no
-     *                            yellow letter was played (i.e.: "_I_C_")
+     * @param yellowLettersPlayed Pairs of indexes and letters that represent the letters and respective positions
+     *                            they were played of those that resulted colored yellow (i.e.: "0I4C")
      * @param greenLettersPlayed A string of 5 characters that represent the letters and respective positions
      *                           they were played of those that resulted colored green, using '_' where no
      *                           green letter was played (i.e.: "T__O_")
@@ -67,20 +66,28 @@ public class HelperController {
         // Validate that count of all characters sent is at least 5
         if (params.stream().filter(Objects::nonNull)
                 .map(s -> s.replace("_", ""))
+                .map(s -> s.replaceAll("[0-9]", ""))
                 .reduce((acc, e) -> acc  + e)
                 .filter(s -> s.length() >= WORD_LENGTH).isEmpty())
             throw new InvalidPlayException("A Wordle play must be of at least " + WORD_LENGTH + " characters combined");
 
         // Validate correct format of params => yellow and green must be five characters long, with only letters and '_'
-        validatePositionPlay(yellow);
-        validatePositionPlay(green);
+        validateYellowPlay(yellow);
+        validateGreenPlay(green);
     }
 
-    private void validatePositionPlay(String play){
+    private void validateGreenPlay(String play){
         if (play == null || play.isEmpty())
             return;
         if (!play.matches(String.format("[a-zA-Z_]{%s}", WORD_LENGTH)))
-            throw new InvalidPlayException("Yellow and Green parameters must be five characters long and contain only letters or underscore");
+            throw new InvalidPlayException("Green parameters must be five characters long and contain only letters or underscore");
+    }
+
+    private void validateYellowPlay(String play) {
+        if (play == null || play.isEmpty())
+            return;
+        if (!play.matches("([0-9][a-zA-Z])*"))
+            throw new InvalidPlayException("Yellow parameters must contain only pairs of indexes and letters");
     }
 
     private Language validateLanguage(String language){
