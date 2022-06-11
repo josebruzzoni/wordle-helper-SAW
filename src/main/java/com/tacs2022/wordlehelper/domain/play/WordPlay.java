@@ -15,16 +15,16 @@ public class WordPlay {
     public WordPlay(String grayLettersPlayed, String yellowLettersPlayed, String greenLettersPlayed){
         letters = new ArrayList<>();
         //process grey letters
-        readLettersFromStringNoPosition(grayLettersPlayed);
+        readGrayLettersFromString(grayLettersPlayed);
         //process yellow letters
-        readLettersFromStringWithPositions(yellowLettersPlayed, LetterColor.YELLOW);
+        readYellowLettersFromString(yellowLettersPlayed);
         //process green letters
-        readLettersFromStringWithPositions(greenLettersPlayed, LetterColor.GREEN);
+        readGreenLettersFromString(greenLettersPlayed);
 
         //TODO: throw exception if empty?
     }
 
-    private void readLettersFromStringNoPosition(String string){
+    private void readGrayLettersFromString(String string){
         if (string == null) return;
 
         for (int i = 0 ; i < string.length() ; i++){
@@ -33,12 +33,22 @@ public class WordPlay {
         }
     }
 
-    private void readLettersFromStringWithPositions(String string, LetterColor targetColor){
+    private void readYellowLettersFromString(String string){
+        if (string == null) return;
+
+        for (int i = 0 ; i < string.length() ; i+=2){
+            Character index = string.toLowerCase().charAt(i);
+            Character c = string.toLowerCase().charAt(i+1);
+            letters.add(new LetterPlay(c, Integer.valueOf(index.toString()), LetterColor.YELLOW));
+        }
+    }
+
+    private void readGreenLettersFromString(String string){
         if (string == null) return;
 
         for (int i = 0 ; i < string.length() ; i++){
             Character c = string.toLowerCase().charAt(i);
-            if (!c.equals(BLANK_INDICATOR)) letters.add(new LetterPlay(c, i, targetColor));
+            if (!c.equals(BLANK_INDICATOR)) letters.add(new LetterPlay(c, i, LetterColor.GREEN));
         }
     }
 
