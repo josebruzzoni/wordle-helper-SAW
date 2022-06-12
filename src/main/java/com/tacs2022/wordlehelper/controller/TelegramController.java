@@ -365,18 +365,26 @@ public class TelegramController {
     }
 
     private void handleResultLanguage(String chatId, Language language){
-        Result resultInProcess = this.resultsBeingCreatedByChatId.get(chatId);
+        Result result = new Result();
 
-        resultInProcess.setLanguage(language);
+        result.setLanguage(language);
+        this.resultsBeingCreatedByChatId.put(chatId, result);
 
-        String messageText = String.format("Perfect. This is your result:\n\nAttempts: %s\nLanguage: %s\n\n Is everything ok?",
-                resultInProcess.getAttempts().toString(), resultInProcess.getLanguage().getLanguage());
+        List<Integer> attemptsOptions = new ArrayList<>(
+                Arrays.asList(
+                        1, 2, 3, 4, 5, 6
+                )
+        );
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<InlineKeyboardButton> attemptsOptionsButtons = attemptsOptions.stream().map(attemptOption -> {
+            String callbackData = String.format("attempts-%s", attemptOption.toString());
 
-        InlineKeyboardButton confirmButton = new InlineKeyboardButton("Confirm").callbackData("confirmResult");
-        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("cancelResult");
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(confirmButton, cancelButton);
+            return new InlineKeyboardButton(attemptOption.toString()).callbackData(callbackData);
+        }).collect(Collectors.toList());
 
-        this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
+        keyboardMarkup.addRow(attemptsOptionsButtons.toArray(InlineKeyboardButton[]::new));
+
+        this.sendMessageAndExecute(chatId, "Great. Now please select amount of attempts", keyboardMarkup);
     }
 
     private void handleTournamentLanguage(String chatId, List<Language> languages){
@@ -457,16 +465,18 @@ public class TelegramController {
 
     private void handleAttempts(String chatId, String attemptsStr){
         Integer attempts = Integer.parseInt(attemptsStr);
-        Result results = new Result();
+        Result resultInProcess = this.resultsBeingCreatedByChatId.get(chatId);
 
-        results.setAttempts(attempts);
-        this.resultsBeingCreatedByChatId.put(chatId, results);
+        resultInProcess.setAttempts(attempts);
 
-        InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguageResult");
-        InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("spanishLanguageResult");
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton);
+        String messageText = String.format("Perfect. This is your result:\n\nLanguage: %s\nAttempts: %s\n\n Is everything ok?",
+                resultInProcess.getLanguage().getLanguage(), resultInProcess.getAttempts().toString());
 
-        this.sendMessageAndExecute(chatId, "Great. Now please select the language.", keyboardMarkup);
+        InlineKeyboardButton confirmButton = new InlineKeyboardButton("Confirm").callbackData("confirmResult");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("cancelResult");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(confirmButton, cancelButton);
+
+        this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
     }
 
     // End handle query methods
@@ -673,21 +683,11 @@ public class TelegramController {
     }
 
     private void handleSubmitResults(String chatId){
-        List<Integer> attemptsOptions = new ArrayList<>(
-                Arrays.asList(
-                        1, 2, 3, 4, 5, 6
-                )
-        );
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        List<InlineKeyboardButton> attemptsOptionsButtons = attemptsOptions.stream().map(attemptOption -> {
-            String callbackData = String.format("attempts-%s", attemptOption.toString());
+        InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguageResult");
+        InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("spanishLanguageResult");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton);
 
-            return new InlineKeyboardButton(attemptOption.toString()).callbackData(callbackData);
-        }).collect(Collectors.toList());
-
-        keyboardMarkup.addRow(attemptsOptionsButtons.toArray(InlineKeyboardButton[]::new));
-
-        this.sendMessageAndExecute(chatId, "Select amount of attempts", keyboardMarkup);
+        this.sendMessageAndExecute(chatId, "Select the language.", keyboardMarkup);
     }
 
     private void handleDictionaryWord(String chatId, String word){
