@@ -179,11 +179,17 @@ public class TelegramController {
             case "cancelSearchAgain":
                 this.handleCancelSearchAgain(chatId);
                 break;
+            case "keyboardForNotLogued":
+                this.sendKeyboardForLogued(chatId);
+                break;
         }
 
-        if(optionId.startsWith("tournament-")){
-            String tournamentId = optionId.substring("tournament-".length());
-            this.handleShowTournament(chatId, tournamentId);
+        if(optionId.startsWith("showMyTournament-")){
+            String tournamentId = optionId.substring("showMyTournament-".length());
+            this.handleShowTournament(chatId, tournamentId, "My");
+        } else if(optionId.startsWith("showPublicTournament-")) {
+            String tournamentId = optionId.substring("showPublicTournament-".length());
+            this.handleShowTournament(chatId, tournamentId, "Public");
         } else if(optionId.startsWith("joinTournament-")){
             String tournamentId = optionId.substring("joinTournament-".length());
             this.handleJoinTournament(chatId, tournamentId);
@@ -217,9 +223,11 @@ public class TelegramController {
         InlineKeyboardButton showTournamentsButton = new InlineKeyboardButton("Public tournaments").callbackData("showPublicTournaments");
         InlineKeyboardButton createTournamentButton = new InlineKeyboardButton("Create tournament").callbackData("createTournament");
         InlineKeyboardButton submitResultsButton = new InlineKeyboardButton("Submit results").callbackData("submitResults");
+        InlineKeyboardButton backwardsButton = new InlineKeyboardButton("Backwards").callbackData("keyboardForNotLogued");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         keyboardMarkup.addRow(myTournamentsButton, showTournamentsButton);
         keyboardMarkup.addRow(createTournamentButton, submitResultsButton);
+        keyboardMarkup.addRow(backwardsButton);
         String messageText = "Select action to perform";
 
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
@@ -259,7 +267,7 @@ public class TelegramController {
             this.sendSimpleMessageAndExecute(chatId, buttonsMessage);
             this.handleTournaments(chatId);
         } else {
-            this.handleShowTournaments(chatId, tournaments);
+            this.handleShowTournaments(chatId, tournaments, "My");
         }
     }
 
@@ -271,19 +279,22 @@ public class TelegramController {
             this.sendSimpleMessageAndExecute(chatId, buttonsMessage);
             this.sendKeyboard(chatId);
         } else {
-            this.handleShowTournaments(chatId, tournaments);
+            this.handleShowTournaments(chatId, tournaments, "Public");
         }
     }
 
-    public void handleShowTournaments(String chatId,  List<Tournament> tournaments){
+    public void handleShowTournaments(String chatId,  List<Tournament> tournaments, String comesFrom){
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
 
         tournaments.forEach(tournament -> {
             String label = tournament.getName();
-            String callbackData = String.format("tournament-%s", tournament.getId());
+            String callbackData = String.format("show%sTournament-%s", comesFrom, tournament.getId());
             InlineKeyboardButton tournamentButton = new InlineKeyboardButton(label).callbackData(callbackData);
             keyboardMarkup.addRow(tournamentButton);
         });
+
+        InlineKeyboardButton backwardsButton = new InlineKeyboardButton("Backwards").callbackData("tournament");
+        keyboardMarkup.addRow(backwardsButton);
 
         String buttonsMessage = "Click a tournament to show options";
         this.sendMessageAndExecute(chatId, buttonsMessage, keyboardMarkup);
@@ -400,7 +411,7 @@ public class TelegramController {
         this.sendKeyboardForLogued(chatId);
     }
 
-    public void handleShowTournament(String chatId, String tournamentId){
+    public void handleShowTournament(String chatId, String tournamentId, String comesFrom){
         Tournament tournament = this.tournamentService.findById(tournamentId);
         List<User> allParticipants = tournament.getParticipants();
         String participants = "";
@@ -422,6 +433,15 @@ public class TelegramController {
             InlineKeyboardButton tournamentButton = new InlineKeyboardButton("Join").callbackData(data);
             keyboardMarkup = new InlineKeyboardMarkup(tournamentButton);
 
+        }
+
+        String callbackData = String.format("show%sTournaments", comesFrom);
+        InlineKeyboardButton backwardsButton = new InlineKeyboardButton("Backwards").callbackData(callbackData);
+
+        if(keyboardMarkup == null){
+            keyboardMarkup = new InlineKeyboardMarkup(backwardsButton);
+        } else {
+            keyboardMarkup.addRow(backwardsButton);
         }
 
         this.sendMessageAndExecute(chatId, message, keyboardMarkup);
