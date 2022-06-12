@@ -59,6 +59,7 @@ public class TelegramSecurityService {
     }
 
     public boolean isUserLogged(String chatId){
+        System.out.printf("chatId: %s", chatId);
         return this.telegramSessionRepository.existsById(chatId);
     }
 }

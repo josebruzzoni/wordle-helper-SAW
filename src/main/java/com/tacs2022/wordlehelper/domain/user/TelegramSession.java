@@ -4,16 +4,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document("telegramsessions")
+@Document("telegramSessions")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class TelegramSession {
-    @Id
+    @javax.persistence.Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.springframework.data.annotation.Id
     private String chatId;
     private String token;
 }
