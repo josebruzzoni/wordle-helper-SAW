@@ -7,6 +7,7 @@ import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
 import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.BaseRequest;
+import com.pengrad.telegrambot.request.EditMessageReplyMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
 import com.tacs2022.wordlehelper.domain.Language;
@@ -77,6 +78,15 @@ public class TelegramController {
                     "setUsernameForSignin",
                     "setPasswordForSignin"));
 
+    private HashMap<String, String> lastHelperWordByChatId = new HashMap<>();
+    private HashMap<String, List<String>> colourByCharacterForLastWordByChatId = new HashMap<>();
+    private String whiteCircleEmoji = "\u26AA";
+    private String yellowCircleEmoji = "\uD83D\uDFE1";
+    private String greenCircleEmoji = "\uD83D\uDFE2";
+    private static final char whiteCharacter = 'W';
+    private static final char yellowCharacter = 'Y';
+    private static final char greenCharacter = 'G';
+
     public TelegramController(){
         Dotenv dotenv = Dotenv.configure().load();
         String key = dotenv.get("TELEGRAM_BOT_AUTH_TOKEN");
@@ -126,6 +136,9 @@ public class TelegramController {
                 break;
             case "dictionary":
                 this.handleDictionary(chatId);
+                break;
+            case "helper":
+                this.handleHelper(chatId);
                 break;
             case "setEnglishDictionary":
                 this.handleEnglishDictionary(chatId);
@@ -201,6 +214,10 @@ public class TelegramController {
         } else if(optionId.startsWith("attempts-")){
             String attempts = optionId.substring("attempts-".length());
             this.handleAttempts(chatId, attempts);
+        } else if(optionId.startsWith("changeCharacter-")){
+            String characterPosition = optionId.substring("changeCharacter-".length());
+            int messageId = query.message().messageId();
+            this.handleCharacter(chatId, characterPosition, messageId);
         }
     }
 
@@ -262,6 +279,11 @@ public class TelegramController {
 
         this.lastMessageSentByChatId.put(chatId, "setDictionaryWord");
         this.sendSimpleMessageAndExecute(chatId, messageText);
+    }
+
+    private void handleHelper(String chatId){
+        this.lastMessageSentByChatId.put(chatId, "firstWordHelper");
+        this.sendSimpleMessageAndExecute(chatId, "Send me the first word.");
     }
 
     public void handleShowMyTournaments(String chatId){
@@ -484,6 +506,67 @@ public class TelegramController {
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
     }
 
+    private void handleCharacter(String chatId, String characterPosition, int messageId){
+        System.out.printf("messageId: %s\n", messageId);
+        int position = Integer.parseInt(characterPosition);
+        List<String> colourByCharacterForLastWord = this.colourByCharacterForLastWordByChatId.get(chatId);
+        String colourByCharacter = colourByCharacterForLastWord.get(position);
+        String[] characterAndColour = colourByCharacter.split("-");
+
+        char newColour = this.getNextColour(characterAndColour[1].charAt(0));
+        String newColourByCharacter = String.format("%c-%c", characterAndColour[0].charAt(0), newColour);
+        colourByCharacterForLastWord.remove(position);
+        colourByCharacterForLastWord.add(position, newColourByCharacter);
+        this.colourByCharacterForLastWordByChatId.put(chatId, colourByCharacterForLastWord);
+
+        ArrayList<InlineKeyboardButton> colouredButtons = this.getColouredButtons(chatId);
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.addRow(colouredButtons.toArray(new InlineKeyboardButton[0]));
+        EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(chatId, messageId).replyMarkup(inlineKeyboardMarkup);
+        this.executeMessage(editMessageReplyMarkup);
+    }
+
+    private ArrayList<InlineKeyboardButton> getColouredButtons(String chatId){
+        ArrayList<InlineKeyboardButton> buttons = new ArrayList<>();
+        List<String> colourByCharacterForLastWord = this.colourByCharacterForLastWordByChatId.get(chatId);
+        for (int i = 0; i < colourByCharacterForLastWord.size(); i++) {
+            String colourByCharacter = colourByCharacterForLastWord.get(i);
+            String[] characterAndColour = colourByCharacter.split("-");
+            String label = String.format("%c %s", characterAndColour[0].charAt(0), this.getEmoji(characterAndColour[1].charAt(0)));
+            String callbackData = String.format("changeCharacter-%d", i);
+            InlineKeyboardButton tournamentButton = new InlineKeyboardButton(label).callbackData(callbackData);
+            buttons.add(tournamentButton);
+        };
+
+        return buttons;
+    }
+
+    private char getNextColour(Character actualColour){
+        switch(actualColour){
+            case whiteCharacter:
+                return yellowCharacter;
+            case yellowCharacter:
+                return greenCharacter;
+            case greenCharacter:
+                return whiteCharacter;
+            default:
+                return 'N';
+        }
+    }
+
+    private String getEmoji(char colour){
+        switch(colour){
+            case whiteCharacter:
+                return this.whiteCircleEmoji;
+            case yellowCharacter:
+                return this.yellowCircleEmoji;
+            case greenCharacter:
+                return this.greenCircleEmoji;
+            default:
+                return "";
+        }
+    }
+
     // End handle query methods
 
     private void handleMessage(Message message){
@@ -593,7 +676,9 @@ public class TelegramController {
                 case "setDictionaryWord":
                     this.handleDictionaryWord(chatId, text);
                     break;
-
+                case "firstWordHelper":
+                    this.handleFirstWordHelper(chatId, text);
+                    break;
             }
         }
     }
@@ -738,6 +823,34 @@ public class TelegramController {
         this.sendKeyboard(chatId);
     }
 
+    private void handleFirstWordHelper(String chatId, String word){
+        if(word.length() != 5){
+            this.sendSimpleMessageAndExecute(chatId, "Word must be five characters long. Try again.");
+            this.handleHelper(chatId);
+            return;
+        }
+
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        char[] upperWordArray = word.toUpperCase().toCharArray();
+        List<String> colourByCharacterForLastWord = new ArrayList<>();
+
+        for (Character character : upperWordArray) {
+            colourByCharacterForLastWord.add(String.format("%c-%c", character, whiteCharacter));
+        }
+
+        this.colourByCharacterForLastWordByChatId.put(chatId, colourByCharacterForLastWord);
+
+        ArrayList<InlineKeyboardButton> buttons = this.getColouredButtons(chatId);
+        keyboardMarkup.addRow(buttons.toArray(new InlineKeyboardButton[0]));
+
+        InlineKeyboardButton nextWord = new InlineKeyboardButton("Write next word").callbackData("writeNextWord");
+        InlineKeyboardButton finish = new InlineKeyboardButton("Finish").callbackData("finishHelper");
+        keyboardMarkup.addRow(nextWord);
+        keyboardMarkup.addRow(finish);
+
+        this.sendMessageAndExecute(chatId, "Change colours, write next word or finish.", keyboardMarkup);
+    }
+
     // End handle message methods
 
     private void sendSimpleMessageAndExecute(String chatId, String message){
@@ -779,8 +892,9 @@ public class TelegramController {
     private void sendKeyboardForLogued(String chatId){
         InlineKeyboardButton tournamentButton = new InlineKeyboardButton("Tournament").callbackData("tournament");
         InlineKeyboardButton dictionaryButton = new InlineKeyboardButton("Dictionary").callbackData("dictionary");
+        InlineKeyboardButton helperButton = new InlineKeyboardButton("Helper").callbackData("helper");
         InlineKeyboardButton logoutButton = new InlineKeyboardButton("Logout").callbackData("logout");
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(tournamentButton, dictionaryButton, logoutButton);
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(tournamentButton, dictionaryButton, helperButton, logoutButton);
         String buttonMessage = "Select action's category to perform";
         SendMessage sendMessage = new SendMessage(chatId, buttonMessage).replyMarkup(keyboardMarkup);
 
