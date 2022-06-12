@@ -48,7 +48,7 @@ public class UserService {
     }
 
     @Transactional
-    public User save(String username, String password) {
+    public User save(String username, String password) throws ExistingUserException {
         Optional<User> user = this.userRepo.findByUsername(username).stream().findFirst();
 
         if(user.isPresent()){

@@ -18,6 +18,7 @@ import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
+import com.tacs2022.wordlehelper.exceptions.ExistingUserException;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.service.DictionaryService;
 import com.tacs2022.wordlehelper.service.TelegramSecurityService;
@@ -252,13 +253,25 @@ public class TelegramController {
     public void handleShowMyTournaments(String chatId){
         List<Tournament> tournaments = this.tournamentService.findTournamentsInWhichUserIsRegistered(this.currentUser);
 
-        this.handleShowTournaments(chatId, tournaments);
+        if(tournaments.isEmpty()){
+            String buttonsMessage = "You haven't tournaments yet.";
+            this.sendSimpleMessageAndExecute(chatId, buttonsMessage);
+            this.sendKeyboard(chatId);
+        } else {
+            this.handleShowTournaments(chatId, tournaments);
+        }
     }
 
     private void handleShowPublicTournaments(String chatId){
         List<Tournament> tournaments = this.tournamentService.findPublicTournaments();
 
-        this.handleShowTournaments(chatId, tournaments);
+        if(tournaments.isEmpty()){
+            String buttonsMessage = "There aren't public tournaments yet.";
+            this.sendSimpleMessageAndExecute(chatId, buttonsMessage);
+            this.sendKeyboard(chatId);
+        } else {
+            this.handleShowTournaments(chatId, tournaments);
+        }
     }
 
     public void handleShowTournaments(String chatId,  List<Tournament> tournaments){
@@ -578,8 +591,12 @@ public class TelegramController {
             SendMessage sendMessage = new SendMessage(chatId, "User has been created successfuly");
             bot.execute(sendMessage);
             this.sendKeyboardForNotLogued(chatId);
+        } catch(ExistingUserException e){
+            this.sendSimpleMessageAndExecute(chatId, "User already exists.");
+            this.handleSignin(chatId);
         } catch(Exception e){
             System.out.println(e);
+            this.sendSimpleMessageAndExecute(chatId, "An error ocurred.");
         }
     }
 
