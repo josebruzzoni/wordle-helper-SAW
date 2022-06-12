@@ -432,6 +432,7 @@ public class TelegramController {
 
         this.tournamentService.addParticipant(tournament.getId(), this.currentUser, this.currentUser);
         this.sendMessageAndExecute(chatId, "Joined successfuly", null);
+        this.handleShowPublicTournaments(chatId);
     }
 
     private void handleAttempts(String chatId, String attemptsStr){
