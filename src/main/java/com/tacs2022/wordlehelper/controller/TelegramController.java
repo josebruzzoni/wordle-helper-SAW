@@ -5,8 +5,7 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.BaseRequest;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
@@ -61,7 +60,13 @@ public class TelegramController {
             Arrays.asList(
                     new Command("/start", false),
                     new Command("/login", false),
-                    new Command("/logout", false)
+                    new Command("/logout", false),
+                    new Command("/tournament", true),
+                    new Command("/dictionary", true),
+                    new Command("/show_public_tournaments", true),
+                    new Command("/show_my_tournaments", true),
+                    new Command("/create_tournament", true),
+                    new Command("/submit_results", true)
             )
     );
 
@@ -543,6 +548,24 @@ public class TelegramController {
                 case "/start":
                     this.sendKeyboard(chatId);
                     break;
+                case "/tournament":
+                    this.handleTournaments(chatId);
+                    break;
+                case "/dictionary":
+                    this.handleDictionary(chatId);
+                    break;
+                case "/show_public_tournaments":
+                    this.handleShowPublicTournaments(chatId);
+                    break;
+                case "/show_my_tournaments":
+                    this.handleShowMyTournaments(chatId);
+                    break;
+                case "/create_tournament":
+                    this.handleCreateTournament(chatId);
+                    break;
+                case "/submit_result":
+                    this.handleSubmitResults(chatId);
+                    break;
             }
         } else {
             switch (lastMessageId){
@@ -722,13 +745,13 @@ public class TelegramController {
     }
 
     private void sendMessageAndExecute(String chatId, String message, InlineKeyboardMarkup markup){
-        SendMessage sendMessage = new SendMessage(chatId, message);
+        SendMessage sendMessage = new SendMessage(chatId, message).parseMode(ParseMode.HTML);
 
         if(markup != null){
             sendMessage.replyMarkup(markup);
         }
 
-        bot.execute(sendMessage);
+        this.executeMessage(sendMessage);
     }
 
     private void cleanMaps(String chatId){
