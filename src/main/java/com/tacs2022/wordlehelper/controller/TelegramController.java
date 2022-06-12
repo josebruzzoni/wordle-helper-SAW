@@ -522,6 +522,10 @@ public class TelegramController {
         ArrayList<InlineKeyboardButton> colouredButtons = this.getColouredButtons(chatId);
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.addRow(colouredButtons.toArray(new InlineKeyboardButton[0]));
+        InlineKeyboardButton nextWord = new InlineKeyboardButton("Write next word").callbackData("writeNextWord");
+        InlineKeyboardButton finish = new InlineKeyboardButton("Finish").callbackData("finishHelper");
+        inlineKeyboardMarkup.addRow(nextWord);
+        inlineKeyboardMarkup.addRow(finish);
         EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(chatId, messageId).replyMarkup(inlineKeyboardMarkup);
         this.executeMessage(editMessageReplyMarkup);
     }
