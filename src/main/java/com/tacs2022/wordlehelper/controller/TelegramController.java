@@ -588,8 +588,7 @@ public class TelegramController {
 
         try {
             this.userService.save(username, password);
-            SendMessage sendMessage = new SendMessage(chatId, "User has been created successfuly");
-            bot.execute(sendMessage);
+            this.sendSimpleMessageAndExecute(chatId, "User has been created successfuly");
             this.sendKeyboardForNotLogued(chatId);
         } catch(ExistingUserException e){
             this.sendSimpleMessageAndExecute(chatId, "User already exists.");
