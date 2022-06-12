@@ -184,7 +184,7 @@ public class TelegramController {
             case "cancelSearchAgain":
                 this.handleCancelSearchAgain(chatId);
                 break;
-            case "keyboardForNotLogued":
+            case "keyboardForLogued":
                 this.sendKeyboardForLogued(chatId);
                 break;
         }
@@ -228,7 +228,7 @@ public class TelegramController {
         InlineKeyboardButton showTournamentsButton = new InlineKeyboardButton("Public tournaments").callbackData("showPublicTournaments");
         InlineKeyboardButton createTournamentButton = new InlineKeyboardButton("Create tournament").callbackData("createTournament");
         InlineKeyboardButton submitResultsButton = new InlineKeyboardButton("Submit results").callbackData("submitResults");
-        InlineKeyboardButton backwardsButton = new InlineKeyboardButton("Backwards").callbackData("keyboardForNotLogued");
+        InlineKeyboardButton backwardsButton = new InlineKeyboardButton("Backwards").callbackData("keyboardForLogued");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         keyboardMarkup.addRow(myTournamentsButton, showTournamentsButton);
         keyboardMarkup.addRow(createTournamentButton, submitResultsButton);
