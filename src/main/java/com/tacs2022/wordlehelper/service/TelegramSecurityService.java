@@ -54,12 +54,11 @@ public class TelegramSecurityService {
         }
 
         String token = telegramSession.get().getToken();
-        System.out.printf("token: %s\n", token);
+
         return userService.getUserFromToken(token);
     }
 
     public boolean isUserLogged(String chatId){
-        System.out.printf("chatId: %s", chatId);
         return this.telegramSessionRepository.existsById(chatId);
     }
 }

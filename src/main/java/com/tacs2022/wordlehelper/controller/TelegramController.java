@@ -416,7 +416,7 @@ public class TelegramController {
 
         InlineKeyboardMarkup keyboardMarkup = null;
 
-        if(tournament.getStatus() == TournamentStatus.NOT_STARTED) {
+        if(tournament.getStatus() == TournamentStatus.NOT_STARTED && !tournament.isAParticipant(this.currentUser)) {
             String data = String.format("joinTournament-%s", tournament.getId());
             InlineKeyboardButton tournamentButton = new InlineKeyboardButton("Join").callbackData(data);
             keyboardMarkup = new InlineKeyboardMarkup(tournamentButton);
@@ -458,7 +458,7 @@ public class TelegramController {
         String text = message.text();
 
         List<String> commandNames = this.commands.stream().map(Command::getName).collect(Collectors.toList());
-        System.out.println(commandNames);
+
         boolean isCommand = commandNames.contains(text);
 
         // if is not a message that belongs to a flow and is not a command, then the bot doesn't understand the message.
@@ -753,6 +753,10 @@ public class TelegramController {
         if(!isUserLogged){
             this.sendSimpleMessageAndExecute(chatId, "You must be logged to perform this action");
             this.sendKeyboardForNotLogued(chatId);
+        }
+
+        if(this.currentUser == null){
+            this.currentUser = this.telegramSecurityService.getUserFromToken(chatId);
         }
 
         return isUserLogged;
