@@ -8,6 +8,10 @@ import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.exceptions.ResultAlreadyLoadedException;
 import com.tacs2022.wordlehelper.repos.UserRepository;
 import com.tacs2022.wordlehelper.security.jwt.TokenProvider;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,7 +98,7 @@ public class UserService {
     	return this.getUserFromToken(token);
     }
 
-    public User getUserFromToken(String token){
+    public User getUserFromToken(String token) throws ExpiredJwtException, UnsupportedJwtException, MalformedJwtException, SignatureException, IllegalArgumentException{
         String userId = TokenProvider.getId(token);
         return this.findById(userId);
     }

@@ -30,7 +30,7 @@ public class TokenProvider {
 
     }
 
-    public static String getId(final String token) {
+    public static String getId(final String token) throws io.jsonwebtoken.ExpiredJwtException, io.jsonwebtoken.UnsupportedJwtException, io.jsonwebtoken.MalformedJwtException, io.jsonwebtoken.SignatureException, IllegalArgumentException {
         final JwtParser jwtParser = Jwts.parser().setSigningKey(SIGNING_KEY);
         final Jws<Claims> claimsJws = jwtParser.parseClaimsJws(token.replace(TOKEN_BEARER_PREFIX + " ", ""));
         return claimsJws.getBody().getId();

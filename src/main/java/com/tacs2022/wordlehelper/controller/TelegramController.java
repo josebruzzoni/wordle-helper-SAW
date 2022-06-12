@@ -26,6 +26,7 @@ import com.tacs2022.wordlehelper.service.TournamentService;
 import com.tacs2022.wordlehelper.service.UserService;
 import com.tacs2022.wordlehelper.utils.LanguageUtils;
 import io.github.cdimascio.dotenv.Dotenv;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -256,7 +257,7 @@ public class TelegramController {
         if(tournaments.isEmpty()){
             String buttonsMessage = "You haven't tournaments yet.";
             this.sendSimpleMessageAndExecute(chatId, buttonsMessage);
-            this.sendKeyboard(chatId);
+            this.handleTournaments(chatId);
         } else {
             this.handleShowTournaments(chatId, tournaments);
         }
@@ -755,8 +756,15 @@ public class TelegramController {
             this.sendKeyboardForNotLogued(chatId);
         }
 
-        if(this.currentUser == null){
-            this.currentUser = this.telegramSecurityService.getUserFromToken(chatId);
+        try {
+            if (this.currentUser == null) {
+                this.currentUser = this.telegramSecurityService.getUserFromToken(chatId);
+            }
+        } catch(ExpiredJwtException e){
+            this.sendSimpleMessageAndExecute(chatId, "Your token has expired. Please, login again.");
+            this.handleLogin(chatId);
+
+            return false;
         }
 
         return isUserLogged;
