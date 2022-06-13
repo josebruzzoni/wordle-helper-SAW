@@ -956,13 +956,7 @@ public class TelegramController {
 
         WordPlay attemptedPlay = new WordPlay(tempHelperInfo.getGrayLettersPlayed(), tempHelperInfo.getYellowLettersPlayed(),
                 tempHelperInfo.getGreenLettersPlayed());
-
-        System.out.printf("grayLettersPlayed: %s\nyellowLettersPlayed: %s\ngreenLettersPlayed: %s\n",
-                tempHelperInfo.getGrayLettersPlayed(), tempHelperInfo.getYellowLettersPlayed(),
-                tempHelperInfo.getGreenLettersPlayed());
-
         List<String> possibleWords = this.helperService.getWordsByPlay(attemptedPlay, tempHelperInfo.getLanguage());
-
         String message = "Possible words are:\n" + String.join("\n", possibleWords);
 
         this.sendSimpleMessageAndExecute(chatId, message);
