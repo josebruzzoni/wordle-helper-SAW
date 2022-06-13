@@ -21,6 +21,7 @@ import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
 import com.tacs2022.wordlehelper.exceptions.ExistingUserException;
+import com.tacs2022.wordlehelper.exceptions.LetterMismatchException;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
 import com.tacs2022.wordlehelper.service.*;
 import com.tacs2022.wordlehelper.utils.LanguageUtils;
@@ -904,6 +905,18 @@ public class TelegramController {
     }
 
     private void handleWriteNextWord(String chatId){
+        TempHelperInfo tempHelperInfo = this.readLastWord(chatId);
+
+        if(tempHelperInfo == null){
+            return;
+        }
+
+        this.tempHelperInfoByChatId.put(chatId, tempHelperInfo);
+        this.lastMessageSentByChatId.put(chatId, "wordHelper");
+        this.sendSimpleMessageAndExecute(chatId, "Send me the next word please.");
+    }
+
+    private TempHelperInfo readLastWord(String chatId){
         TempHelperInfo tempHelperInfo = this.tempHelperInfoByChatId.get(chatId);
         List<String> colourByCharacterForLastWord = this.colourByCharacterForLastWordByChatId.get(chatId);
 
@@ -921,19 +934,31 @@ public class TelegramController {
                     tempHelperInfo.addYellowLetterPlayed(i, letter);
                     break;
                 case greenCharacter:
-                    tempHelperInfo.addGreenLetterPlayed(i, letter);
+                    try {
+                        tempHelperInfo.addGreenLetterPlayed(i, letter);
+                    }catch(LetterMismatchException e){
+                        this.sendSimpleMessageAndExecute(chatId, e.getMessage());
+                        return null;
+                    }
                     break;
             }
         }
 
-        this.tempHelperInfoByChatId.put(chatId, tempHelperInfo);
-        this.lastMessageSentByChatId.put(chatId, "wordHelper");
-        this.sendSimpleMessageAndExecute(chatId, "Send me the next word please.");
+        return tempHelperInfo;
     }
 
     private void handleFinishHelper(String chatId){
-        TempHelperInfo tempHelperInfo = this.tempHelperInfoByChatId.get(chatId);
+        TempHelperInfo tempHelperInfo = this.readLastWord(chatId);
+
+        if(tempHelperInfo == null){
+            return;
+        }
+
         WordPlay attemptedPlay = new WordPlay(tempHelperInfo.getGrayLettersPlayed(), tempHelperInfo.getYellowLettersPlayed(),
+                tempHelperInfo.getGreenLettersPlayed());
+
+        System.out.printf("grayLettersPlayed: %s\nyellowLettersPlayed: %s\ngreenLettersPlayed: %s\n",
+                tempHelperInfo.getGrayLettersPlayed(), tempHelperInfo.getYellowLettersPlayed(),
                 tempHelperInfo.getGreenLettersPlayed());
 
         List<String> possibleWords = this.helperService.getWordsByPlay(attemptedPlay, tempHelperInfo.getLanguage());

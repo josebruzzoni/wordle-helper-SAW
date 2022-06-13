@@ -43,8 +43,12 @@ public class TempHelperInfo {
         int lastPosition = this.greenLettersPlayed.length()-1;
 
         if(position != lastPosition){
-            rightSideOfPosition = this.greenLettersPlayed.substring(position+1, lastPosition);
+            rightSideOfPosition = this.greenLettersPlayed.substring(position+1);
         }
+
+        System.out.printf("greenLettersPlayed: %s\nleftSideOfPosition: %s\nletter: %c\nrightSideOfPosition: %s\n",
+                this.greenLettersPlayed, leftSideOfPosition,
+                letter, rightSideOfPosition);
 
         this.greenLettersPlayed = leftSideOfPosition + letter + rightSideOfPosition;
     }
