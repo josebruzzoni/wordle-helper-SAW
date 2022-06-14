@@ -19,11 +19,9 @@ class HelperServiceTest {
     @BeforeEach
     void init(){
         helperService = new HelperService();
-        wordPlay = new WordPlay("KIR", "G__W_", "A_L__");
+        wordPlay = new WordPlay("KIR", "0G3W", "A_L__");
         emptyPlay = new WordPlay(null, null, null);
     }
-
-    //TODO: standardize test names
 
     //TODO: more tests
     @ParameterizedTest
@@ -35,8 +33,8 @@ class HelperServiceTest {
 
     private static Stream<Arguments> test_getWordsByPlay() {
         return Stream.of(
-                Arguments.of(new WordPlay("KIR", "W____", "A_L__"), Language.EN, List.of("ABLOW", "AFLOW", "ALLOW", "AGLOW")),
-                Arguments.of(new WordPlay("ARBLFUEGPS", "_I_C_", "____O"), Language.ES, List.of("CHINO", "CHITO", "CHIVO", "COIDO", "COITO", "ICONO", "TOCIO"))
+                Arguments.of(new WordPlay("KIR", "0W", "A_L__"), Language.EN, List.of("ABLOW", "AFLOW", "ALLOW", "AGLOW")),
+                Arguments.of(new WordPlay("ARBLFUEGPS", "1I3C", "____O"), Language.ES, List.of("CHINO", "CHITO", "CHIVO", "COIDO", "COITO", "ICONO", "TOCIO"))
         );
     }
 
