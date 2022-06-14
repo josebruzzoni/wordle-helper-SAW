@@ -12,7 +12,7 @@ class WordPlayTest {
 
     @Test
     void test_Constructor(){
-        WordPlay wordPlay = new WordPlay("AL", "_I_C_", "____O");
+        WordPlay wordPlay = new WordPlay("AL", "1I3C", "____O");
 
         List<LetterPlay> expectedLetters = List.of(
                 new LetterPlay('a', -1, LetterColor.GRAY),
