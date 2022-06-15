@@ -1,7 +1,7 @@
 version: '3'
 services:
     mongo:
-        image: mongo:latest
+        image: mongo:5.0
         restart: always
         container_name: wordle-helper-db-mongo
         hostname: host-mongo
@@ -19,6 +19,8 @@ services:
         build: ./../../wordle-helper
         ports:
             - "8080:8080"
+        depends_on:
+            - mongo
         networks:
             - wordle-network
     wordle-frontend:
@@ -27,6 +29,8 @@ services:
         build: ./../../wordle-helper-front
         ports:
             - "3000:3000"
+        depends_on:
+            - wordle-backend
         networks:
             - wordle-network
 networks:
