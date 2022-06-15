@@ -17,6 +17,8 @@ services:
             - wordle-network
     wordle-backend:
         build: ./../../wordle-helper
+        environment:
+            MONGO_DB_URI: ${MONGODB_URI}
         ports:
             - "8080:8080"
         depends_on:
