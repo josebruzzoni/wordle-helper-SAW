@@ -9,14 +9,14 @@ services:
           MONGO_INITDB_ROOT_USERNAME: root
           MONGO_INITDB_ROOT_PASSWORD: secret
         volumes:
-          - ./data:/data/db
-          - ./data/log:/var/log/mongodb/
+          - ./docker-compose/data:/data/db
+          - ./docker-compose/data/log:/var/log/mongodb/
         ports:
           - "27017:27017"
         networks:
             - wordle-network
     wordle-backend:
-        build: ./../../wordle-helper
+        build: ./../wordle-helper
         environment:
             MONGO_DB_URI: ${MONGODB_URI}
         ports:
@@ -28,7 +28,7 @@ services:
     wordle-frontend:
         stdin_open: true
         command: npm start
-        build: ./../../wordle-helper-front
+        build: ./../wordle-helper-front
         ports:
             - "3000:3000"
         depends_on:
