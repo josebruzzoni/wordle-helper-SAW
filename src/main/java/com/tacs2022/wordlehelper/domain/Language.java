@@ -1,8 +1,8 @@
 package com.tacs2022.wordlehelper.domain;
 
 public enum Language {
-    EN("english"),
-    ES("spanish");
+    EN("English"),
+    ES("Spanish");
 
     private final String language;
 

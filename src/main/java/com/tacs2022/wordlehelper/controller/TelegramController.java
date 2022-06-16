@@ -5,26 +5,29 @@ import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
-import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
+import com.pengrad.telegrambot.model.request.*;
 import com.pengrad.telegrambot.request.BaseRequest;
+import com.pengrad.telegrambot.request.EditMessageReplyMarkup;
 import com.pengrad.telegrambot.request.SendMessage;
 import com.pengrad.telegrambot.response.BaseResponse;
 import com.tacs2022.wordlehelper.domain.Language;
 import com.tacs2022.wordlehelper.domain.dictionary.Word;
+import com.tacs2022.wordlehelper.domain.play.TempHelperInfo;
+import com.tacs2022.wordlehelper.domain.play.WordPlay;
 import com.tacs2022.wordlehelper.domain.tournaments.Tournament;
 import com.tacs2022.wordlehelper.domain.tournaments.TournamentStatus;
 import com.tacs2022.wordlehelper.domain.tournaments.Visibility;
 import com.tacs2022.wordlehelper.domain.user.Result;
 import com.tacs2022.wordlehelper.domain.user.User;
 import com.tacs2022.wordlehelper.dtos.tournaments.NewTournamentDto;
+import com.tacs2022.wordlehelper.exceptions.ExistingUserException;
+import com.tacs2022.wordlehelper.exceptions.LetterMismatchException;
 import com.tacs2022.wordlehelper.exceptions.NotFoundException;
-import com.tacs2022.wordlehelper.service.DictionaryService;
-import com.tacs2022.wordlehelper.service.TelegramSecurityService;
-import com.tacs2022.wordlehelper.service.TournamentService;
-import com.tacs2022.wordlehelper.service.UserService;
+import com.tacs2022.wordlehelper.service.*;
 import com.tacs2022.wordlehelper.utils.LanguageUtils;
 import io.github.cdimascio.dotenv.Dotenv;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.lang.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -46,6 +49,8 @@ public class TelegramController {
     private TournamentService tournamentService;
     @Autowired
     private DictionaryService dictionaryService;
+    @Autowired
+    private HelperService helperService;
 
     private Map<String, String> usernameByChatId = new HashMap<>();
     private Map<String, String> lastMessageSentByChatId = new HashMap<>();
@@ -59,7 +64,13 @@ public class TelegramController {
             Arrays.asList(
                     new Command("/start", false),
                     new Command("/login", false),
-                    new Command("/logout", false)
+                    new Command("/logout", false),
+                    new Command("/tournament", true),
+                    new Command("/dictionary", true),
+                    new Command("/show_public_tournaments", true),
+                    new Command("/show_my_tournaments", true),
+                    new Command("/create_tournament", true),
+                    new Command("/submit_results", true)
             )
     );
 
@@ -69,6 +80,16 @@ public class TelegramController {
                     "setPasswordForLogin",
                     "setUsernameForSignin",
                     "setPasswordForSignin"));
+    private HashMap<String, List<String>> colourByCharacterForLastWordByChatId = new HashMap<>();
+    private HashMap<String, TempHelperInfo> tempHelperInfoByChatId = new HashMap<>();
+
+    private HashMap<String, Integer> helperWordsSentByChatId = new HashMap<>();
+    private String whiteCircleEmoji = "\u26AA";
+    private String yellowCircleEmoji = "\uD83D\uDFE1";
+    private String greenCircleEmoji = "\uD83D\uDFE2";
+    private static final char whiteCharacter = 'W';
+    private static final char yellowCharacter = 'Y';
+    private static final char greenCharacter = 'G';
 
     public TelegramController(){
         Dotenv dotenv = Dotenv.configure().load();
@@ -119,6 +140,9 @@ public class TelegramController {
                 break;
             case "dictionary":
                 this.handleDictionary(chatId);
+                break;
+            case "helper":
+                this.handleHelper(chatId);
                 break;
             case "setEnglishDictionary":
                 this.handleEnglishDictionary(chatId);
@@ -177,17 +201,39 @@ public class TelegramController {
             case "cancelSearchAgain":
                 this.handleCancelSearchAgain(chatId);
                 break;
+            case "keyboardForLogued":
+                this.sendKeyboardForLogued(chatId);
+                break;
+            case "englishLanguageHelper":
+                this.handleEnglishLanguageHelper(chatId);
+                break;
+            case "spanishLanguageHelper":
+                this.handleSpanishLanguageHelper(chatId);
+                break;
+            case "writeNextWord":
+                this.handleWriteNextWord(chatId);
+                break;
+            case "finishHelper":
+                this.handleFinishHelper(chatId);
+                break;
         }
 
-        if(optionId.startsWith("tournament-")){
-            String tournamentId = optionId.substring("tournament-".length());
-            this.handleShowTournament(chatId, tournamentId);
+        if(optionId.startsWith("showMyTournament-")){
+            String tournamentId = optionId.substring("showMyTournament-".length());
+            this.handleShowTournament(chatId, tournamentId, "My");
+        } else if(optionId.startsWith("showPublicTournament-")) {
+            String tournamentId = optionId.substring("showPublicTournament-".length());
+            this.handleShowTournament(chatId, tournamentId, "Public");
         } else if(optionId.startsWith("joinTournament-")){
             String tournamentId = optionId.substring("joinTournament-".length());
             this.handleJoinTournament(chatId, tournamentId);
         } else if(optionId.startsWith("attempts-")){
             String attempts = optionId.substring("attempts-".length());
             this.handleAttempts(chatId, attempts);
+        } else if(optionId.startsWith("changeCharacter-")){
+            String characterPosition = optionId.substring("changeCharacter-".length());
+            int messageId = query.message().messageId();
+            this.handleCharacter(chatId, characterPosition, messageId);
         }
     }
 
@@ -215,9 +261,11 @@ public class TelegramController {
         InlineKeyboardButton showTournamentsButton = new InlineKeyboardButton("Public tournaments").callbackData("showPublicTournaments");
         InlineKeyboardButton createTournamentButton = new InlineKeyboardButton("Create tournament").callbackData("createTournament");
         InlineKeyboardButton submitResultsButton = new InlineKeyboardButton("Submit results").callbackData("submitResults");
+        InlineKeyboardButton backwardsButton = new InlineKeyboardButton("Backwards").callbackData("keyboardForLogued");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         keyboardMarkup.addRow(myTournamentsButton, showTournamentsButton);
         keyboardMarkup.addRow(createTournamentButton, submitResultsButton);
+        keyboardMarkup.addRow(backwardsButton);
         String messageText = "Select action to perform";
 
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
@@ -249,27 +297,66 @@ public class TelegramController {
         this.sendSimpleMessageAndExecute(chatId, messageText);
     }
 
+    private void handleHelper(String chatId){
+        InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguageHelper");
+        InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("spanishLanguageHelper");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton);
+        this.sendMessageAndExecute(chatId, "Select the language to get help.", keyboardMarkup);
+    }
+
+    private void handleEnglishLanguageHelper(String chatId){
+        this.handleLanguageHelper(chatId, Language.EN);
+    }
+
+    private void handleSpanishLanguageHelper(String chatId){
+        this.handleLanguageHelper(chatId, Language.ES);
+    }
+
+    private void handleLanguageHelper(String chatId, Language language){
+        TempHelperInfo tempHelperInfo = new TempHelperInfo();
+        tempHelperInfo.setLanguage(language);
+        this.tempHelperInfoByChatId.put(chatId, tempHelperInfo);
+
+        this.lastMessageSentByChatId.put(chatId, "wordHelper");
+        this.sendSimpleMessageAndExecute(chatId, "Good. Now send me the first word.");
+    }
+
     public void handleShowMyTournaments(String chatId){
         List<Tournament> tournaments = this.tournamentService.findTournamentsInWhichUserIsRegistered(this.currentUser);
 
-        this.handleShowTournaments(chatId, tournaments);
+        if(tournaments.isEmpty()){
+            String buttonsMessage = "You haven't tournaments yet.";
+            this.sendSimpleMessageAndExecute(chatId, buttonsMessage);
+            this.handleTournaments(chatId);
+        } else {
+            this.handleShowTournaments(chatId, tournaments, "My");
+        }
     }
 
     private void handleShowPublicTournaments(String chatId){
         List<Tournament> tournaments = this.tournamentService.findPublicTournaments();
 
-        this.handleShowTournaments(chatId, tournaments);
+        if(tournaments.isEmpty()){
+            String buttonsMessage = "There aren't public tournaments yet.";
+            this.sendSimpleMessageAndExecute(chatId, buttonsMessage);
+            this.sendKeyboard(chatId);
+        } else {
+            this.handleShowTournaments(chatId, tournaments, "Public");
+        }
     }
 
-    public void handleShowTournaments(String chatId,  List<Tournament> tournaments){
+    public void handleShowTournaments(String chatId,  List<Tournament> tournaments, String comesFrom){
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
 
         tournaments.forEach(tournament -> {
             String label = tournament.getName();
-            String callbackData = String.format("tournament-%s", tournament.getId());
+            String callbackData = String.format("show%sTournament-%s", comesFrom, tournament.getId());
             InlineKeyboardButton tournamentButton = new InlineKeyboardButton(label).callbackData(callbackData);
             keyboardMarkup.addRow(tournamentButton);
         });
+
+        InlineKeyboardButton backwardsButton = new InlineKeyboardButton("Backwards").callbackData("tournament");
+        keyboardMarkup.addRow(backwardsButton);
 
         String buttonsMessage = "Click a tournament to show options";
         this.sendMessageAndExecute(chatId, buttonsMessage, keyboardMarkup);
@@ -340,18 +427,26 @@ public class TelegramController {
     }
 
     private void handleResultLanguage(String chatId, Language language){
-        Result resultInProcess = this.resultsBeingCreatedByChatId.get(chatId);
+        Result result = new Result();
 
-        resultInProcess.setLanguage(language);
+        result.setLanguage(language);
+        this.resultsBeingCreatedByChatId.put(chatId, result);
 
-        String messageText = String.format("Perfect. This is your result:\n\nAttempts: %s\nLanguage: %s\n\n Is everything ok?",
-                resultInProcess.getAttempts().toString(), resultInProcess.getLanguage().getLanguage());
+        List<Integer> attemptsOptions = new ArrayList<>(
+                Arrays.asList(
+                        1, 2, 3, 4, 5, 6
+                )
+        );
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        List<InlineKeyboardButton> attemptsOptionsButtons = attemptsOptions.stream().map(attemptOption -> {
+            String callbackData = String.format("attempts-%s", attemptOption.toString());
 
-        InlineKeyboardButton confirmButton = new InlineKeyboardButton("Confirm").callbackData("confirmResult");
-        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("cancelResult");
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(confirmButton, cancelButton);
+            return new InlineKeyboardButton(attemptOption.toString()).callbackData(callbackData);
+        }).collect(Collectors.toList());
 
-        this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
+        keyboardMarkup.addRow(attemptsOptionsButtons.toArray(InlineKeyboardButton[]::new));
+
+        this.sendMessageAndExecute(chatId, "Great. Now please select amount of attempts", keyboardMarkup);
     }
 
     private void handleTournamentLanguage(String chatId, List<Language> languages){
@@ -386,7 +481,7 @@ public class TelegramController {
         this.sendKeyboardForLogued(chatId);
     }
 
-    public void handleShowTournament(String chatId, String tournamentId){
+    public void handleShowTournament(String chatId, String tournamentId, String comesFrom){
         Tournament tournament = this.tournamentService.findById(tournamentId);
         List<User> allParticipants = tournament.getParticipants();
         String participants = "";
@@ -403,11 +498,20 @@ public class TelegramController {
 
         InlineKeyboardMarkup keyboardMarkup = null;
 
-        if(tournament.getStatus() == TournamentStatus.NOT_STARTED) {
+        if(tournament.getStatus() == TournamentStatus.NOT_STARTED && !tournament.isAParticipant(this.currentUser)) {
             String data = String.format("joinTournament-%s", tournament.getId());
             InlineKeyboardButton tournamentButton = new InlineKeyboardButton("Join").callbackData(data);
             keyboardMarkup = new InlineKeyboardMarkup(tournamentButton);
 
+        }
+
+        String callbackData = String.format("show%sTournaments", comesFrom);
+        InlineKeyboardButton backwardsButton = new InlineKeyboardButton("Backwards").callbackData(callbackData);
+
+        if(keyboardMarkup == null){
+            keyboardMarkup = new InlineKeyboardMarkup(backwardsButton);
+        } else {
+            keyboardMarkup.addRow(backwardsButton);
         }
 
         this.sendMessageAndExecute(chatId, message, keyboardMarkup);
@@ -418,20 +522,87 @@ public class TelegramController {
 
         this.tournamentService.addParticipant(tournament.getId(), this.currentUser, this.currentUser);
         this.sendMessageAndExecute(chatId, "Joined successfuly", null);
+        this.handleShowPublicTournaments(chatId);
     }
 
     private void handleAttempts(String chatId, String attemptsStr){
         Integer attempts = Integer.parseInt(attemptsStr);
-        Result results = new Result();
+        Result resultInProcess = this.resultsBeingCreatedByChatId.get(chatId);
 
-        results.setAttempts(attempts);
-        this.resultsBeingCreatedByChatId.put(chatId, results);
+        resultInProcess.setAttempts(attempts);
 
-        InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguageResult");
-        InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("spanishLanguageResult");
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton);
+        String messageText = String.format("Perfect. This is your result:\n\nLanguage: %s\nAttempts: %s\n\n Is everything ok?",
+                resultInProcess.getLanguage().getLanguage(), resultInProcess.getAttempts().toString());
 
-        this.sendMessageAndExecute(chatId, "Great. Now please select the language.", keyboardMarkup);
+        InlineKeyboardButton confirmButton = new InlineKeyboardButton("Confirm").callbackData("confirmResult");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("cancelResult");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(confirmButton, cancelButton);
+
+        this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
+    }
+
+    private void handleCharacter(String chatId, String characterPosition, int messageId){
+        int position = Integer.parseInt(characterPosition);
+        List<String> colourByCharacterForLastWord = this.colourByCharacterForLastWordByChatId.get(chatId);
+        String colourByCharacter = colourByCharacterForLastWord.get(position);
+        String[] characterAndColour = colourByCharacter.split("-");
+
+        char newColour = this.getNextColour(characterAndColour[1].charAt(0));
+        String newColourByCharacter = String.format("%c-%c", characterAndColour[0].charAt(0), newColour);
+        colourByCharacterForLastWord.remove(position);
+        colourByCharacterForLastWord.add(position, newColourByCharacter);
+        this.colourByCharacterForLastWordByChatId.put(chatId, colourByCharacterForLastWord);
+
+        ArrayList<InlineKeyboardButton> colouredButtons = this.getColouredButtons(chatId);
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.addRow(colouredButtons.toArray(new InlineKeyboardButton[0]));
+        InlineKeyboardButton nextWord = new InlineKeyboardButton("Write next word").callbackData("writeNextWord");
+        InlineKeyboardButton finish = new InlineKeyboardButton("Finish").callbackData("finishHelper");
+        inlineKeyboardMarkup.addRow(nextWord);
+        inlineKeyboardMarkup.addRow(finish);
+        EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(chatId, messageId).replyMarkup(inlineKeyboardMarkup);
+        this.executeMessage(editMessageReplyMarkup);
+    }
+
+    private ArrayList<InlineKeyboardButton> getColouredButtons(String chatId){
+        ArrayList<InlineKeyboardButton> buttons = new ArrayList<>();
+        List<String> colourByCharacterForLastWord = this.colourByCharacterForLastWordByChatId.get(chatId);
+        for (int i = 0; i < colourByCharacterForLastWord.size(); i++) {
+            String colourByCharacter = colourByCharacterForLastWord.get(i);
+            String[] characterAndColour = colourByCharacter.split("-");
+            String label = String.format("%c %s", characterAndColour[0].charAt(0), this.getEmoji(characterAndColour[1].charAt(0)));
+            String callbackData = String.format("changeCharacter-%d", i);
+            InlineKeyboardButton tournamentButton = new InlineKeyboardButton(label).callbackData(callbackData);
+            buttons.add(tournamentButton);
+        };
+
+        return buttons;
+    }
+
+    private char getNextColour(Character actualColour){
+        switch(actualColour){
+            case whiteCharacter:
+                return yellowCharacter;
+            case yellowCharacter:
+                return greenCharacter;
+            case greenCharacter:
+                return whiteCharacter;
+            default:
+                return 'N';
+        }
+    }
+
+    private String getEmoji(char colour){
+        switch(colour){
+            case whiteCharacter:
+                return this.whiteCircleEmoji;
+            case yellowCharacter:
+                return this.yellowCircleEmoji;
+            case greenCharacter:
+                return this.greenCircleEmoji;
+            default:
+                return "";
+        }
     }
 
     // End handle query methods
@@ -445,7 +616,7 @@ public class TelegramController {
         String text = message.text();
 
         List<String> commandNames = this.commands.stream().map(Command::getName).collect(Collectors.toList());
-        System.out.println(commandNames);
+
         boolean isCommand = commandNames.contains(text);
 
         // if is not a message that belongs to a flow and is not a command, then the bot doesn't understand the message.
@@ -498,6 +669,24 @@ public class TelegramController {
                 case "/start":
                     this.sendKeyboard(chatId);
                     break;
+                case "/tournament":
+                    this.handleTournaments(chatId);
+                    break;
+                case "/dictionary":
+                    this.handleDictionary(chatId);
+                    break;
+                case "/show_public_tournaments":
+                    this.handleShowPublicTournaments(chatId);
+                    break;
+                case "/show_my_tournaments":
+                    this.handleShowMyTournaments(chatId);
+                    break;
+                case "/create_tournament":
+                    this.handleCreateTournament(chatId);
+                    break;
+                case "/submit_result":
+                    this.handleSubmitResults(chatId);
+                    break;
             }
         } else {
             switch (lastMessageId){
@@ -525,7 +714,9 @@ public class TelegramController {
                 case "setDictionaryWord":
                     this.handleDictionaryWord(chatId, text);
                     break;
-
+                case "wordHelper":
+                    this.handleWordHelper(chatId, text);
+                    break;
             }
         }
     }
@@ -575,11 +766,14 @@ public class TelegramController {
 
         try {
             this.userService.save(username, password);
-            SendMessage sendMessage = new SendMessage(chatId, "User has been created successfuly");
-            bot.execute(sendMessage);
+            this.sendSimpleMessageAndExecute(chatId, "User has been created successfuly");
             this.sendKeyboardForNotLogued(chatId);
+        } catch(ExistingUserException e){
+            this.sendSimpleMessageAndExecute(chatId, "User already exists.");
+            this.handleSignin(chatId);
         } catch(Exception e){
             System.out.println(e);
+            this.sendSimpleMessageAndExecute(chatId, "An error ocurred.");
         }
     }
 
@@ -635,21 +829,11 @@ public class TelegramController {
     }
 
     private void handleSubmitResults(String chatId){
-        List<Integer> attemptsOptions = new ArrayList<>(
-                Arrays.asList(
-                        1, 2, 3, 4, 5, 6
-                )
-        );
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
-        List<InlineKeyboardButton> attemptsOptionsButtons = attemptsOptions.stream().map(attemptOption -> {
-            String callbackData = String.format("attempts-%s", attemptOption.toString());
+        InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguageResult");
+        InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("spanishLanguageResult");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton);
 
-            return new InlineKeyboardButton(attemptOption.toString()).callbackData(callbackData);
-        }).collect(Collectors.toList());
-
-        keyboardMarkup.addRow(attemptsOptionsButtons.toArray(InlineKeyboardButton[]::new));
-
-        this.sendMessageAndExecute(chatId, "Select amount of attempts", keyboardMarkup);
+        this.sendMessageAndExecute(chatId, "Select the language.", keyboardMarkup);
     }
 
     private void handleDictionaryWord(String chatId, String word){
@@ -677,6 +861,108 @@ public class TelegramController {
         this.sendKeyboard(chatId);
     }
 
+    private void handleWordHelper(String chatId, String word){
+        if(word.length() != 5){
+            this.sendSimpleMessageAndExecute(chatId, "Word must be five characters long. Try again.");
+            this.handleHelper(chatId);
+            return;
+        }
+
+        Integer wordsSent = this.helperWordsSentByChatId.get(chatId);
+
+        if(wordsSent == null){
+            wordsSent = 0;
+        }
+
+        this.helperWordsSentByChatId.put(chatId, wordsSent+1);
+
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
+        char[] upperWordArray = word.toUpperCase().toCharArray();
+        List<String> colourByCharacterForLastWord = new ArrayList<>();
+
+        for (Character character : upperWordArray) {
+            colourByCharacterForLastWord.add(String.format("%c-%c", character, whiteCharacter));
+        }
+
+        this.colourByCharacterForLastWordByChatId.put(chatId, colourByCharacterForLastWord);
+
+        ArrayList<InlineKeyboardButton> buttons = this.getColouredButtons(chatId);
+        keyboardMarkup.addRow(buttons.toArray(new InlineKeyboardButton[0]));
+
+        wordsSent = this.helperWordsSentByChatId.get(chatId);
+        String writeNextWord = "";
+
+        if(wordsSent != 5){
+            InlineKeyboardButton nextWord = new InlineKeyboardButton("Write next word").callbackData("writeNextWord");
+            keyboardMarkup.addRow(nextWord);
+            writeNextWord = ", write next word";
+        }
+
+        InlineKeyboardButton finish = new InlineKeyboardButton("Finish").callbackData("finishHelper");
+        keyboardMarkup.addRow(finish);
+
+        this.sendMessageAndExecute(chatId, String.format("Change colours%s or finish.", writeNextWord), keyboardMarkup);
+    }
+
+    private void handleWriteNextWord(String chatId){
+        TempHelperInfo tempHelperInfo = this.readLastWord(chatId);
+
+        if(tempHelperInfo == null){
+            return;
+        }
+
+        this.tempHelperInfoByChatId.put(chatId, tempHelperInfo);
+        this.lastMessageSentByChatId.put(chatId, "wordHelper");
+        this.sendSimpleMessageAndExecute(chatId, "Send me the next word please.");
+    }
+
+    private TempHelperInfo readLastWord(String chatId){
+        TempHelperInfo tempHelperInfo = this.tempHelperInfoByChatId.get(chatId);
+        List<String> colourByCharacterForLastWord = this.colourByCharacterForLastWordByChatId.get(chatId);
+
+        for(int i = 0; i < colourByCharacterForLastWord.size(); i++){
+            String colourByCharacter = colourByCharacterForLastWord.get(i);
+            String[] characterAndColour = Strings.split(colourByCharacter, "-");
+            char colour = characterAndColour[1].charAt(0);
+            char letter = characterAndColour[0].charAt(0);
+
+            switch(colour){
+                case whiteCharacter:
+                    tempHelperInfo.addGreyLetterPlayed(letter);
+                    break;
+                case yellowCharacter:
+                    tempHelperInfo.addYellowLetterPlayed(i, letter);
+                    break;
+                case greenCharacter:
+                    try {
+                        tempHelperInfo.addGreenLetterPlayed(i, letter);
+                    }catch(LetterMismatchException e){
+                        this.sendSimpleMessageAndExecute(chatId, e.getMessage());
+                        return null;
+                    }
+                    break;
+            }
+        }
+
+        return tempHelperInfo;
+    }
+
+    private void handleFinishHelper(String chatId){
+        TempHelperInfo tempHelperInfo = this.readLastWord(chatId);
+
+        if(tempHelperInfo == null){
+            return;
+        }
+
+        WordPlay attemptedPlay = new WordPlay(tempHelperInfo.getGrayLettersPlayed(), tempHelperInfo.getYellowLettersPlayed(),
+                tempHelperInfo.getGreenLettersPlayed());
+        List<String> possibleWords = this.helperService.getWordsByPlay(attemptedPlay, tempHelperInfo.getLanguage());
+        String message = "Possible words are:\n" + String.join("\n", possibleWords);
+
+        this.sendSimpleMessageAndExecute(chatId, message);
+        this.sendKeyboard(chatId);
+    }
+
     // End handle message methods
 
     private void sendSimpleMessageAndExecute(String chatId, String message){
@@ -684,13 +970,13 @@ public class TelegramController {
     }
 
     private void sendMessageAndExecute(String chatId, String message, InlineKeyboardMarkup markup){
-        SendMessage sendMessage = new SendMessage(chatId, message);
+        SendMessage sendMessage = new SendMessage(chatId, message).parseMode(ParseMode.HTML);
 
         if(markup != null){
             sendMessage.replyMarkup(markup);
         }
 
-        bot.execute(sendMessage);
+        this.executeMessage(sendMessage);
     }
 
     private void cleanMaps(String chatId){
@@ -718,8 +1004,9 @@ public class TelegramController {
     private void sendKeyboardForLogued(String chatId){
         InlineKeyboardButton tournamentButton = new InlineKeyboardButton("Tournament").callbackData("tournament");
         InlineKeyboardButton dictionaryButton = new InlineKeyboardButton("Dictionary").callbackData("dictionary");
+        InlineKeyboardButton helperButton = new InlineKeyboardButton("Helper").callbackData("helper");
         InlineKeyboardButton logoutButton = new InlineKeyboardButton("Logout").callbackData("logout");
-        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(tournamentButton, dictionaryButton, logoutButton);
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(tournamentButton, dictionaryButton, helperButton, logoutButton);
         String buttonMessage = "Select action's category to perform";
         SendMessage sendMessage = new SendMessage(chatId, buttonMessage).replyMarkup(keyboardMarkup);
 
@@ -737,6 +1024,17 @@ public class TelegramController {
         if(!isUserLogged){
             this.sendSimpleMessageAndExecute(chatId, "You must be logged to perform this action");
             this.sendKeyboardForNotLogued(chatId);
+        }
+
+        try {
+            if (this.currentUser == null) {
+                this.currentUser = this.telegramSecurityService.getUserFromToken(chatId);
+            }
+        } catch(ExpiredJwtException e){
+            this.sendSimpleMessageAndExecute(chatId, "Your token has expired. Please, login again.");
+            this.handleLogin(chatId);
+
+            return false;
         }
 
         return isUserLogged;
