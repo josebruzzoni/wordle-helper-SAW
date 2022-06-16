@@ -34,3 +34,6 @@ build/
 
 /.env
 logs
+/docker-compose/data
+/docker-compose/logs
+/docker-compose/.env
