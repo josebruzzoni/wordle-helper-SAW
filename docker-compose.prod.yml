@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 services:
     wordle-backend:
         build: ./../wordle-helper
@@ -10,11 +10,11 @@ services:
         networks:
             - wordle-network
     wordle-frontend:
-        stdin_open: true
-        container_name: wordle-frontend-prod
         build: 
             context: ./../wordle-helper-front
             target: production
+        stdin_open: true
+        container_name: wordle-frontend-prod
         depends_on:
             - wordle-backend
         ports:
