@@ -6,8 +6,8 @@ services:
         container_name: wordle-helper-db-mongo
         hostname: host-mongo
         environment:
-          MONGO_INITDB_ROOT_USERNAME: root
-          MONGO_INITDB_ROOT_PASSWORD: secret
+          MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+          MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
         volumes:
           - ./docker-compose/data:/data/db
           - ./docker-compose/data/log:/var/log/mongodb/
@@ -28,7 +28,9 @@ services:
     wordle-frontend:
         stdin_open: true
         command: npm start
-        build: ./../wordle-helper-front
+        build: 
+            context: ./../wordle-helper-front
+            target: development
         ports:
             - "3000:3000"
         depends_on:
