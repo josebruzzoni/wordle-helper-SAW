@@ -1,0 +1,26 @@
+version: '3.7'
+services:
+    wordle-backend:
+        build: ./../wordle-helper
+        container_name: wordle-backend-prod
+        environment:
+            MONGO_DB_URI: ${MONGODB_URI_PROD}
+        ports:
+            - "8080:8080"
+        networks:
+            - wordle-network
+    wordle-frontend:
+        build: 
+            context: ./../wordle-helper-front
+            target: production
+        stdin_open: true
+        container_name: wordle-frontend-prod
+        depends_on:
+            - wordle-backend
+        ports:
+            - "80:80"
+        networks:
+            - wordle-network
+networks:
+    wordle-network:
+        driver: bridge
