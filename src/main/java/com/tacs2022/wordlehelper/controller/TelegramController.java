@@ -820,6 +820,11 @@ public class TelegramController {
         try {
             LocalDate localDate = LocalDate.parse(date, this.formatter);
 
+            if(localDate.isBefore(LocalDate.now())){
+                this.sendSimpleMessageAndExecute(chatId, "Date cannot be in the past. Please try again.");
+                return null;
+            }
+
             return localDate;
         } catch (DateTimeParseException e) {
             this.sendSimpleMessageAndExecute(chatId, "Date is not in correct format. Please try again.");
