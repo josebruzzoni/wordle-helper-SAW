@@ -41,4 +41,8 @@ public class NewTournamentDto {
 
         return new Tournament(name, startDate, endDate, visibility, languages, owner);
     }
+
+    public boolean hasValidDates(){
+        return this.startDate != null && this.endDate != null && this.startDate.isAfter(this.endDate);
+    }
 }
