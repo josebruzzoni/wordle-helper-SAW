@@ -840,12 +840,13 @@ public class TelegramController {
 
         NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
 
+        tournamentInProcess.setEndDate(localDate);
+
         if(!tournamentInProcess.hasValidDates()){
             this.sendSimpleMessageAndExecute(chatId, "End date must be after start date. Please try again.");
             return;
         }
 
-        tournamentInProcess.setEndDate(localDate);
         this.lastMessageSentByChatId.put(chatId, "setVisibilityForTournament");
         InlineKeyboardButton publicButton = new InlineKeyboardButton("Public").callbackData("publicTournament");
         InlineKeyboardButton privateButton = new InlineKeyboardButton("Private").callbackData("privateTournament");
