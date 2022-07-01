@@ -171,9 +171,6 @@ public class TelegramController {
             case "confirmTournament":
                 this.handleConfirmTournament(chatId);
                 break;
-            case "cancelTournament":
-                this.handleCancelTournament(chatId);
-                break;
             case "englishLanguageTournament":
                 this.handleTournamentEnglishLanguage(chatId);
                 break;
@@ -192,17 +189,11 @@ public class TelegramController {
             case "confirmResult":
                 this.handleConfirmResult(chatId);
                 break;
-            case "cancelResult":
-                this.handleCancelResult(chatId);
-                break;
             case "confirmSearchAgain":
                 this.handleConfirmSearchAgain(chatId);
                 break;
             case "cancelSearchAgain":
                 this.handleCancelSearchAgain(chatId);
-                break;
-            case "keyboardForLogued":
-                this.sendKeyboardForLogued(chatId);
                 break;
             case "englishLanguageHelper":
                 this.handleEnglishLanguageHelper(chatId);
@@ -215,6 +206,9 @@ public class TelegramController {
                 break;
             case "finishHelper":
                 this.handleFinishHelper(chatId);
+                break;
+            case "start":
+                this.sendKeyboard(chatId);
                 break;
         }
 
@@ -240,8 +234,11 @@ public class TelegramController {
     // Begin handle query methods
 
     private void handleLogin(String chatId){
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("start");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(cancelButton);
+
         this.lastMessageSentByChatId.put(chatId, "setUsernameForLogin");
-        this.sendSimpleMessageAndExecute(chatId, "What's your username?");
+        this.sendMessageAndExecute(chatId, "What's your username?", keyboardMarkup);
     }
 
     private void handleLogout(String chatId){
@@ -252,8 +249,11 @@ public class TelegramController {
     }
 
     private void handleSignin(String chatId){
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("start");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(cancelButton);
+
         this.lastMessageSentByChatId.put(chatId, "setUsernameForSignin");
-        this.sendSimpleMessageAndExecute(chatId, "What will be your username?");
+        this.sendMessageAndExecute(chatId, "What will be your username?", keyboardMarkup);
     }
 
     private void handleTournaments(String chatId){
@@ -261,7 +261,7 @@ public class TelegramController {
         InlineKeyboardButton showTournamentsButton = new InlineKeyboardButton("Public tournaments").callbackData("showPublicTournaments");
         InlineKeyboardButton createTournamentButton = new InlineKeyboardButton("Create tournament").callbackData("createTournament");
         InlineKeyboardButton submitResultsButton = new InlineKeyboardButton("Submit results").callbackData("submitResults");
-        InlineKeyboardButton backwardsButton = new InlineKeyboardButton("Backwards").callbackData("keyboardForLogued");
+        InlineKeyboardButton backwardsButton = new InlineKeyboardButton("Backwards").callbackData("start");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup();
         keyboardMarkup.addRow(myTournamentsButton, showTournamentsButton);
         keyboardMarkup.addRow(createTournamentButton, submitResultsButton);
@@ -274,7 +274,9 @@ public class TelegramController {
     private void handleDictionary(String chatId){
         InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("setEnglishDictionary");
         InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("setSpanishDictionary");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("start");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton);
+        keyboardMarkup.addRow(cancelButton);
         String messageText = "Select a language";
 
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
@@ -292,15 +294,21 @@ public class TelegramController {
 
     private void handleLanguageDictionary(String chatId){
         String messageText = String.format("Great. Now send me a word to search in %s.", this.currentDictionaryLanguage.getLanguage());
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("start");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(cancelButton);
 
         this.lastMessageSentByChatId.put(chatId, "setDictionaryWord");
-        this.sendSimpleMessageAndExecute(chatId, messageText);
+        this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
     }
 
     private void handleHelper(String chatId){
         InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguageHelper");
         InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("spanishLanguageHelper");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("start");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton);
+
+        keyboardMarkup.addRow(cancelButton);
+
         this.sendMessageAndExecute(chatId, "Select the language to get help.", keyboardMarkup);
     }
 
@@ -317,8 +325,11 @@ public class TelegramController {
         tempHelperInfo.setLanguage(language);
         this.tempHelperInfoByChatId.put(chatId, tempHelperInfo);
 
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("start");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(cancelButton);
+
         this.lastMessageSentByChatId.put(chatId, "wordHelper");
-        this.sendSimpleMessageAndExecute(chatId, "Good. Now send me the first word.");
+        this.sendMessageAndExecute(chatId, "Good. Now send me the first word.", keyboardMarkup);
     }
 
     public void handleShowMyTournaments(String chatId){
@@ -363,12 +374,17 @@ public class TelegramController {
     }
 
     private void handleCreateTournament(String chatId){
-        this.sendMessageAndExecute(chatId, "What will be the name of the tournament?", null);
+        this.tournamentBeingCreatedByChatId.remove(chatId);
+
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
+        InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(cancelButton);
 
         NewTournamentDto tournament = new NewTournamentDto();
 
         this.tournamentBeingCreatedByChatId.put(chatId, tournament);
         this.lastMessageSentByChatId.put(chatId, "setNameForTournament");
+
+        this.sendMessageAndExecute(chatId, "What will be the name of the tournament?", keyboardMarkup);
     }
 
     private void handlePublicTournament(String chatId){
@@ -386,7 +402,10 @@ public class TelegramController {
         InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguageTournament");
         InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("spanishLanguageTournament");
         InlineKeyboardButton englishAndSpanishButton = new InlineKeyboardButton("English & Spanish").callbackData("englishSpanishLanguageTournament");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton, englishAndSpanishButton);
+
+        keyboardMarkup.addRow(cancelButton);
 
         this.sendMessageAndExecute(chatId, "Fine. Please select your tournament's languages", keyboardMarkup);
     }
@@ -420,12 +439,6 @@ public class TelegramController {
         this.sendKeyboard(chatId);
     }
 
-    private void handleCancelResult(String chatId){
-        this.resultsBeingCreatedByChatId.remove(chatId);
-
-        this.sendKeyboard(chatId);
-    }
-
     private void handleResultLanguage(String chatId, Language language){
         Result result = new Result();
 
@@ -446,6 +459,9 @@ public class TelegramController {
 
         keyboardMarkup.addRow(attemptsOptionsButtons.toArray(InlineKeyboardButton[]::new));
 
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
+        keyboardMarkup.addRow(cancelButton);
+
         this.sendMessageAndExecute(chatId, "Great. Now please select amount of attempts", keyboardMarkup);
     }
 
@@ -455,7 +471,7 @@ public class TelegramController {
         tournamentInProcess.setLanguages(languages);
 
         InlineKeyboardButton confirmButton = new InlineKeyboardButton("Confirm").callbackData("confirmTournament");
-        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("cancelTournament");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(confirmButton, cancelButton);
 
         String messageText = String.format("Allright. This will be your tournament:\n\nName: %s\nStart date: %s\nEnd date: %s\nVisibility: %s\nLanguages: %s\n\n Is everything ok?",
@@ -473,11 +489,6 @@ public class TelegramController {
         this.tournamentService.save(newTournament);
 
         this.sendSimpleMessageAndExecute(chatId, "Tournament created succesfuly!");
-        this.sendKeyboardForLogued(chatId);
-    }
-
-    private void handleCancelTournament(String chatId){
-        this.tournamentBeingCreatedByChatId.remove(chatId);
         this.sendKeyboardForLogued(chatId);
     }
 
@@ -535,7 +546,7 @@ public class TelegramController {
                 resultInProcess.getLanguage().getLanguage(), resultInProcess.getAttempts().toString());
 
         InlineKeyboardButton confirmButton = new InlineKeyboardButton("Confirm").callbackData("confirmResult");
-        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("cancelResult");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(confirmButton, cancelButton);
 
         this.sendMessageAndExecute(chatId, messageText, keyboardMarkup);
@@ -556,11 +567,14 @@ public class TelegramController {
         ArrayList<InlineKeyboardButton> colouredButtons = this.getColouredButtons(chatId);
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         inlineKeyboardMarkup.addRow(colouredButtons.toArray(new InlineKeyboardButton[0]));
-        InlineKeyboardButton nextWord = new InlineKeyboardButton("Write next word").callbackData("writeNextWord");
-        InlineKeyboardButton finish = new InlineKeyboardButton("Finish").callbackData("finishHelper");
-        inlineKeyboardMarkup.addRow(nextWord);
-        inlineKeyboardMarkup.addRow(finish);
+        InlineKeyboardButton nextWordButton = new InlineKeyboardButton("Write next word").callbackData("writeNextWord");
+        InlineKeyboardButton finishButton = new InlineKeyboardButton("Finish").callbackData("finishHelper");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
+        inlineKeyboardMarkup.addRow(nextWordButton);
+        inlineKeyboardMarkup.addRow(finishButton);
+        inlineKeyboardMarkup.addRow(cancelButton);
         EditMessageReplyMarkup editMessageReplyMarkup = new EditMessageReplyMarkup(chatId, messageId).replyMarkup(inlineKeyboardMarkup);
+
         this.executeMessage(editMessageReplyMarkup);
     }
 
@@ -726,13 +740,21 @@ public class TelegramController {
     private void handleUsernameForLogin(String chatId, String username){
         this.usernameByChatId.put(chatId, username);
         this.lastMessageSentByChatId.put(chatId, "setPasswordForLogin");
-        this.sendSimpleMessageAndExecute(chatId, "What is your password?");
+
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("start");
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(cancelButton);
+
+        this.sendMessageAndExecute(chatId, "What is your password?", inlineKeyboardMarkup);
     }
 
     private void handleUsernameForSignin(String chatId, String username){
         this.usernameByChatId.put(chatId, username);
         this.lastMessageSentByChatId.put(chatId, "setPasswordForSignin");
-        this.sendSimpleMessageAndExecute(chatId, "What will be your password?");
+
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("start");
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(cancelButton);
+
+        this.sendMessageAndExecute(chatId, "What will be your password?", inlineKeyboardMarkup);
     }
 
     private void handlePasswordForLogin(String chatId, String password) {
@@ -782,7 +804,12 @@ public class TelegramController {
         tournamentInProcess.setName(name);
 
         this.lastMessageSentByChatId.put(chatId, "setStartDateForTournament");
-        this.sendMessageAndExecute(chatId, "Right. Now please send me the start date of the tournament in this format: 20/05/2022", null);
+
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(cancelButton);
+        String message = "Right. Now please send me the start date of the tournament in this format: 20/05/2022";
+
+        this.sendMessageAndExecute(chatId, message, inlineKeyboardMarkup);
     }
 
     private void handleStartDateForTournament(String chatId, String startDate){
@@ -796,7 +823,12 @@ public class TelegramController {
         tournamentInProcess.setStartDate(localDate);
 
         this.lastMessageSentByChatId.put(chatId, "setEndDateForTournament");
-        this.sendSimpleMessageAndExecute(chatId, "Great. Now please send me the end date of the tournament in this format: 20/05/2022");
+
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(cancelButton);
+        String message = "Great. Now please send me the end date of the tournament in this format: 20/05/2022";
+
+        this.sendMessageAndExecute(chatId, message, inlineKeyboardMarkup);
     }
 
     private void handleEndDateForTournament(String chatId, String endDate){
@@ -817,7 +849,11 @@ public class TelegramController {
         this.lastMessageSentByChatId.put(chatId, "setVisibilityForTournament");
         InlineKeyboardButton publicButton = new InlineKeyboardButton("Public").callbackData("publicTournament");
         InlineKeyboardButton privateButton = new InlineKeyboardButton("Private").callbackData("privateTournament");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(publicButton, privateButton);
+
+        keyboardMarkup.addRow(cancelButton);
+
         this.sendMessageAndExecute(chatId, "Perfect. Will it be a public or a private tournament?", keyboardMarkup);
     }
 
@@ -840,9 +876,14 @@ public class TelegramController {
     }
 
     private void handleSubmitResults(String chatId){
+        this.resultsBeingCreatedByChatId.remove(chatId);
+
         InlineKeyboardButton englishButton = new InlineKeyboardButton("English").callbackData("englishLanguageResult");
         InlineKeyboardButton spanishButton = new InlineKeyboardButton("Spanish").callbackData("spanishLanguageResult");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(englishButton, spanishButton);
+
+        keyboardMarkup.addRow(cancelButton);
 
         this.sendMessageAndExecute(chatId, "Select the language.", keyboardMarkup);
     }
@@ -910,7 +951,9 @@ public class TelegramController {
         }
 
         InlineKeyboardButton finish = new InlineKeyboardButton("Finish").callbackData("finishHelper");
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("start");
         keyboardMarkup.addRow(finish);
+        keyboardMarkup.addRow(cancelButton);
 
         this.sendMessageAndExecute(chatId, String.format("Change colours%s or finish.", writeNextWord), keyboardMarkup);
     }
@@ -924,7 +967,11 @@ public class TelegramController {
 
         this.tempHelperInfoByChatId.put(chatId, tempHelperInfo);
         this.lastMessageSentByChatId.put(chatId, "wordHelper");
-        this.sendSimpleMessageAndExecute(chatId, "Send me the next word please.");
+
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("start");
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(cancelButton);
+
+        this.sendMessageAndExecute(chatId, "Send me the next word please.", inlineKeyboardMarkup);
     }
 
     private TempHelperInfo readLastWord(String chatId){
@@ -996,6 +1043,8 @@ public class TelegramController {
     }
 
     private void sendKeyboard(String chatId){
+        this.lastMessageSentByChatId.remove(chatId);
+
         if(this.telegramSecurityService.isUserLogged(chatId)){
             this.sendKeyboardForLogued(chatId);
         } else {
