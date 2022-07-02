@@ -115,7 +115,7 @@ public class TelegramController {
         String chatId = query.message().chat().id().toString();
         String optionId = query.data();
 
-        List<String> optionsToNotCheckIfUserIsLogged = new ArrayList<>(Arrays.asList("login", "logout", "signin"));
+        List<String> optionsToNotCheckIfUserIsLogged = new ArrayList<>(Arrays.asList("login", "logout", "signin", "start"));
 
         if(!optionsToNotCheckIfUserIsLogged.contains(optionId)){
             boolean isUserLogged = this.checkLoggedUser(chatId);
