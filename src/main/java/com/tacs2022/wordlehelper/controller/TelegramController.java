@@ -841,16 +841,17 @@ public class TelegramController {
         NewTournamentDto tournamentInProcess = this.tournamentBeingCreatedByChatId.get(chatId);
 
         tournamentInProcess.setEndDate(localDate);
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
 
         if(!tournamentInProcess.hasValidDates()){
-            this.sendSimpleMessageAndExecute(chatId, "End date must be after start date. Please try again.");
+            InlineKeyboardMarkup keyboardMarkupForErrorMessage = new InlineKeyboardMarkup(cancelButton);
+            this.sendMessageAndExecute(chatId, "End date must be after start date. Please try again.", keyboardMarkupForErrorMessage);
             return;
         }
 
         this.lastMessageSentByChatId.put(chatId, "setVisibilityForTournament");
         InlineKeyboardButton publicButton = new InlineKeyboardButton("Public").callbackData("publicTournament");
         InlineKeyboardButton privateButton = new InlineKeyboardButton("Private").callbackData("privateTournament");
-        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
         InlineKeyboardMarkup keyboardMarkup = new InlineKeyboardMarkup(publicButton, privateButton);
 
         keyboardMarkup.addRow(cancelButton);

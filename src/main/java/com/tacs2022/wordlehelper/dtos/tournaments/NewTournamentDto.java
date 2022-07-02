@@ -43,6 +43,6 @@ public class NewTournamentDto {
     }
 
     public boolean hasValidDates(){
-        return this.startDate != null && this.endDate != null && this.startDate.isAfter(this.endDate);
+        return this.startDate != null && this.endDate != null && this.startDate.isBefore(this.endDate);
     }
 }
