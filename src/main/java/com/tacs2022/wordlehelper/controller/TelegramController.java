@@ -861,17 +861,21 @@ public class TelegramController {
 
     // Returns if parse date was successful
     private LocalDate handleDateForTournament(String chatId, String date){
+        InlineKeyboardButton cancelButton = new InlineKeyboardButton("Cancel").callbackData("tournament");
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup(cancelButton);
+
         try {
             LocalDate localDate = LocalDate.parse(date, this.formatter);
 
             if(localDate.isBefore(LocalDate.now())){
-                this.sendSimpleMessageAndExecute(chatId, "Date cannot be in the past. Please try again.");
+                this.sendMessageAndExecute(chatId, "Date cannot be in the past. Please try again.", inlineKeyboardMarkup);
+
                 return null;
             }
 
             return localDate;
         } catch (DateTimeParseException e) {
-            this.sendSimpleMessageAndExecute(chatId, "Date is not in correct format. Please try again.");
+            this.sendMessageAndExecute(chatId, "Date is not in correct format. Please try again.", inlineKeyboardMarkup);
 
             return null;
         }
