@@ -6,9 +6,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1/admin")
 public class AdminController {
 
-    @PostMapping()
-    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(path = "")
+    @ResponseStatus(HttpStatus.OK)
     public String admin(@RequestBody String body) {
-        return "";
+        System.out.println(body);
+        return body;
     }
 }
