@@ -22,7 +22,7 @@ public class AdminController {
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public void admin(@RequestBody String body) throws UnsupportedEncodingException {
-        String newBody = URLDecoder.decode(body, StandardCharsets.UTF_8.toString());
+        String newBody = this.removeEqual(URLDecoder.decode(body, StandardCharsets.UTF_8.toString()));
         System.out.println("INSERT INTO participants (name,score) VALUES (\'"+newBody+"\',"+100+");");
         jdbcTemplate.execute("INSERT INTO participants (name,score) VALUES (\'"+newBody+"\',"+100+");");
     }
@@ -40,5 +40,12 @@ public class AdminController {
                 return e;
             }
         });
+    }
+
+    public String removeEqual(String str) {
+        if (str != null && str.length() > 0 && str.charAt(str.length() - 1) == '=') {
+            str = str.substring(0, str.length() - 1);
+        }
+        return str;
     }
 }
